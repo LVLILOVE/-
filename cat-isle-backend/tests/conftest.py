@@ -36,6 +36,7 @@ def clean_business_tables():
         db.execute(text("DELETE FROM adoption_notes"))
         db.execute(text("DELETE FROM adoptions"))
         db.execute(text("DELETE FROM reservations"))
+        db.execute(text("DELETE FROM qa"))
         db.commit()
     finally:
         db.close()

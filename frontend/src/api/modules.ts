@@ -7,7 +7,7 @@
 import http from './client'
 import type {
   Cat, MenuItem, Reservation, StoreInfo,
-  Adoption, AdoptedCase, SlotsResp,
+  Adoption, AdoptedCase, SlotsResp, QaItem,
 } from '@/types'
 
 // ==================== 前台公开接口 ====================
@@ -57,6 +57,14 @@ export const cancelReservation = (rid: number, phone: string) =>
 // 提交领养申请
 export const createAdoption = (data: Partial<Adoption>) =>
   http.post<unknown, { id: number; status: string }>('/adoptions', data)
+
+// 店长解答：已解答问题列表（前台公开）
+export const fetchAnsweredQa = () =>
+  http.get<unknown, QaItem[]>('/qa')
+
+// 店长解答：提交问题（前台公开，免注册）
+export const submitQuestion = (data: { question: string; nickname: string; phone?: string }) =>
+  http.post<unknown, { id: number; status: string }>('/qa', data)
 
 // 上传图片（领养环境照片，公开接口）
 export const uploadPhoto = (file: File) => {
@@ -112,6 +120,14 @@ export const adminSaveSettings = (data: StoreInfo) => http.put<unknown, null>('/
 export const adminSlots = () => http.get<unknown, any[]>('/admin/slot-settings')
 export const adminSaveSlots = (data: any) => http.put<unknown, null>('/admin/slot-settings', data)
 export const adminStats = () => http.get<unknown, any>('/admin/stats')
+
+// 后台：店长解答管理（列表/解答/删除）
+export const adminQaList = (status = '') =>
+  http.get<unknown, any[]>('/admin/qa', { params: { status } })
+export const adminQaAnswer = (qid: number, answer: string) =>
+  http.put<unknown, { id: number; status: string }>(`/admin/qa/${qid}`, { answer })
+export const adminQaDelete = (qid: number) =>
+  http.delete<unknown, null>(`/admin/qa/${qid}`)
 
 // 后台：上传（猫咪/菜品/收款码）
 export const adminUpload = (file: File) => {

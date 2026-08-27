@@ -1,4 +1,4 @@
-"""后台：猫咪/餐单管理 + 门店/时段配置 + 统计 + 图片上传"""
+"""后台：猫咪/餐单管理 + 门店/时段配置 + 统计 + 图片上传 + 店长解答"""
 import uuid
 import os
 from datetime import datetime, timedelta
@@ -7,8 +7,9 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from PIL import Image
+from pydantic import BaseModel, Field
 
-from ..models import Cat, MenuItem, StoreSetting, SlotSetting, Reservation, Adoption
+from ..models import Cat, MenuItem, StoreSetting, SlotSetting, Reservation, Adoption, Qa
 from ..core.deps import get_db, get_current_admin
 from ..core.response import ok, BizError
 from ..core.config import settings
@@ -168,3 +169,52 @@ async def upload(file: UploadFile = File(...)):
     target_dir.mkdir(parents=True, exist_ok=True)
     img.save(target_dir / name, "WEBP", quality=80)
     return ok({"url": f"/uploads/admin/{name}"})
+
+
+# ============================================================
+# 店长解答：后台问答管理（列表 / 解答 / 删除）
+# ============================================================
+
+# 解答入参：回答内容
+class QaAnswerIn(BaseModel):
+    answer: str = Field(min_length=2, max_length=2000)
+
+
+@router.get("/qa")
+def qa_list(status: str = "", db: Session = Depends(get_db)):
+    """后台：问答列表（默认全部；?status=pending/answered 过滤）"""
+    q = db.query(Qa)
+    if status:
+        q = q.filter(Qa.status == status)
+    rows = q.order_by(Qa.created_at.desc()).all()
+    return ok([{
+        "id": x.id, "question": x.question, "nickname": x.nickname, "phone": x.phone,
+        "status": x.status, "answer": x.answer,
+        "created_at": x.created_at.strftime("%Y-%m-%d %H:%M") if x.created_at else "",
+        "answered_at": x.answered_at.strftime("%Y-%m-%d %H:%M") if x.answered_at else "",
+    } for x in rows])
+
+
+@router.put("/qa/{qid}")
+def qa_answer(qid: int, body: QaAnswerIn, db: Session = Depends(get_db)):
+    """后台：解答问题（pending → answered，答案在前台公开展示）"""
+    x = db.get(Qa, qid)
+    if not x:
+        raise BizError(40401, "问题不存在")
+    x.answer = body.answer.strip()
+    x.status = "answered"
+    x.answered_at = datetime.now()
+    x.updated_at = datetime.now()
+    db.commit()
+    return ok({"id": x.id, "status": x.status})
+
+
+@router.delete("/qa/{qid}")
+def qa_delete(qid: int, db: Session = Depends(get_db)):
+    """后台：删除问题（前台同步消失）"""
+    x = db.get(Qa, qid)
+    if not x:
+        raise BizError(40401, "问题不存在")
+    db.delete(x)
+    db.commit()
+    return ok(None)

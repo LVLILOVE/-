@@ -1,4 +1,4 @@
-"""前台公开接口：猫咪 / 餐单 / 时段余量 / 门店 / 领养成功案例 / 领养照片上传"""
+"""前台公开接口：猫咪 / 餐单 / 时段余量 / 门店 / 领养成功案例 / 领养照片上传 / 店长解答"""
 import io
 import uuid
 from pathlib import Path
@@ -7,8 +7,9 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy import text, bindparam
 from sqlalchemy.orm import Session
 from PIL import Image
+from pydantic import BaseModel, Field
 
-from ..models import Cat, MenuItem, StoreSetting, Adoption
+from ..models import Cat, MenuItem, StoreSetting, Adoption, Qa
 from ..services.reservation import OCCUPYING
 from ..core.deps import get_db
 from ..core.response import ok, BizError
@@ -98,3 +99,37 @@ async def upload_adoption_photo(file: UploadFile = File(...)):
     target.mkdir(parents=True, exist_ok=True)
     img.save(target / name, "WEBP", quality=80)
     return ok({"url": f"/uploads/adoption/{name}"})
+
+
+# ============================================================
+# 店长解答：前台提问 / 已解答列表（新客可查，手机号不外露）
+# ============================================================
+
+# 提问入参：昵称 + 手机号（店长回访用）+ 问题内容
+class QaCreateIn(BaseModel):
+    question: str = Field(min_length=2, max_length=500)
+    nickname: str = Field(min_length=1, max_length=30)
+    phone: str = Field(default="")
+
+
+@router.get("/qa")
+def list_answered_qa(db: Session = Depends(get_db)):
+    """前台公开：仅返回店长已解答的问题（按解答时间倒序）"""
+    rows = db.query(Qa).filter(Qa.status == "answered").order_by(Qa.answered_at.desc()).all()
+    return ok([{
+        "id": q.id, "question": q.question, "nickname": q.nickname,
+        "answer": q.answer, "answered_at": q.answered_at.strftime("%Y-%m-%d") if q.answered_at else "",
+    } for q in rows])
+
+
+@router.post("/qa")
+def create_qa(body: QaCreateIn, db: Session = Depends(get_db)):
+    """前台公开：提交问题（免注册）；店长解答后自动公开展示"""
+    # 昵称去空格兜底
+    nickname = body.nickname.strip()
+    if not nickname:
+        raise BizError(40001, "请填写昵称")
+    q = Qa(question=body.question.strip(), nickname=nickname, phone=body.phone.strip(), status="pending")
+    db.add(q)
+    db.commit()
+    return ok({"id": q.id, "status": q.status})

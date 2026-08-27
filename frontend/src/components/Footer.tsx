@@ -21,6 +21,7 @@ export default function Footer() {
           <Link to="/menu" className="block text-[13px] text-ink-soft hover:text-main-deep py-0.5">餐单</Link>
           <Link to="/reserve" className="block text-[13px] text-ink-soft hover:text-main-deep py-0.5">预约</Link>
           <Link to="/adopt" className="block text-[13px] text-ink-soft hover:text-main-deep py-0.5">领养</Link>
+          <Link to="/qa" className="block text-[13px] text-ink-soft hover:text-main-deep py-0.5">店长解答</Link>
         </div>
         {/* 社交占位（正式上线替换真实账号链接） */}
         <div>

@@ -13,6 +13,7 @@ const MENU = [
   { to: '/admin/menu', label: '餐单管理', icon: '☕' },
   { to: '/admin/reservations', label: '预约管理', icon: '📅' },
   { to: '/admin/adoptions', label: '领养管理', icon: '❤' },
+  { to: '/admin/qa', label: '店长解答', icon: '❓' },
   { to: '/admin/settings', label: '门店设置', icon: '⚙' },
   { to: '/admin/slots', label: '时段设置', icon: '🕐' },
 ]

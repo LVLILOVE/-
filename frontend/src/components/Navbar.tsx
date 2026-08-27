@@ -1,19 +1,20 @@
 // ============================================================
 // 代码段功能：吸顶导航组件（对齐 UIUX §3.1 / PRD §4.1）
-// - 桌面端：Logo「猫屿」+ 4 导航项（猫咪/餐单/预约/领养）+ 立即预约 CTA
+// - 桌面端：Logo「猫屿」+ 5 导航项（猫咪/餐单/预约/领养/店长解答）+ 立即预约 CTA
 // - 滚动 >200px 切换白色毛玻璃吸顶（useEffect 监听滚动）
-// - 移动端 ≤900px：汉堡菜单展开 4 项（44px 触控目标）+ 底部预约栏
+// - 移动端 ≤900px：汉堡菜单展开 5 项（44px 触控目标）+ 底部预约栏
 // - 当前页导航项显示暖橙下划线激活态
 // ============================================================
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
-// 导航项定义：路径与文字（严格按 PRD §4.1，共 4 项）
+// 导航项定义：路径与文字（猫咪/餐单/预约/领养/店长解答）
 const NAV_ITEMS = [
   { to: '/cats', label: '猫咪' },
   { to: '/menu', label: '餐单' },
   { to: '/reserve', label: '预约' },
   { to: '/adopt', label: '领养' },
+  { to: '/qa', label: '店长解答' },
 ]
 
 export default function Navbar() {

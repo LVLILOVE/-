@@ -98,3 +98,15 @@ export interface AdoptedCase {
   photo?: string
   adopted_at?: string
 }
+
+// ---- 店长解答（问答）----
+export interface QaItem {
+  id: number
+  question: string
+  nickname: string
+  phone?: string        // 仅后台返回（店长回访用），前台接口不含此字段
+  status: 'pending' | 'answered'
+  answer?: string
+  created_at?: string
+  answered_at?: string
+}

@@ -156,3 +156,22 @@ class SlotSetting(Base):
         CheckConstraint("capacity > 0"),
         CheckConstraint("is_open IN (0,1)"),
     )
+
+# ===== 9 店长解答（顾客提问 / 店长解答 / 前台展示）=====
+class Qa(Base):
+    """问答表：前台顾客提问，后台店长解答；前台仅展示已解答的问题"""
+    __tablename__ = "qa"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    question = Column(Text, nullable=False)          # 问题内容
+    nickname = Column(String(30), nullable=False)     # 提问昵称
+    phone = Column(String(11))                        # 联系电话（店长回访用，前台不展示）
+    status = Column(String(20), nullable=False, default="pending", server_default="pending")  # pending/answered
+    answer = Column(Text)                             # 店长解答
+    answered_at = Column(DateTime)                    # 解答时间
+    created_at = Column(DateTime, nullable=False, default=now)
+    updated_at = Column(DateTime, nullable=False, default=now)
+
+    __table_args__ = (
+        CheckConstraint("status IN ('pending','answered')"),
+        Index("idx_qa_status", "status"),
+    )
