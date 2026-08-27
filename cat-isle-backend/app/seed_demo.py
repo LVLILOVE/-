@@ -24,7 +24,7 @@ DEMO_CATS = [
      "avatar_url": "https://images.unsplash.com/photo-1601565812491-fed7af6905f2?auto=format&fit=crop&w=500&q=70"},
     {"name": "芝麻", "persona": "粘人精", "story": "本咪的呼噜声是猫屿限定版，只要人类大腿一出现，咪就自动导航降落~", "breed": "狸花",
      "age": "2岁", "gender": "母", "neutered": 1, "skills": "呼噜机", "sort_order": 4,
-     "avatar_url": "https://images.unsplash.com/photo-1618826411640-d6df44dd3f7c?auto=format&fit=crop&w=500&q=70"},
+     "avatar_url": "https://images.unsplash.com/photo-1615789591457-74a63395c990?auto=format&fit=crop&w=500&q=70"},
     {"name": "汤圆", "persona": "小吃货", "story": "零食袋一响，本咪就会闪现！想交朋友很简单，冻干管够就行~", "breed": "白猫",
      "age": "1岁", "gender": "母", "neutered": 0, "skills": "要零食", "sort_order": 5, "adoptable": 1,
      "avatar_url": "https://images.unsplash.com/photo-1637424864218-b040b739ac44?auto=format&fit=crop&w=500&q=70"},
