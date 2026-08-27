@@ -32,9 +32,9 @@ export default function Home() {
     <div>
       {/* ===== 区块 1：Hero（全宽猫咪图 + Slogan + 双 CTA）===== */}
       <section className="relative min-h-[92vh] flex items-center justify-center text-center overflow-hidden">
-        {/* 背景图：全宽猫咪实拍 */}
+        {/* 背景图：欢快玩耍的小猫（本地图片，随构建产物入库） */}
         <img
-          src="https://images.unsplash.com/photo-1532951779377-1080f5c62ab7?auto=format&fit=crop&w=1600&q=75"
+          src="/images/hero-cat.webp"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
