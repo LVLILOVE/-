@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" width="100%" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="680" height="420" fill="#F7F2EA"/>
+<title>猫屿 CAT ISLE 数据库 ER 图</title>
+<desc>八张表的实体关系图：猫咪档案、领养申请与回访记录存在外键关系</desc>
+
+<text x="340" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#6B4F3F" letter-spacing="2">猫屿数据库 ER 图</text>
+
+<defs>
+<marker id="crow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+<path d="M2 2 L8 5 L2 8 M2 2 L2 8" fill="none" stroke="#A97B50" stroke-width="1.2"/>
+</marker>
+<marker id="one" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+<path d="M1 2 L1 8" fill="none" stroke="#A97B50" stroke-width="1.2"/>
+</marker>
+</defs>
+
+<g font-size="11">
+<rect x="44" y="62" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="44" y="62" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="110" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">admin_user</text>
+<text x="54" y="104" fill="#6B4F3F">username</text>
+<text x="54" y="126" fill="#6B4F3F">password_hash</text>
+<text x="54" y="148" fill="#6B4F3F">created_at</text>
+
+<rect x="212" y="62" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="212" y="62" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="278" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">cats</text>
+<text x="222" y="104" fill="#6B4F3F">name</text>
+<text x="222" y="126" fill="#6B4F3F">persona</text>
+<text x="222" y="148" fill="#6B4F3F">status</text>
+<text x="222" y="170" fill="#6B4F3F">adoptable</text>
+<text x="222" y="192" fill="#6B4F3F">deleted</text>
+
+<rect x="380" y="62" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="380" y="62" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="446" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">menu_items</text>
+<text x="390" y="104" fill="#6B4F3F">name</text>
+<text x="390" y="126" fill="#6B4F3F">category</text>
+<text x="390" y="148" fill="#6B4F3F">price</text>
+<text x="390" y="170" fill="#6B4F3F">status</text>
+
+<rect x="548" y="62" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="548" y="62" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="614" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">reservations</text>
+<text x="558" y="104" fill="#6B4F3F">phone</text>
+<text x="558" y="126" fill="#6B4F3F">reserve_date</text>
+<text x="558" y="148" fill="#6B4F3F">slot</text>
+<text x="558" y="170" fill="#6B4F3F">status</text>
+
+<rect x="44" y="230" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="44" y="230" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="110" y="247" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">adoptions</text>
+<text x="54" y="272" fill="#6B4F3F">cat_id</text>
+<text x="54" y="294" fill="#6B4F3F">phone</text>
+<text x="54" y="316" fill="#6B4F3F">status</text>
+<text x="54" y="338" fill="#6B4F3F">success_story</text>
+
+<rect x="212" y="230" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="212" y="230" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="278" y="247" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">adoption_notes</text>
+<text x="222" y="272" fill="#6B4F3F">adoption_id</text>
+<text x="222" y="294" fill="#6B4F3F">note_date</text>
+<text x="222" y="316" fill="#6B4F3F">content</text>
+
+<rect x="380" y="230" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="380" y="230" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="446" y="247" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">store_settings</text>
+<text x="390" y="272" fill="#6B4F3F">key</text>
+<text x="390" y="294" fill="#6B4F3F">value</text>
+
+<rect x="548" y="230" width="132" height="140" rx="10" fill="#FFFFFF" stroke="#EADFCF" stroke-width="1"/>
+<rect x="548" y="230" width="132" height="26" rx="10" fill="#E8C9A8"/>
+<text x="614" y="247" text-anchor="middle" font-size="12" font-weight="600" fill="#6B4F3F">slot_settings</text>
+<text x="558" y="272" fill="#6B4F3F">slot</text>
+<text x="558" y="294" fill="#6B4F3F">capacity</text>
+<text x="558" y="316" fill="#6B4F3F">is_open</text>
+<text x="558" y="338" fill="#6B4F3F">holidays</text>
+</g>
+
+<g stroke="#A97B50" stroke-width="1.2" fill="none">
+<path d="M278 202 C278 214, 140 214, 140 226" marker-start="url(#one)" marker-end="url(#crow)"/>
+<path d="M176 296 L208 296" marker-start="url(#one)" marker-end="url(#crow)"/>
+</g>
+<rect x="180" y="214" width="62" height="16" rx="8" fill="#F7F2EA"/>
+<text x="211" y="225" text-anchor="middle" font-size="11" fill="#A97B50">意向猫 1—*</text>
+<rect x="212" y="286" width="62" height="16" rx="8" fill="#F7F2EA"/>
+<text x="243" y="297" text-anchor="middle" font-size="11" fill="#A97B50">回访 1—*</text>
+
+<text x="340" y="402" text-anchor="middle" font-size="11" fill="#8A6F5C">仅 cats→adoptions（意向猫）与 adoptions→adoption_notes（回访）存在外键，其余为独立表</text>
+</svg>

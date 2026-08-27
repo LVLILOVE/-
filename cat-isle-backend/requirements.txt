@@ -1,0 +1,14 @@
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+sqlalchemy==2.0.*
+alembic==1.14.*
+pydantic==2.10.*
+pydantic-settings==2.7.*
+passlib[bcrypt]==1.7.*
+bcrypt==4.0.1                  # 固定版本：passlib 1.7.4 与 bcrypt>=4.1 存在 72 字节兼容性问题
+python-jose[cryptography]==3.3.*
+python-multipart==0.0.*
+Pillow==11.*
+APScheduler==3.11.*
+pytest==8.*
+httpx==0.28.*
