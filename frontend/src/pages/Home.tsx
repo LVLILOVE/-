@@ -10,11 +10,10 @@ import Button from '@/components/Button'
 import { fetchCats, fetchMenu, fetchStore } from '@/api/modules'
 import type { Cat, MenuItem, StoreInfo } from '@/types'
 
-// 品牌故事文案（PRD §4.1：文案在代码中维护）
-const STORY_LINES = [
-  { head: '想抚摸一只猫的时候', text: '猫屿在这里。' },
-  { head: '心情沉闷需要安静的时候', text: '猫屿在这里。' },
-  { head: '想和重要的人拉近距离的时候', text: '猫屿在这里。' },
+// 品牌故事文案（品牌定位：慢节奏空间，尊重猫咪天性）
+const STORY_PARAS = [
+  '我们不追求热闹喧嚣，只想打造一处慢节奏空间。',
+  '猫咪才是这里的主人，我们尊重每一只小猫的性格，希望你可以松弛地享受与小猫相伴的时光。',
 ]
 
 export default function Home() {
@@ -67,9 +66,10 @@ export default function Home() {
             loading="lazy"
           />
           <div className="space-y-4">
-            {STORY_LINES.map((line) => (
-              <p key={line.head} className="text-base text-ink-soft tracking-wide">
-                {line.head}，<b className="text-ink">{line.text}</b>
+            {/* 品牌定位文案：慢节奏空间 + 尊重猫咪天性（两段） */}
+            {STORY_PARAS.map((para, i) => (
+              <p key={i} className="text-base text-ink-soft tracking-wide leading-loose">
+                {para}
               </p>
             ))}
             <p className="text-base text-ink-soft tracking-wide">
