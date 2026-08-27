@@ -61,7 +61,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <img
             src="/images/story-cats.webp"
-            alt="猫妈妈与一窝小猫依偎在一起的温馨合照"
+            alt="三只白猫靠墙排排坐的可爱照片"
             className="w-full rounded-2xl object-cover h-[400px]"
             loading="lazy"
           />
