@@ -60,8 +60,8 @@ export default function Home() {
         <p className="text-center text-xs tracking-[0.3em] text-ink-faint mt-2 mb-9 font-en">OUR STORY</p>
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <img
-            src="https://images.unsplash.com/photo-1622046016568-ff3842481d42?auto=format&fit=crop&w=800&q=70"
-            alt="女孩怀抱白棕色小猫的温馨照片"
+            src="/images/story-cats.webp"
+            alt="猫妈妈与一窝小猫依偎在一起的温馨合照"
             className="w-full rounded-2xl object-cover h-[400px]"
             loading="lazy"
           />
