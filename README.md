@@ -41,5 +41,14 @@ uvicorn app.main:app --reload --port 8000   # 生产必须 --workers 1
 
 - [x] M1 设计定稿（文档 + 原型）
 - [x] M2 后端开发（37/37 接口，pytest 22/22，Uvicorn 冒烟通过）
-- [ ] M3 前端开发（React）
+- [x] M3 前端开发（前台 7 页 + 后台 8 模块，构建通过，前后端代理联调通过）
 - [ ] M4 联调上线
+
+## 前端快速启动
+
+```bash
+cd frontend
+npm install          # 依赖（.npmrc 已配置国内镜像）
+npm run dev          # 开发：http://localhost:5173（/api 代理到 8000）
+npm run build        # 构建：产物 dist/（M4 接入后端 static/）
+```
