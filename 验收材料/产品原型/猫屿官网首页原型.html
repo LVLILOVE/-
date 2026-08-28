@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猫屿 CAT ISLE · 首页原型（按 PRD V1.1）</title>
+<style>
+:root{
+  --bg:#F7F2EA; --bg-soft:#FBF8F2; --card:#FFFFFF;
+  --ink:#6B4F3F; --ink-soft:#8A6F5C; --ink-faint:#B5A08F;
+  --main:#C89F7B; --main-deep:#A97B50; --accent:#E8935F;
+  --btn:#A94A26; --pink:#D96C75; --line:#EADFCF; --line-soft:#F1E9DB;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.8;font-size:15px;}
+
+/* ===== 吸顶导航（PRD 4.1）===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:32px;padding:14px 5vw;transition:all .3s ease;background:rgba(247,242,234,0);border-bottom:1px solid transparent;}
+.nav.scrolled{background:rgba(255,255,255,0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);box-shadow:0 2px 16px rgba(107,79,63,0.06);padding:10px 5vw;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none;}
+.logo-mark{width:36px;height:36px;border-radius:50%;background:var(--main);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:500;}
+.logo-text{line-height:1.2;}
+.logo-text .cn{font-size:17px;font-weight:600;letter-spacing:3px;color:var(--ink);}
+.logo-text .en{font-size:10px;color:var(--ink-faint);letter-spacing:2px;}
+.nav-links{display:flex;gap:30px;list-style:none;}
+.nav-links a{font-size:14px;color:var(--ink);text-decoration:none;padding:6px 2px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-links a:hover{color:var(--main-deep);}
+.nav-links a:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:4px;}
+.nav-links a.active{border-bottom-color:var(--accent);font-weight:500;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+.btn{display:inline-block;background:var(--btn);color:#fff;border:none;border-radius:999px;padding:10px 28px;font-size:14px;font-weight:500;letter-spacing:2px;text-decoration:none;cursor:pointer;transition:background .2s,transform .2s;}
+.btn:hover{background:#8F3D1F;transform:translateY(-1px);}
+.btn:focus-visible{outline:2px solid var(--btn);outline-offset:3px;}
+.btn-ghost{background:transparent;color:var(--btn);border:1.5px solid var(--btn);}
+.btn-ghost:hover{background:#FDF0E7;}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:10px;flex-direction:column;gap:5px;}
+.burger span{width:22px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s;}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);z-index:99;padding:16px 24px;box-shadow:0 12px 24px rgba(107,79,63,.08);}
+.mobile-menu.open{display:block;}
+.mobile-menu a{display:block;padding:13px 8px;font-size:15px;color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line-soft);min-height:44px;}
+.mobile-menu a:last-child{border-bottom:none;}
+
+/* ===== Hero（PRD 4.1）===== */
+.hero{position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;margin-top:0;}
+.hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1532951779377-1080f5c62ab7?auto=format&fit=crop&w=1600&q=75') center/cover no-repeat;}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(247,242,234,.35) 0%,rgba(247,242,234,.55) 60%,var(--bg) 100%);}
+.hero-inner{position:relative;z-index:2;padding:0 24px;max-width:720px;}
+.hero .slogan{font-size:clamp(28px,5vw,52px);font-weight:600;letter-spacing:6px;color:var(--ink);line-height:1.5;}
+.hero .sub{margin-top:18px;font-size:16px;color:var(--ink-soft);letter-spacing:2px;}
+.hero .ctas{margin-top:36px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ===== 区块 ===== */
+section{padding:84px 5vw;max-width:1100px;margin:0 auto;}
+.sec-title{text-align:center;font-size:26px;font-weight:600;letter-spacing:4px;margin-bottom:8px;}
+.sec-en{text-align:center;font-size:12px;color:var(--ink-faint);letter-spacing:3px;margin-bottom:36px;}
+
+/* 品牌故事（PRD 4.1）*/
+.story{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+.story img{width:100%;border-radius:16px;object-fit:cover;height:400px;}
+.story p{font-size:16px;color:var(--ink-soft);letter-spacing:1px;margin:14px 0;}
+.story p b{color:var(--ink);}
+
+/* 猫咪预览（PRD 4.1）*/
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.cat-card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .25s,box-shadow .25s;}
+.cat-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(107,79,63,.10);}
+.cat-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+.cat-card img{width:100%;height:210px;object-fit:cover;display:block;}
+.cat-body{padding:16px 18px 20px;}
+.cat-name{font-size:17px;font-weight:600;}
+.cat-tag{display:inline-block;background:var(--bg-soft);border:1px solid var(--line);color:var(--main-deep);font-size:12px;padding:2px 12px;border-radius:999px;margin:8px 0 6px;}
+.cat-desc{font-size:13px;color:var(--ink-soft);}
+.see-more{text-align:center;margin-top:32px;}
+
+/* 餐单预览（PRD 4.1）*/
+.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.menu-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center;}
+.menu-item .ph{height:64px;width:64px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.menu-item h4{font-size:14px;margin-bottom:4px;}
+.menu-item .price{color:var(--btn);font-weight:600;font-size:13px;}
+.menu-item .cat{font-size:11px;color:var(--ink-faint);}
+
+/* 安全须知（PRD 4.1）*/
+.safety{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.safety .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;}
+.safety .item .ic{font-size:22px;margin-bottom:8px;}
+.safety .item h4{font-size:15px;margin-bottom:6px;}
+.safety .item p{font-size:13px;color:var(--ink-soft);}
+
+/* 门店（PRD 4.1）*/
+.store{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:36px;}
+.store-info{font-size:15px;color:var(--ink-soft);}
+.store-info p{margin:10px 0;}
+.store-info b{color:var(--ink);}
+.map-ph{background:var(--bg-soft);border:1px dashed var(--line);border-radius:12px;height:240px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:13px;}
+
+/* 悬浮横幅（PRD 4.1）*/
+.floating{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:90;display:flex;flex-direction:column;gap:10px;}
+.fb{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--ink);text-decoration:none;box-shadow:0 4px 16px rgba(107,79,63,.10);text-align:center;min-width:86px;}
+.fb:hover{border-color:var(--accent);}
+.fb .fb-t{font-weight:600;display:block;margin-bottom:2px;}
+
+/* 页脚（PRD 4.1）*/
+footer{background:#F1E8DA;border-top:1px solid var(--line);padding:48px 5vw 40px;margin-top:60px;}
+.foot{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:28px;}
+.foot h4{font-size:14px;margin-bottom:10px;color:var(--ink);}
+.foot a{display:block;color:var(--ink-soft);text-decoration:none;font-size:13px;padding:3px 0;}
+.foot a:hover{color:var(--main-deep);}
+.foot-bottom{margin-top:30px;text-align:center;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:20px;}
+
+/* 移动端底部预约按钮（PRD 3.1）*/
+.bottom-bar{display:none;}
+
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .nav-right .btn{display:none;}
+  .burger{display:flex;}
+  .story,.store{grid-template-columns:1fr;}
+  .cats{grid-template-columns:1fr 1fr;}
+  .menu{grid-template-columns:1fr 1fr;}
+  .safety{grid-template-columns:1fr;}
+  .floating{display:none;}
+  .bottom-bar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:95;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);}
+  .bottom-bar .btn{flex:1;text-align:center;}
+  body{padding-bottom:64px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 吸顶导航（PRD 4.1）===== -->
+<header class="nav" id="nav">
+  <a class="logo" href="#top" aria-label="猫屿首页">
+    <span class="logo-mark" aria-hidden="true">猫</span>
+    <span class="logo-text"><span class="cn">猫屿</span><br><span class="en">CAT ISLE</span></span>
+  </a>
+  <nav aria-label="主导航">
+    <ul class="nav-links">
+      <li><a href="#cats" class="active">猫咪</a></li>
+      <li><a href="#menu">餐单</a></li>
+      <li><a href="#reserve">预约</a></li>
+      <li><a href="#adopt">领养</a></li>
+    </ul>
+  </nav>
+  <div class="nav-right">
+    <a class="btn" href="#reserve">立即预约</a>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+<nav class="mobile-menu" id="mobileMenu" aria-label="移动端导航">
+  <a href="#cats">猫咪</a>
+  <a href="#menu">餐单</a>
+  <a href="#reserve">预约</a>
+  <a href="#adopt">领养</a>
+</nav>
+
+<!-- ===== Hero（PRD 4.1）===== -->
+<div class="hero" id="top">
+  <div class="hero-bg" role="img" aria-label="猫咪在白色毯子上安静睡觉的照片"></div>
+  <div class="hero-inner">
+    <h1 class="slogan">在猫的节奏里<br>慢下来</h1>
+    <p class="sub">城市里，有一个被猫治愈的角落</p>
+    <div class="ctas">
+      <a class="btn" href="#reserve">立即预约</a>
+      <a class="btn btn-ghost" href="#cats">认识猫咪</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 品牌故事（PRD 4.1）===== -->
+<section id="story">
+  <h2 class="sec-title">猫屿的故事</h2>
+  <p class="sec-en">OUR STORY</p>
+  <div class="story">
+    <img src="https://images.unsplash.com/photo-1622046016568-ff3842481d42?auto=format&fit=crop&w=800&q=70" alt="女孩怀抱白棕色小猫的温馨照片">
+    <div>
+      <p>想抚摸一只猫的时候，<b>猫屿在这里</b>。</p>
+      <p>心情沉闷需要安静的时候，<b>猫屿在这里</b>。</p>
+      <p>想和重要的人拉近距离的时候，<b>猫屿在这里</b>。</p>
+      <p>这里的每一只猫，都有自己的名字和脾气。<br>你可以只是坐着，看它们晒太阳。<br><b>第一次来也没关系，猫会先认识你。</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 猫咪预览（PRD 4.1）===== -->
+<section id="cats">
+  <h2 class="sec-title">住在这里的猫</h2>
+  <p class="sec-en">OUR CATS</p>
+  <div class="cats">
+    <a class="cat-card" href="#" aria-label="查看奶糖详情">
+      <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=500&q=70" alt="橘白猫奶糖的照片">
+      <div class="cat-body"><p class="cat-name">奶糖</p><span class="cat-tag">撒娇大王</span><p class="cat-desc">摸到舒服会翻肚皮给你看。</p></div>
+    </a>
+    <a class="cat-card" href="#" aria-label="查看布丁详情">
+      <img src="https://images.unsplash.com/photo-1529778873920-4da4926a72c2?auto=format&fit=crop&w=500&q=70" alt="虎斑小猫布丁的照片">
+      <div class="cat-body"><p class="cat-name">布丁</p><span class="cat-tag">探险家</span><p class="cat-desc">永远在追逐激光笔。</p></div>
+    </a>
+    <a class="cat-card" href="#" aria-label="查看团子详情">
+      <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=500&q=70" alt="长毛猫团子的照片">
+      <div class="cat-body"><p class="cat-name">团子</p><span class="cat-tag">睡神</span><p class="cat-desc">一天睡 20 小时的毛绒团子。</p></div>
+    </a>
+    <a class="cat-card" href="#" aria-label="查看芝麻详情">
+      <img src="https://images.unsplash.com/photo-1516750105099-4b8a83e217ee?auto=format&fit=crop&w=500&q=70" alt="灰猫芝麻的照片">
+      <div class="cat-body"><p class="cat-name">芝麻</p><span class="cat-tag">高冷系</span><p class="cat-desc">愿意等他的话，会收获粘人的芝麻。</p></div>
+    </a>
+    <a class="cat-card" href="#" aria-label="查看小满详情">
+      <img src="https://images.unsplash.com/photo-1601565812491-fed7af6905f2?auto=format&fit=crop&w=500&q=70" alt="黑白猫小满的照片">
+      <div class="cat-body"><p class="cat-name">小满</p><span class="cat-tag">运动健将</span><p class="cat-desc">猫爬架顶端的常客。</p></div>
+    </a>
+    <a class="cat-card" href="#" aria-label="查看汤圆详情">
+      <img src="https://images.unsplash.com/photo-1637424864218-b040b739ac44?auto=format&fit=crop&w=500&q=70" alt="小橘猫汤圆的照片">
+      <div class="cat-body"><p class="cat-name">汤圆</p><span class="cat-tag">小吃货</span><p class="cat-desc">营业时请看好自己的甜品。</p></div>
+    </a>
+  </div>
+  <p class="see-more"><a class="btn btn-ghost" href="#">查看全部猫咪</a></p>
+</section>
+
+<!-- ===== 餐单预览（PRD 4.1）===== -->
+<section id="menu">
+  <h2 class="sec-title">一杯咖啡的时间</h2>
+  <p class="sec-en">MENU</p>
+  <div class="menu">
+    <div class="menu-item"><div class="ph" style="background:#EADFCF;">☕</div><h4>猫爪印拿铁</h4><p class="cat">咖啡</p><p class="price">¥ 28</p></div>
+    <div class="menu-item"><div class="ph" style="background:#F1E9DB;">🥛</div><h4>云朵燕麦拿铁</h4><p class="cat">咖啡</p><p class="price">¥ 32</p></div>
+    <div class="menu-item"><div class="ph" style="background:#FAEEDA;">🍰</div><h4>小满的下午</h4><p class="cat">甜品</p><p class="price">¥ 26</p></div>
+    <div class="menu-item"><div class="ph" style="background:#EAF3DE;">🐟</div><h4>奶糖的零食罐</h4><p class="cat">猫零食</p><p class="price">¥ 12</p></div>
+  </div>
+  <p class="see-more"><a class="btn btn-ghost" href="#">查看完整菜单</a></p>
+</section>
+
+<!-- ===== 安全须知（PRD 4.1）===== -->
+<section id="safety">
+  <h2 class="sec-title">让你和猫都安心</h2>
+  <p class="sec-en">SAFETY</p>
+  <div class="safety">
+    <div class="item"><p class="ic">🧼</p><h4>进店消毒</h4><p>入店前手部消毒，提供一次性鞋套，猫咪疫苗接种记录店内公示。</p></div>
+    <div class="item"><p class="ic">🤝</p><h4>互动规则</h4><p>请用逗猫棒引导互动，不抱猫、不打扰睡觉的猫，儿童需家长全程陪同。</p></div>
+    <div class="item"><p class="ic">🏠</p><h4>首次到访</h4><p>第一次来也不用紧张——安静坐下，等猫主动靠近就好。</p></div>
+  </div>
+</section>
+
+<!-- ===== 门店与预约（PRD 4.1）===== -->
+<section id="reserve">
+  <h2 class="sec-title">来找我们吧</h2>
+  <p class="sec-en">VISIT US</p>
+  <div class="store">
+    <div class="store-info">
+      <p><b>猫屿 CAT ISLE</b></p>
+      <p>📍 地址：XX 市 XX 区 XX 路 XX 号（后台可配）</p>
+      <p>📞 电话：138-0000-0000（后台可配）</p>
+      <p>🕐 营业时间：11:00-19:00 · 周一店休（后台可配）</p>
+      <p style="font-size:13px;color:var(--ink-faint);">预约需支付押金 ¥20（线下收款码转账，店主核验）· 每时段限 6 组</p>
+      <p style="margin-top:18px;"><a class="btn" href="#">立即预约</a></p>
+    </div>
+    <div class="map-ph">地图占位（高德/腾讯地图 iframe，后台配置）</div>
+  </div>
+</section>
+
+<!-- ===== 页脚（PRD 4.1）===== -->
+<footer>
+  <div class="foot">
+    <div>
+      <p style="font-size:16px;font-weight:600;letter-spacing:2px;">猫屿 CAT ISLE</p>
+      <p style="font-size:12px;color:var(--ink-faint);margin-top:6px;">在猫的节奏里，慢下来</p>
+    </div>
+    <div>
+      <h4>导航</h4>
+      <a href="#cats">猫咪</a><a href="#menu">餐单</a><a href="#reserve">预约</a><a href="#adopt">领养</a>
+    </div>
+    <div>
+      <h4>关注我们</h4>
+      <a href="#">小红书（占位）</a><a href="#">抖音（占位）</a><a href="#">微信公众号（占位）</a>
+    </div>
+    <div>
+      <h4>信息</h4>
+      <a href="#reserve">营业时间：11:00-19:00（周一店休）</a><a href="#">隐私政策</a>
+    </div>
+  </div>
+  <div class="foot-bottom">© 2026 猫屿 CAT ISLE 保留所有权利 · 本页为产品原型，数据与链接均为占位</div>
+</footer>
+
+<!-- ===== 右侧悬浮横幅（PRD 4.1）===== -->
+<div class="floating">
+  <a class="fb" href="#cats"><span class="fb-t">新猫报道</span>去看看</a>
+  <a class="fb" href="#adopt"><span class="fb-t">领养成功</span>毕业啦</a>
+  <a class="fb" href="#"><span class="fb-t">周边上新</span>（外链可配）</a>
+</div>
+
+<!-- ===== 移动端底部预约按钮（PRD 3.1）===== -->
+<div class="bottom-bar">
+  <a class="btn" href="#reserve">立即预约</a>
+</div>
+
+<script>
+// 滚动 200px 后导航毛玻璃（PRD 4.1）
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 200);
+}, { passive: true });
+
+// 移动端汉堡菜单
+const burger = document.getElementById('burger');
+const menu = document.getElementById('mobileMenu');
+burger.addEventListener('click', () => {
+  const open = menu.classList.toggle('open');
+  burger.setAttribute('aria-expanded', open);
+  burger.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+});
+menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  menu.classList.remove('open');
+  burger.setAttribute('aria-expanded', 'false');
+}));
+
+// 导航激活态跟随滚动（原型演示）
+const links = document.querySelectorAll('.nav-links a');
+const sections = ['cats','menu','safety','reserve'];
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+</script>
+</body>
+</html>

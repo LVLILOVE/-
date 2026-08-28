@@ -1,0 +1,25 @@
+# ============================================================
+# 代码段功能：systemd 服务单元（猫屿 FastAPI 后端）
+# - 使用方式：sudo cp catisle.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now catisle
+# - 关键：--workers 1（内嵌 APScheduler 定时任务，多 worker 会重复执行！）
+# ============================================================
+[Unit]
+Description=Cat Isle CAT ISLE FastAPI backend
+After=network.target
+
+[Service]
+# 运行目录：项目代码位置（含 app/ 与 static/）
+WorkingDirectory=/opt/catisle
+# 使用项目虚拟环境中的 uvicorn（本机内网监听，由 Nginx 反代）
+ExecStart=/opt/catisle/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=always
+RestartSec=3
+# 环境变量从项目 .env 读取（JWT_SECRET / ADMIN_PASSWORD 等）
+EnvironmentFile=/opt/catisle/.env
+# 安全加固（可选）
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

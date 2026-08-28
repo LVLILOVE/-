@@ -1,0 +1,57 @@
+/* ============================================================
+   代码段功能：全局样式 + Tailwind v4 设计 Token
+   - 对齐 UI/UX 设计文档 §10：暖咖色板 / 圆角 / 字号 / 字体
+   - @theme 定义后，Tailwind 自动生成 bg-bg / text-ink / border-line 等类
+   - 基础样式：全站圆润无直角、中文行高、按钮/链接光标
+============================================================ */
+@import "tailwindcss";
+
+@theme {
+  /* ---- 色彩系统（UIUX §10 Token 一一对应）---- */
+  --color-bg: #F7F2EA;          /* 页面主背景（奶油米白，占比 80%） */
+  --color-bg-soft: #FBF8F2;     /* 次级背景：输入框/分区底 */
+  --color-card: #FFFFFF;        /* 卡片/导航底 */
+  --color-ink: #6B4F3F;         /* 正文文字（深暖棕） */
+  --color-ink-soft: #8A6F5C;    /* 次级文字 */
+  --color-ink-faint: #B5A08F;   /* 提示/占位文字（仅非关键信息） */
+  --color-main: #C89F7B;        /* 主色：Logo/选中态/进度 */
+  --color-main-deep: #A97B50;   /* 主色 hover/深一级 */
+  --color-accent: #E8935F;      /* 强调色：激活下划线/装饰 */
+  --color-btn: #A94A26;         /* 主按钮底（白字对比 5.68:1 达标） */
+  --color-btn-hover: #8F3D1F;   /* 主按钮 hover（7.09:1） */
+  --color-pink: #D96C75;        /* 领养标签/逾期标记 */
+  --color-danger: #B4503E;      /* 错误/高风险 */
+  --color-danger-bg: #F7E3E0;   /* 错误浅底 */
+  --color-warn: #A9792C;        /* 待办/进行中 */
+  --color-warn-bg: #FAEEDA;     /* 待办浅底 */
+  --color-success: #5C7A3C;     /* 完成/已确认 */
+  --color-success-bg: #EAF3DE;  /* 完成浅底 */
+  --color-line: #EADFCF;        /* 卡片描边 */
+  --color-line-soft: #F1E9DB;   /* 虚线/分隔 */
+
+  /* ---- 字体（中文思源黑体系 + 英文 Nunito/Varela）---- */
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-en: "Nunito Sans", "Varela Round", sans-serif;
+
+  /* ---- 圆角系统（全站无直角）---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+}
+
+/* 基础样式：行高、光标、选择色 */
+html { scroll-behavior: smooth; }
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+  line-height: 1.8;
+  font-size: 15px;
+}
+/* 所有可点击元素显示手型（ui-ux 规范） */
+button, a, [role="button"] { cursor: pointer; }
+/* 焦点环：键盘可达性（UIUX §9） */
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+/* 尊重系统减弱动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

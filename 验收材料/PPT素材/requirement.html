@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* 需求处理记录页：模拟 WorkBuddy 对话式需求处理记录（验收 PPT 素材） */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f7f3ee; padding: 32px; color: #3d342c; }
+  .page { max-width: 860px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 24px; }
+  .header h1 { font-size: 24px; letter-spacing: 3px; }
+  .header p { font-size: 12px; color: #9a8f83; margin-top: 6px; letter-spacing: 2px; }
+  .chat { background: #fff; border-radius: 16px; border: 1px solid #e8e0d5; padding: 24px; box-shadow: 0 4px 20px rgba(120,90,60,.08); }
+  .row { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .user .avatar { background: #a87b51; color: #fff; }
+  .bot .avatar { background: #efe6db; }
+  .bubble { flex: 1; background: #fbf8f4; border: 1px solid #eee5d8; border-radius: 12px; padding: 14px 16px; font-size: 14px; line-height: 1.9; }
+  .user .bubble { background: #fff7ef; border-color: #ecd9c3; }
+  .bubble b { color: #a35b24; }
+  .tag { display: inline-block; background: #a87b51; color: #fff; font-size: 11px; border-radius: 10px; padding: 2px 10px; margin-right: 6px; }
+  .tag.green { background: #7a9b76; }
+  .time { font-size: 11px; color: #b5aa9d; margin-top: 4px; }
+  .stat { display: flex; gap: 12px; margin-top: 18px; }
+  .card { flex: 1; background: #fff; border: 1px solid #e8e0d5; border-radius: 12px; padding: 14px; text-align: center; }
+  .card .num { font-size: 26px; font-weight: bold; color: #a35b24; }
+  .card .lbl { font-size: 12px; color: #9a8f83; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>WorkBuddy 需求处理记录</h1>
+    <p>猫屿 CAT ISLE 官网 · 2026-08 开发周期</p>
+  </div>
+
+  <div class="chat">
+    <div class="row user">
+      <div class="avatar">我</div>
+      <div class="bubble">
+        <b>需求：</b>为猫咖做一个官网，需要：<br>
+        ① 前台免注册预约（押金转账 + 店长核验）<br>
+        ② 猫咪档案与领养 4 级审核<br>
+        ③ 店长解答问答区、小助手、今日店长…<br>
+        <span class="time">2026-08-26 10:24 · 需求提出</span>
+      </div>
+    </div>
+
+    <div class="row bot">
+      <div class="avatar">🤖</div>
+      <div class="bubble">
+        <span class="tag">PRD</span><span class="tag green">方案</span>已生成 12 章完整《猫屿猫咖官网PRD》与《开发实施方案》，拆分为 M1-M4 四个里程碑。<br>
+        <span class="time">2026-08-26 · WorkBuddy 处理</span>
+      </div>
+    </div>
+
+    <div class="row bot">
+      <div class="avatar">🤖</div>
+      <div class="bubble">
+        <span class="tag green">M1</span>需求与设计：PRD、UIUX 规范、技术文档、产品原型（前台+后台）<br>
+        <span class="tag green">M2</span>后端开发：FastAPI + SQLite，9 张数据表，29 个接口，pytest 28 项全过<br>
+        <span class="tag green">M3</span>前端开发：React 19 + Vite + Tailwind，前台 8 页 + 后台 8 模块<br>
+        <span class="tag green">M4</span>联调上线：单端口部署、内网穿透公网访问、验收材料
+        <span class="time">2026-08-26 ~ 2026-08-28 · WorkBuddy 执行</span>
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="card"><div class="num">29</div><div class="lbl">API 接口</div></div>
+      <div class="card"><div class="num">9</div><div class="lbl">数据表</div></div>
+      <div class="card"><div class="num">16</div><div class="lbl">页面/模块</div></div>
+      <div class="card"><div class="num">28</div><div class="lbl">测试用例通过</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
