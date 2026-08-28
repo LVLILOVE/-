@@ -33,3 +33,6 @@ uploads/
 .DS_Store
 Thumbs.db
 *.local
+
+# ===== Office 临时锁定文件（打开文档时产生，如 ~$xxx.pptx）=====
+~$*
