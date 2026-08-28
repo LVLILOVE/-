@@ -59,19 +59,31 @@ export default function MenuPage() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {shown.map((m) => (
-            <div key={m.id} className="relative bg-card border border-line rounded-xl p-5 text-center">
+            <div key={m.id} className="relative bg-card border border-line rounded-xl overflow-hidden text-center">
               {/* 猫零食标记：右上角粉色小标签（UIUX §4.4） */}
               {m.category === 'cat_snack' && (
-                <span className="absolute top-3 right-3 bg-pink/10 text-pink text-[10px] px-2 py-0.5 rounded-full">
+                <span className="absolute top-3 right-3 bg-pink/10 text-pink text-[10px] px-2 py-0.5 rounded-full z-10">
                   给猫咪的小零食
                 </span>
               )}
-              <div className="w-16 h-16 rounded-full bg-bg-soft border border-line mx-auto mb-2.5 flex items-center justify-center text-2xl" aria-hidden="true">
-                {ICONS[m.category] || '🍽'}
+              {/* 餐品图片：有 image_url 显示实拍图，无图则显示分类图标占位 */}
+              {m.image_url ? (
+                <img
+                  src={m.image_url}
+                  alt={m.name}
+                  className="w-full h-36 md:h-44 object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-bg-soft border border-line mx-auto mt-5 mb-2.5 flex items-center justify-center text-2xl" aria-hidden="true">
+                  {ICONS[m.category] || '🍽'}
+                </div>
+              )}
+              <div className="p-4">
+                <h4 className="text-sm font-medium">{m.name}</h4>
+                {m.desc && <p className="text-[11px] text-ink-faint mt-0.5 line-clamp-2">{m.desc}</p>}
+                <p className="text-[13px] font-semibold text-btn mt-1.5">¥ {m.price.toFixed(2)}</p>
               </div>
-              <h4 className="text-sm font-medium">{m.name}</h4>
-              {m.desc && <p className="text-[11px] text-ink-faint mt-0.5 line-clamp-2">{m.desc}</p>}
-              <p className="text-[13px] font-semibold text-btn mt-1.5">¥ {m.price.toFixed(2)}</p>
             </div>
           ))}
         </div>
