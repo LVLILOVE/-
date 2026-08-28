@@ -18,6 +18,7 @@ const MenuPage = lazy(() => import('./pages/MenuPage'))
 const Reserve = lazy(() => import('./pages/Reserve'))
 const Adopt = lazy(() => import('./pages/Adopt'))
 const Qa = lazy(() => import('./pages/Qa'))
+const About = lazy(() => import('./pages/About'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/reserve" element={<Reserve />} />
           <Route path="/adopt" element={<Adopt />} />
           <Route path="/qa" element={<Qa />} />
+          <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
         </Route>
 
