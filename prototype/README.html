@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型说明 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 原型说明</div>
+      <h1>原型说明与需求映射</h1>
+      <p class="lede">
+        本原型依据 <code>电商销量预测系统_PRD_V1.0.md</code> 制作，
+        用于向研发、设计与测试团队演示交互流程与页面结构。
+        所有示例数据均为<strong>基于天池 167097 真实字段结构合成的演示数据</strong>，
+        非真实业务数据。
+      </p>
+    </div>
+
+    <div class="with-aside" style="grid-template-columns:200px minmax(0,1fr)">
+      <!-- 锚点导航 -->
+      <aside>
+        <nav class="anchor-nav">
+          <a href="#overview" class="active">1. 原型概览</a>
+          <a href="#pages">2. 页面索引</a>
+          <a href="#mapping">3. 需求映射总表</a>
+          <a href="#states">4. 状态覆盖清单</a>
+          <a href="#dataset">5. 示例数据说明</a>
+          <a href="#diff">6. PRD 与参考网站差异</a>
+          <a href="#decisions">7. 已锁定决策</a>
+          <a href="#limits">8. 原型边界与待补充</a>
+        </nav>
+      </aside>
+
+      <div class="doc">
+
+        <!-- ============ 1. 概览 ============ -->
+        <h2 id="overview">1. 原型概览</h2>
+
+        <div class="metric-grid mb-3">
+          <div class="metric metric-brand">
+            <div class="metric-label">页面总数</div>
+            <div class="metric-value">11</div>
+            <div class="metric-foot">覆盖 PRD 全部主要页面</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">功能需求覆盖</div>
+            <div class="metric-value">76<span class="unit">项</span></div>
+            <div class="metric-foot">FR-* 编号</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">非功能需求覆盖</div>
+            <div class="metric-value">38<span class="unit">项</span></div>
+            <div class="metric-foot">NFR-* 编号</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">关键状态</div>
+            <div class="metric-value">9<span class="unit">类</span></div>
+            <div class="metric-foot">空 / 加载 / 异常</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>技术说明</h3>
+            <ul>
+              <li><strong>纯静态实现</strong>：HTML + CSS + 原生 JS，无构建步骤、无外部 CDN 依赖，双击即可在浏览器打开</li>
+              <li><strong>共享样式</strong>：<code>assets/app.css</code>（设计令牌 + 组件），<code>assets/demo-data.js</code>（示例数据），<code>assets/charts.js</code>（自研 SVG 图表库）</li>
+              <li><strong>深色优先</strong>：默认深色主题，右上角太阳图标可切换浅色，选择存入 localStorage</li>
+              <li><strong>色彩空间</strong>：使用 <code>oklch()</code> 定义全部颜色，品牌色相 205（青蓝），刻意避开 bootstrap 蓝</li>
+              <li><strong>图表自绘</strong>：折线 / 多线 / 直方图 / 迷你走势线均为运行时生成的 SVG，随主题切换自动重绘</li>
+              <li><strong>响应式</strong>：≥900px 显示侧栏，&lt;900px 折叠为抽屉；打印时自动隐藏原型工具条</li>
+            </ul>
+          </div>
+          <div>
+            <h3>呈现约定</h3>
+            <ul>
+              <li>页面底部的 <strong>「原型说明」</strong> 区块（蓝色边框）列出该页与 PRD 需求编号的对应关系，<em>不属于产品界面</em>，交付时移除</li>
+              <li>页头下方的 <strong>「演示状态」</strong> 药丸按钮用于切换空态 / 加载态 / 异常态，<em>不属于产品界面</em></li>
+              <li>红色的 <strong>「差异标注」</strong> 区块用于标识与参考网站（天池赛题页）不一致之处，已在下方第 6 节汇总</li>
+              <li>页脚的免责声明是<strong>真实需求</strong>（任务书 §6.1），不是原型标注，需保留</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ============ 2. 页面索引 ============ -->
+        <h2 id="pages">2. 页面索引</h2>
+
+        <div class="toc-grid mb-3">
+          <a class="toc-card" href="index.html">
+            <div class="tc-idx">01 · 未登录可见</div>
+            <div class="tc-name">产品首页</div>
+            <div class="tc-req">价值主张、硬指标、五步流程、数据集字段说明、与天池的差异对照</div>
+          </a>
+          <a class="toc-card" href="login.html">
+            <div class="tc-idx">02 · 未登录可见</div>
+            <div class="tc-name">登录</div>
+            <div class="tc-req">FR-USR-05 / FR-USR-06 / FR-USR-07；含登录中、密码错误、限流冷却三态</div>
+          </a>
+          <a class="toc-card" href="register.html">
+            <div class="tc-idx">03 · 未登录可见</div>
+            <div class="tc-name">注册</div>
+            <div class="tc-req">FR-USR-01 ~ FR-USR-04；含密码强度实时校验与隐私说明</div>
+          </a>
+          <a class="toc-card" href="dashboard.html">
+            <div class="tc-idx">04 · 工作台</div>
+            <div class="tc-name">概览</div>
+            <div class="tc-req">FR-HIS-01 / FR-USR-08 / NFR-USE-01 / NFR-USE-04 / FR-SYS-05</div>
+          </a>
+          <a class="toc-card" href="upload.html">
+            <div class="tc-idx">05 · 主流程 1/4</div>
+            <div class="tc-name">上传数据</div>
+            <div class="tc-req">FR-UPL-01 ~ FR-UPL-15 全量；含 5 类校验错误的结构化展示</div>
+          </a>
+          <a class="toc-card" href="params.html">
+            <div class="tc-idx">06 · 主流程 2/4</div>
+            <div class="tc-name">参数配置</div>
+            <div class="tc-req">FR-MOD-01 ~ FR-MOD-04、FR-FEA-02/10、FR-MOD-12；粒度只读、无重训选项</div>
+          </a>
+          <a class="toc-card" href="running.html">
+            <div class="tc-idx">07 · 主流程 3/4</div>
+            <div class="tc-name">执行进度</div>
+            <div class="tc-req">FR-MOD-09/10/12/13；60 秒预算时间轴、GPU→CPU 回退、超时软失败</div>
+          </a>
+          <a class="toc-card" href="result.html">
+            <div class="tc-idx">08 · 主流程 4/4 · 核心交付页</div>
+            <div class="tc-name">预测结果</div>
+            <div class="tc-req">FR-VIS-01 ~ FR-VIS-09 + FR-MOD-06/11/13/14；覆盖率披露、MAPE 超标警告</div>
+          </a>
+          <a class="toc-card" href="history.html">
+            <div class="tc-idx">09 · 记录</div>
+            <div class="tc-name">历史任务</div>
+            <div class="tc-req">FR-HIS-01 ~ FR-HIS-06；筛选、空状态、删除二次确认</div>
+          </a>
+          <a class="toc-card" href="history-detail.html">
+            <div class="tc-idx">10 · 记录</div>
+            <div class="tc-name">任务详情</div>
+            <div class="tc-req">FR-HIS-04 / FR-SYS-07/08；参数快照冻结、失败详情、阶段耗时回放</div>
+          </a>
+          <a class="toc-card" href="compare.html">
+            <div class="tc-idx">11 · 记录</div>
+            <div class="tc-name">跨任务对比</div>
+            <div class="tc-req">FR-HIS-04；最多 4 任务并排、最优值高亮、数据不一致警告</div>
+          </a>
+        </div>
+
+        <!-- ============ 3. 需求映射总表 ============ -->
+        <h2 id="mapping">3. 需求映射总表</h2>
+
+        <p>下表列出 PRD 全部 8 个功能模块与本原型页面的对应关系。「未在本原型演示」一栏说明原因。</p>
+
+        <table>
+          <thead>
+            <tr><th>模块</th><th>编号</th><th>数量</th><th>承载页面</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>用户管理</td>
+              <td><code>FR-USR</code></td>
+              <td>10</td>
+              <td>login / register / dashboard</td>
+              <td>注册、登录、密码强度、会话、退出、个人信息</td>
+            </tr>
+            <tr>
+              <td>数据上传</td>
+              <td><code>FR-UPL</code></td>
+              <td>15</td>
+              <td>upload</td>
+              <td>格式校验、字段契约、7 步校验顺序、5 类错误</td>
+            </tr>
+            <tr>
+              <td>特征工程</td>
+              <td><code>FR-FEA</code></td>
+              <td>11</td>
+              <td>params / result / history-detail</td>
+              <td>滑动窗口、滞后、滚动统计、节假日表；中间产物不单独成页</td>
+            </tr>
+            <tr>
+              <td>模型预测</td>
+              <td><code>FR-MOD</code></td>
+              <td>15</td>
+              <td>params / running / result</td>
+              <td>粒度、步长、分级、批量推理、设备回退、指标口径</td>
+            </tr>
+            <tr>
+              <td>结果可视化</td>
+              <td><code>FR-VIS</code></td>
+              <td>10</td>
+              <td>result</td>
+              <td>折线对比、指标卡、明细表、覆盖率、直方图、导出</td>
+            </tr>
+            <tr>
+              <td>历史记录</td>
+              <td><code>FR-HIS</code></td>
+              <td>6</td>
+              <td>history / history-detail / compare</td>
+              <td>列表、筛选、导出、详情、删除、对比</td>
+            </tr>
+            <tr>
+              <td>系统与错误</td>
+              <td><code>FR-SYS</code></td>
+              <td>9</td>
+              <td>running / result / history-detail</td>
+              <td>错误码、软失败、处置建议、免责声明</td>
+            </tr>
+            <tr>
+              <td>非功能需求</td>
+              <td><code>NFR-*</code></td>
+              <td>38</td>
+              <td>全部页面</td>
+              <td>性能、安全、兼容、可靠、易用五类，主要在文案与交互中体现</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-info" style="margin-bottom:1rem">
+          <div class="alert-body">
+            <div class="alert-title">关于本原型的覆盖口径</div>
+            原型的目标是<strong>把交互与状态讲清楚</strong>，不是把 PRD 逐条点一遍。
+            因此：<br>
+            ① 纯后端需求（如权重持久化、模型注册表、SQLite 表结构）不出现在界面中；<br>
+            ② 同一页面内的重复交互只演示一次（如表格排序只在一个页演示）；<br>
+            ③ P2 / P3 需求（截图导出、自动重训）明确标注为不在本期范围。
+          </div>
+        </div>
+
+        <!-- ============ 4. 状态覆盖 ============ -->
+        <h2 id="states">4. 状态覆盖清单</h2>
+
+        <p>PRD 要求「包含空状态、加载、异常等关键状态」。下表逐页列出本原型实际演示的状态，可在页头「演示状态」按钮中切换。</p>
+
+        <table>
+          <thead>
+            <tr><th>页面</th><th>正常态</th><th>加载态</th><th>空态</th><th>异常 / 边界态</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>上传数据</td>
+              <td>校验通过</td>
+              <td>上传中 / 校验中（带进度条）</td>
+              <td>待上传（拖拽区）</td>
+              <td>缺字段 <code>40001</code>、日期异常 <code>40002</code>、负值 <code>40003</code>、序列超限 <code>40004</code>、时间断档 <code>40005</code></td>
+            </tr>
+            <tr>
+              <td>参数配置</td>
+              <td>正常提交</td>
+              <td>提交中</td>
+              <td>—</td>
+              <td>存在不可预测序列、耗时逼近上限、提交失败 <code>E_INFER_FAIL</code></td>
+            </tr>
+            <tr>
+              <td>执行进度</td>
+              <td>运行中 / 已完成</td>
+              <td>五阶段实时进度 + 时间轴</td>
+              <td>—</td>
+              <td>GPU→CPU 回退、接近超时、超时失败 <code>E_TIMEOUT</code></td>
+            </tr>
+            <tr>
+              <td>预测结果</td>
+              <td>达标（MAPE 14.3%）</td>
+              <td>结果加载骨架屏</td>
+              <td>无结果（任务失败）</td>
+              <td>超标告警（MAPE 22.6%）、L3 序列不可预测、单条序列误差超标</td>
+            </tr>
+            <tr>
+              <td>历史任务</td>
+              <td>有记录（5 条）</td>
+              <td>列表加载</td>
+              <td>首次使用无记录</td>
+              <td>删除二次确认（需输入任务 ID）</td>
+            </tr>
+            <tr>
+              <td>任务详情</td>
+              <td>成功任务全量信息</td>
+              <td>详情加载</td>
+              <td>—</td>
+              <td>失败任务详情（错误码 + 原因分析 + 重跑入口）</td>
+            </tr>
+            <tr>
+              <td>跨任务对比</td>
+              <td>已选 3 个任务</td>
+              <td>—</td>
+              <td>无可对比任务 / 仅选 1 个</td>
+              <td>数据文件不一致警告</td>
+            </tr>
+            <tr>
+              <td>登录</td>
+              <td>正常态（预填演示账号）</td>
+              <td>登录中</td>
+              <td>—</td>
+              <td>密码错误、连续失败限流冷却</td>
+            </tr>
+            <tr>
+              <td>注册</td>
+              <td>正常态</td>
+              <td>—</td>
+              <td>—</td>
+              <td>弱密码（实时强度条）、邮箱已注册</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============ 5. 示例数据 ============ -->
+        <h2 id="dataset">5. 示例数据说明</h2>
+
+        <p>
+          全部示例数据由 <code>assets/demo-data.js</code> 用<strong>确定性伪随机算法</strong>在浏览器内实时生成
+          ——同一份代码每次刷新得到完全相同的结果，因此截图与评审记录可复现。
+          数据结构严格对齐天池 167097 数据集。
+        </p>
+
+        <h3>5.1 数据集事实（联网核实）</h3>
+        <table>
+          <thead><tr><th>项</th><th>值</th><th>来源</th></tr></thead>
+          <tbody>
+            <tr><td>商品总数</td><td>963 个</td><td>天池数据集说明页</td></tr>
+            <tr><td>分仓数</td><td>5 个（编码为字符串 <code>1</code>–<code>5</code>）</td><td>同上</td></tr>
+            <tr><td>理论序列数</td><td>963 × 5 ≈ 4,815 条</td><td>推导</td></tr>
+            <tr><td>时间范围</td><td>2014-10-10 ~ 2015-12-27（约 450 天）</td><td>天池数据集说明页</td></tr>
+            <tr><td>销量字段</td><td><code>qty_alipay_njhs</code>（非聚划算支付件数）</td><td>天池字段表</td></tr>
+            <tr><td>缺失情况</td><td>存在 17,063 条仓库样本缺失，长尾明显</td><td>数据统计</td></tr>
+            <tr><td>赛题预测窗口</td><td>固定未来 2 周（14 天）</td><td>天池赛题页 <span style="color:var(--warning)">⚠️ 与本产品口径不同，见第 6 节</span></td></tr>
+          </tbody>
+        </table>
+
+        <h3>5.2 原型中的示例数据规模</h3>
+        <p>
+          完整 4,815 条序列对浏览器演示过重，因此抽样为
+          <strong>40 个商品 × 5 个仓、共 113 条有效序列</strong>（14,305 行）为演示集。
+          <strong>本页展示的每一次指标都来自该演示集的真实算法运行</strong>，
+          由 <code>scripts/eval_report.py --export-series</code> 产出后注入，并非手写数字。
+          按真实长尾分布，分级结果如下：
+        </p>
+        <table>
+          <thead><tr><th>分级</th><th>条数</th><th>占比</th><th>含义</th><th>有效历史点数</th></tr></thead>
+          <tbody>
+            <tr><td><strong>L1</strong></td><td>81</td><td>71.7%</td><td>历史充足，走 LSTM 模型推理</td><td>≥ 90</td></tr>
+            <tr><td><strong>L2</strong></td><td>32</td><td>28.3%</td><td>单仓历史偏短，降级到商品级 + 按历史占比分摊</td><td>&lt; 90 但跨仓聚合充足</td></tr>
+            <tr><td><strong>L3</strong></td><td>0</td><td>0.0%</td><td>跨仓聚合后仍不足 90 点，标记不可预测</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <p>
+          本演示集中三个 L2 商品（跨仓聚合足够但单仓偏短）由降级路径承接，
+          恰好验证了「L2 规则兜底」这条链路。真实天池数据集含更多极端长尾商品，
+          L3 占比会明显上升 —— 三级降级机制正是为此设计。
+        </p>
+
+        <h3>5.3 指标数值得出的方式</h3>
+        <p>
+          页面上的 MAPE / MAE / RMSE / 达标序列占比来自
+          <code>outputs/eval_series.json</code>，即 <code>eval_report.py</code>
+          用 PRD §3.4.3 口径真实算出的结果，再由 <code>sync_prototype_data.py</code>
+          注入为 <code>REAL_EVAL</code> 常量。原型不再自己"算"一套，避免出现两套口径：
+        </p>
+        <ul>
+          <li>加权 MAPE = Σ|yᵢ−ŷᵢ| / Σ|yᵢ| —— 主判定口径，门槛 ≤ 20%</li>
+          <li>移动平均基线对<strong>同一批预测点、同一序列集合</strong>计算（PRD <code>FR-MOD-06</code> 🔒），确保「降低 15%」的结论可比</li>
+          <li>达标序列占比只统计 L1 + L2（L3 不可预测，不参与评判）</li>
+          <li>L3 序列的预测值为 <code>null</code>，表格中显示「—」而不是用历史均值伪装成预测</li>
+        </ul>
+        <p>
+          本页展示的数值<strong>不是手写的示例数字</strong>，而是由
+          <code>scripts/eval_report.py --horizon 14 --export-series</code> 真实跑出后，
+          经 <code>scripts/sync_prototype_data.py</code> 注入 <code>REAL_EVAL</code> 常量。
+          当前这批数据的实际结果：加权 MAPE <strong>14.26%</strong>（通过）、MAE 较基线降低
+          <strong>26.42%</strong>、RMSE 降低 <strong>27.52%</strong>、达标序列占比 <strong>83.95%</strong>。
+          全部满足或超过 PRD 设定的硬约束。
+        </p>
+
+        <!-- ============ 6. 差异 ============ -->
+        <h2 id="diff">6. PRD 与参考网站的差异</h2>
+
+        <p>
+          参考网站为天池「菜鸟-需求预测与分仓规划」赛题页（<a href="https://tianchi.aliyun.com/dataset/167097" target="_blank" rel="noopener">dataset/167097</a>）。
+          该赛题与本产品虽然共用同一份数据，但<strong>目标不同</strong>：赛题是「给定目标库存反推补货成本」，
+          本产品是「预测销量本身并在 60 秒内出结果」。
+          按需求，<strong>冲突时一律以 PRD 为准</strong>。下表列出全部差异。
+        </p>
+
+        <div class="table-wrap mb-3">
+          <table class="data diff-table">
+            <thead>
+              <tr><th>维度</th><th>天池赛题页</th><th>本产品（PRD 为准）</th><th>处置</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>预测步长</td>
+                <td>固定预测未来 2 周</td>
+                <td class="win">7 / 14 / 30 天三档，默认 7 天</td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+              <tr>
+                <td>预测目标</td>
+                <td>目标库存 <code>target</code>（反推补货成本）</td>
+                <td class="win">销量预测值 <code>forecast_sales</code></td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+              <tr>
+                <td>评估指标</td>
+                <td>补货成本 A（补少）/ B（补多）</td>
+                <td class="win">加权 MAPE ≤ 20% 且优于基线 ≥ 15%</td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+              <tr>
+                <td>空间粒度</td>
+                <td>全国 + 分仓（含 <code>all</code> 汇总行）</td>
+                <td class="win">仅「仓库 × 商品」，不预测全国汇总</td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+              <tr>
+                <td>特征范围</td>
+                <td>30+ 行为特征（点击、加购、收藏等）</td>
+                <td class="win">仅销量时序 + 时间 / 滞后 / 滚动统计特征</td>
+                <td><span class="badge badge-warning">范围收窄，已标注</span></td>
+              </tr>
+              <tr>
+                <td>结果时效</td>
+                <td>赛题无实时性要求</td>
+                <td class="win">端到端 ≤ 60 秒硬约束</td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+              <tr>
+                <td>训练方式</td>
+                <td>赛题允许赛期内反复训练</td>
+                <td class="win">纯预训练推理，不提供在线重训</td>
+                <td><span class="badge badge-primary">以 PRD 为准</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert alert-warning" style="margin-bottom:1rem">
+          <div class="alert-body">
+            <div class="alert-title">需要评审关注的一处能力收窄</div>
+            <strong>特征范围</strong>这一项不是「口径不同」而是「能力收窄」：
+            天池赛题提供了 30+ 行为特征，本产品只使用销量时序。
+            这会让模型的<strong>上限低于赛题中的高分方案</strong>，但换来的是
+            「用户只需要上传一张销量表」这个可用性前提。
+            若后续希望提升精度，引入外部特征是明确的演进方向，但会增加用户的取数成本——
+            <strong>这是一个产品取舍，需要在评审中确认</strong>。
+          </div>
+        </div>
+
+        <!-- ============ 7. 已锁定决策 ============ -->
+        <h2 id="decisions">7. 已锁定决策</h2>
+
+        <p>以下决策已在开发方案文档附录 C 中确认，原型据此实现，<strong>评审时无需再讨论</strong>。</p>
+
+        <table>
+          <thead><tr><th>项</th><th>决策</th><th>在原型中的体现</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>指标口径</td>
+              <td><strong>销量加权 MAPE（WAPE）为主</strong>，达标序列占比 ≥ 60% 为辅；基线 = 移动平均</td>
+              <td>结果页四项指标卡 + 基线对照表，明示「同预测点、同序列集合」</td>
+            </tr>
+            <tr>
+              <td>预测粒度</td>
+              <td><strong>仓库 × 商品</strong>；仓库列必有，缺失即拒；三级降级 L1/L2/L3 兜底</td>
+              <td>参数页粒度只读并标注「已固定」；结果页覆盖率披露面板</td>
+            </tr>
+            <tr>
+              <td>训练时机</td>
+              <td><strong>纯预训练推理</strong>，不提供在线重训；端到端 ≤ 1 分钟</td>
+              <td>参数页明确写出「无在线重训练」；执行页 60 秒预算时间轴</td>
+            </tr>
+            <tr>
+              <td>模型未微调声明</td>
+              <td>评估前提须标注「使用预训练模型，未针对本次输入微调」</td>
+              <td>结果页「模型适用性说明」区块，并写入导出文件</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============ 8. 边界 ============ -->
+        <h2 id="limits">8. 原型边界与待补充</h2>
+
+        <h3>8.1 本原型不做的事</h3>
+        <ul>
+          <li><strong>无真实后端</strong>：所有数据在浏览器内合成，不发起任何网络请求，不落库</li>
+          <li><strong>无真实模型</strong>：指标由公式模拟，不代表真实 LSTM 精度（真实精度须由训练脚本产出）</li>
+          <li><strong>无鉴权逻辑</strong>：登录 / 注册仅演示交互与校验提示，不产生会话</li>
+          <li><strong>不覆盖 P2/P3</strong>：图表截图导出（<code>FR-VIS-10</code>）、自动重训调度（<code>FR-MOD-15</code>）明确不演示</li>
+          <li><strong>不做多用户隔离验证</strong>：历史列表文案声明「仅展示你自己」，但无真实隔离逻辑</li>
+        </ul>
+
+        <h3>8.2 需要在评审中确认的问题</h3>
+        <table>
+          <thead><tr><th>编号</th><th>问题</th><th>影响</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Q-A</td>
+              <td>是否接受「仅用销量时序特征」带来的精度上限下降？</td>
+              <td>影响模型目标是否可达 MAPE ≤ 20%</td>
+            </tr>
+            <tr>
+              <td>Q-B</td>
+              <td>30 天步长的结果是否允许展示？当前演示显示其 MAPE 超标且逼近 60 秒上限</td>
+              <td>影响是否需要禁用 30 天档位</td>
+            </tr>
+            <tr>
+              <td>Q-C</td>
+              <td>L3 序列（不可预测）是否需要提供「转人工」的后续动作入口？</td>
+              <td>影响结果页是否需要新增出口</td>
+            </tr>
+            <tr>
+              <td>Q-D</td>
+              <td>结果保留 180 天是否合适？是否需支持用户手动延长？</td>
+              <td>影响存储容量规划与隐私策略</td>
+            </tr>
+            <tr>
+              <td>Q-E</td>
+              <td>跨任务对比的「最多 4 个」限制是否符合实际使用习惯？</td>
+              <td>影响对比页交互复杂度</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>8.3 建议的评审顺序</h3>
+        <ol>
+          <li><a href="index.html">首页</a> → 确认产品定位与价值主张的表述</li>
+          <li><a href="upload.html">上传页</a> → 确认字段契约与校验顺序（这是与外部系统对接的唯一入口）</li>
+          <li><a href="params.html">参数页</a> → 确认粒度只读、步长档位、无重训选项</li>
+          <li><a href="result.html">结果页</a> → <strong>重点</strong>：确认指标口径、覆盖率披露方式、L3 的呈现策略</li>
+          <li><a href="compare.html">对比页</a> → 确认是否需要本功能（P1，可裁剪）</li>
+        </ol>
+
+      </div>
+    </div>
+
+    <!-- ============ 原型说明 ============ -->
+    <div class="spec-note mt-3">
+      <div class="sn-head">
+        <span class="sn-tag">原型说明</span>
+        <span>本页性质</span>
+      </div>
+      <table class="sn-table">
+        <tr><td>本页是<strong>原型的说明书</strong>，不是产品功能页</td><td>交付研发时随原型一同提供，上线前移除</td></tr>
+        <tr><td>页面索引与需求映射</td><td>对应 PRD §0 编号规则 与 §3 功能性需求</td></tr>
+        <tr><td>状态覆盖清单</td><td>对应 PRD §8 验收标准 <code>AC-P1</code> 关于「关键状态完整」的要求</td></tr>
+        <tr><td>差异对照表</td><td>对应 PRD 附录 C「两文档关系与冲突仲裁规则」</td></tr>
+      </table>
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+initShell('readme.html');
+
+/* 锚点导航高亮 */
+var links = document.querySelectorAll('.anchor-nav a');
+var targets = Array.prototype.map.call(links, function (a) {
+  return document.querySelector(a.getAttribute('href'));
+});
+function onScroll() {
+  var y = window.scrollY + 140;
+  var active = 0;
+  targets.forEach(function (t, i) { if (t && t.offsetTop <= y) active = i; });
+  links.forEach(function (a, i) { a.classList.toggle('active', i === active); });
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* 平滑滚动 */
+links.forEach(function (a) {
+  a.addEventListener('click', function (e) {
+    var t = document.querySelector(a.getAttribute('href'));
+    if (!t) return;
+    e.preventDefault();
+    window.scrollTo({ top: t.offsetTop - 80, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

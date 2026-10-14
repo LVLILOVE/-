@@ -1,0 +1,78 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>04 目标达成度 · 质量保障</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>质量保障：把缺陷拦在交付前</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>缺陷与通过率均来自测试报告统计</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 676, height: 512, flexDirection: 'column' }}>
+                <Box style={{ height: 250, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: '18px 22px', flexDirection: 'column' }}>
+                    <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2 }}>缺陷分布</Text>
+                    <Text style={{ fontSize: 24, color: '#0E3F8C', fontWeight: 'bold', marginTop: 8 }}>脚本自身的缺陷是产品的 5 倍</Text>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', marginTop: 18 }}>
+                        <Text style={{ width: 116, fontSize: 19, color: '#4A5568' }}>产品缺陷</Text>
+                        <Box style={{ width: 92, height: 24, background: '#1E4FA8', borderRadius: 4 }} />
+                        <Text style={{ fontSize: 22, color: '#1E4FA8', fontWeight: 'bold', paddingLeft: 12 }}>5 个</Text>
+                    </Box>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                        <Text style={{ width: 116, fontSize: 19, color: '#4A5568' }}>脚本缺陷</Text>
+                        <Box style={{ width: 452, height: 24, background: '#D9534F', borderRadius: 4 }} />
+                        <Text style={{ fontSize: 22, color: '#D9534F', fontWeight: 'bold', paddingLeft: 12 }}>26 个</Text>
+                    </Box>
+
+                    <Text style={{ fontSize: 16, color: '#8B97A8', lineHeight: 1.5, marginTop: 16 }}>结论：验证脚本本身才是主要风险面，因此每条断言都必须写「会失败的条件」而非恒真断言。</Text>
+                </Box>
+
+                <Box style={{ height: 246, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 10, padding: '18px 22px', flexDirection: 'column', marginTop: 16 }}>
+                    <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>覆盖矩阵</Text>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 42, borderBottom: '1px solid #F0F2F5', marginTop: 6 }}>
+                        <Text style={{ flex: 1, fontSize: 19, color: '#4A5568' }}>Edge · Chromium 内核</Text>
+                        <Text style={{ fontSize: 19, color: '#1E4FA8', fontWeight: 'bold' }}>109 / 109 通过</Text>
+                    </Box>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 42, borderBottom: '1px solid #F0F2F5' }}>
+                        <Text style={{ flex: 1, fontSize: 19, color: '#4A5568' }}>Chrome · Chromium 内核</Text>
+                        <Text style={{ fontSize: 19, color: '#1E4FA8', fontWeight: 'bold' }}>109 / 109 通过</Text>
+                    </Box>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 42, borderBottom: '1px solid #F0F2F5' }}>
+                        <Text style={{ flex: 1, fontSize: 19, color: '#4A5568' }}>Firefox · Gecko 内核</Text>
+                        <Text style={{ fontSize: 19, color: '#1E4FA8', fontWeight: 'bold' }}>109 / 109 通过</Text>
+                    </Box>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 42 }}>
+                        <Text style={{ flex: 1, fontSize: 19, color: '#4A5568' }}>无障碍检测（对比度 / 焦点环）</Text>
+                        <Text style={{ fontSize: 19, color: '#1E4FA8', fontWeight: 'bold' }}>53 项 0 失效</Text>
+                    </Box>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 524, height: 512, paddingLeft: 24, flexDirection: 'column' }}>
+                <Box style={{ height: 310, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 14, flexDirection: 'column' }}>
+                    <Box style={{ width: '100%', height: 254, borderRadius: 6, overflow: 'hidden', background: '#FFFFFF' }}>
+                        <Image src='assets/api_docs.png' style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+                    </Box>
+                    <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 8 }}>图 4　/docs 接口文档本地化后正常渲染（真实浏览器验证）</Text>
+                </Box>
+
+                <Box style={{ height: 186, background: '#E8EFF8', borderRadius: 10, padding: '18px 20px', flexDirection: 'column', marginTop: 16 }}>
+                    <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>把「验证脚本也会错」写进报告</Text>
+                    <Text style={{ fontSize: 22, color: '#1A2230', lineHeight: 1.5, marginTop: 10 }}>比只报一个漂亮的通过率，更能说明团队知道自己在测什么、测漏了什么。</Text>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>15 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>

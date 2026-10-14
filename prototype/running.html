@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>执行进度 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 新建预测 / 执行预测</div>
+      <h1>正在执行预测</h1>
+      <p class="lede">
+        任务 <code>T-20261008-1524</code> 正在运行。系统按「预处理 → 特征 → 分级 → 推理 → 指标」
+        五个阶段顺序推进，端到端不超过 60 秒。<strong>可以离开本页</strong>，任务不会中断。
+      </p>
+    </div>
+
+    <div class="row wrap mb-3" style="gap:.5rem;font-size:.75rem">
+      <span class="badge badge-success">✓ 1 · 上传数据</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-success">✓ 2 · 确认参数</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-primary">3 · 执行预测</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">4 · 查看结果</span>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="running">运行中</button>
+      <button class="state-pill" data-state="fallback">GPU 回退到 CPU</button>
+      <button class="state-pill" data-state="slow">接近超时</button>
+      <button class="state-pill" data-state="timeout">超时失败</button>
+      <button class="state-pill" data-state="done">已完成</button>
+    </div>
+
+    <div class="with-aside">
+      <div class="stack">
+
+        <!-- ============ 进度总览 ============ -->
+        <section class="card">
+          <div class="row-between">
+            <div>
+              <div class="row" style="gap:.5rem">
+                <h3 style="margin:0">总体进度</h3>
+                <span id="status-badge"><span class="badge badge-info"><span class="dot dot-info dot-pulse"></span>运行中</span></span>
+              </div>
+              <div class="t-xs t-muted mt-1">
+                双十一前 · 分仓备货预测 · 113 条序列 · 步长 <span id="hd">7</span> 天 · 输出 <span id="pt">791</span> 个预测点
+              </div>
+            </div>
+            <div class="t-right">
+              <div class="t-mono t-bold" style="font-size:1.75rem;letter-spacing:-.02em" id="elapsed">12.4<span style="font-size:.875rem;color:var(--text-3)"> s</span></div>
+              <div class="t-xs t-muted">已用时 / 上限 60 s</div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="progress"><i id="main-bar" style="width:21%"></i></div>
+            <div class="row-between mt-1">
+              <span class="t-xs t-muted" id="stage-label">阶段 2/5 · 特征构建</span>
+              <span class="t-xs t-mono t-muted" id="pct-label">21%</span>
+            </div>
+          </div>
+
+          <!-- 时间轴刻度：0-60s -->
+          <div class="mt-3" style="position:relative;height:34px">
+            <div style="position:absolute;inset:0 0 auto 0;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex">
+              <i id="tl-pre" style="height:100%;width:0%;background:var(--c2)"></i>
+              <i id="tl-feat" style="height:100%;width:0%;background:var(--c1)"></i>
+              <i id="tl-infer" style="height:100%;width:0%;background:var(--c5)"></i>
+              <i id="tl-metric" style="height:100%;width:0%;background:var(--c3)"></i>
+            </div>
+            <!-- 60s 上限标记 -->
+            <div style="position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--danger);opacity:.75"></div>
+            <div style="position:absolute;left:0;top:16px;font-size:.625rem;color:var(--text-3);font-family:var(--font-mono)">0 s</div>
+            <div style="position:absolute;left:30%;top:16px;font-size:.625rem;color:var(--text-3);font-family:var(--font-mono);transform:translateX(-50%)">18 s</div>
+            <div style="position:absolute;left:60%;top:16px;font-size:.625rem;color:var(--text-3);font-family:var(--font-mono);transform:translateX(-50%)">36 s</div>
+            <div style="position:absolute;right:0;top:16px;font-size:.625rem;color:var(--danger);font-family:var(--font-mono);transform:translateX(38%)" class="t-nowrap">60 s 上限</div>
+          </div>
+        </section>
+
+        <!-- ============ 阶段列表 ============ -->
+        <section class="card">
+          <div class="card-head">
+            <h3>执行阶段</h3>
+            <div class="right t-xs t-muted">点击阶段可查看该阶段输出</div>
+          </div>
+          <div class="stage-list" id="stage-list">
+            <div class="stage" data-stage="pre">
+              <span class="stage-icon">1</span>
+              <span class="stage-name">数据预处理 · 缺失插值 + 异常尖峰截断</span>
+              <span class="stage-budget">预算 3.2 s</span>
+            </div>
+            <div class="stage" data-stage="feat">
+              <span class="stage-icon">2</span>
+              <span class="stage-name">特征构建 · 滑动窗口 + 时间/滞后/滚动特征</span>
+              <span class="stage-budget">预算 5.1 s</span>
+            </div>
+            <div class="stage" data-stage="classify">
+              <span class="stage-icon">3</span>
+              <span class="stage-name">序列分级 · 按有效历史长度判定 L1/L2/L3</span>
+              <span class="stage-budget">预算 0.6 s</span>
+            </div>
+            <div class="stage" data-stage="infer">
+              <span class="stage-icon">4</span>
+              <span class="stage-name">批量模型推理 · 已加载权重 lstm_v1</span>
+              <span class="stage-budget">预算 22.0 s</span>
+            </div>
+            <div class="stage" data-stage="metric">
+              <span class="stage-icon">5</span>
+              <span class="stage-name">指标计算 · 加权 MAPE/MAE/RMSE + 移动平均基线</span>
+              <span class="stage-budget">预算 3.9 s</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 设备信息 ============ -->
+        <section class="card" id="card-device">
+          <div class="card-head">
+            <h3>推理设备</h3>
+            <div class="right" id="device-badge"><span class="badge badge-success">GPU · CUDA</span></div>
+          </div>
+          <div class="grid-3">
+            <div>
+              <div class="t-xs t-muted">设备</div>
+              <div class="t-bold" id="dev-name">NVIDIA GeForce MX450</div>
+            </div>
+            <div>
+              <div class="t-xs t-muted">显存峰值</div>
+              <div class="t-bold t-mono" id="dev-mem">111 MB / 2,048 MB</div>
+            </div>
+            <div>
+              <div class="t-xs t-muted">批大小</div>
+              <div class="t-bold t-mono">81（L1 序列一次性入批）</div>
+            </div>
+          </div>
+          <div class="alert alert-warning mt-3 hidden" id="fallback-alert" style="margin-bottom:0">
+            <div class="alert-body">
+              <div class="alert-title">已自动回退到 CPU 推理</div>
+              检测到 <code>CUDA out of memory</code>，系统已按 <code>NFR-REL-03</code> 自动切换至 CPU。
+              <strong>任务不会失败</strong>，但耗时预计增加至 45–55 s，请留意 60 秒上限。
+              本次回退已记入任务详情，供后续排查。
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 实时日志 ============ -->
+        <section class="card">
+          <div class="card-head">
+            <h3>执行日志</h3>
+            <div class="right t-xs t-muted" id="log-count">已输出 9 行</div>
+          </div>
+          <div class="log-stream" id="log"></div>
+          <div class="t-xs t-muted mt-2">
+            日志仅记录阶段级摘要与异常，不包含原始销量明细，避免敏感业务数据落盘（<code>NFR-SEC-09</code>）。
+          </div>
+        </section>
+
+        <!-- ============ 超时失败态 ============ -->
+        <section class="card hidden" id="card-timeout">
+          <div class="card-head">
+            <h3>任务失败</h3>
+            <div class="right"><span class="badge badge-danger">E_TIMEOUT（50001）</span></div>
+          </div>
+          <div class="verdict fail">
+            <span class="vd-icon" data-icon="x"></span>
+            <div>
+              <div class="vd-t">端到端耗时 61.2 秒，超过 60 秒硬上限</div>
+              <div class="vd-d">
+                已完成 42/50 条序列的推理，未产出完整结果，任务标记为失败。
+                已完成的中间计算结果<strong>不落盘</strong>，避免保存半成品误导决策。
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h4 class="mb-1">可采取的处置</h4>
+            <div class="stack-sm">
+              <div class="alert alert-info" style="margin:0">
+                <div class="alert-body">
+                  <div class="alert-title">1. 缩短预测步长</div>
+                  步长从 30 天降至 14 天可显著降低逐日推理量，这是最直接有效的降耗手段。
+                </div>
+              </div>
+              <div class="alert alert-info" style="margin:0">
+                <div class="alert-body">
+                  <div class="alert-title">2. 缩小商品范围</div>
+                  按近 90 天销量取 Top N 商品重新上传，序列数下降后推理耗时近似线性下降。
+                </div>
+              </div>
+              <div class="alert alert-warning" style="margin:0">
+                <div class="alert-body">
+                  <div class="alert-title">3. 检查是否处于 CPU 回退状态</div>
+                  CPU 推理较 GPU 慢约 4.3 倍（本机实测）。若长期回退，需先解决显存占用问题。
+                </div>
+              </div>
+            </div>
+            <div class="btn-row mt-2">
+              <a class="btn btn-primary btn-sm" href="params.html">返回调整参数</a>
+              <a class="btn btn-secondary btn-sm" href="upload.html">重新上传数据</a>
+              <a class="btn btn-ghost btn-sm" href="history.html">查看历史任务</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 完成态 ============ -->
+        <section class="card hidden" id="card-done">
+          <div class="card-head">
+            <h3>任务已完成</h3>
+            <div class="right"><span class="badge badge-success">✓ 全部阶段完成</span></div>
+          </div>
+          <div class="verdict pass">
+            <span class="vd-icon" data-icon="check"></span>
+            <div>
+              <div class="vd-t">端到端耗时 7.9 秒，满足 60 秒硬约束</div>
+              <div class="vd-d">
+                识别 113 条序列：L1 模型推理 81 条、L2 商品级降级 32 条、L3 不可预测 0 条。
+                加权 MAPE 14.3%，优于移动平均基线 26.4%，判定为<strong>达标</strong>。
+              </div>
+            </div>
+          </div>
+          <div class="btn-row mt-3">
+            <a class="btn btn-primary btn-lg" href="result.html">查看预测结果</a>
+            <a class="btn btn-secondary btn-lg" href="history.html">返回历史任务</a>
+          </div>
+        </section>
+
+        <!-- ============ 原型说明：需求映射 ============ -->
+        <div class="spec-note">
+          <div class="sn-head">
+            <span class="sn-tag">原型说明</span>
+            <span>本页与 PRD 的对应关系</span>
+          </div>
+          <table class="sn-table">
+            <tr>
+              <td>五阶段进度展示（预处理 → 特征 → 分级 → 推理 → 指标）</td>
+              <td><code>FR-MOD-09</code></td>
+            </tr>
+            <tr>
+              <td>60 秒时间预算与实际耗时对照</td>
+              <td><code>NFR-PERF-01</code> · <code>FR-MOD-12</code></td>
+            </tr>
+            <tr>
+              <td>GPU → CPU 自动回退提示（任务不失败）</td>
+              <td><code>NFR-REL-03</code> · <code>FR-MOD-13</code></td>
+            </tr>
+            <tr>
+              <td>超时软失败态、错误码 <code>E_TIMEOUT</code>、半成品不落盘</td>
+              <td><code>FR-SYS-07</code> · <code>NFR-REL-04</code></td>
+            </tr>
+            <tr>
+              <td>失败处置建议（缩短步长 / 缩小范围 / 检查回退）</td>
+              <td><code>FR-SYS-08</code></td>
+            </tr>
+            <tr>
+              <td>「可离开本页」—— 无轮询阻塞，任务后台继续</td>
+              <td><code>FR-MOD-10</code> · <code>NFR-USE-02</code></td>
+            </tr>
+            <tr>
+              <td>执行日志只记摘要不落销量明细</td>
+              <td><code>NFR-SEC-09</code></td>
+            </tr>
+          </table>
+          <div class="sn-foot">
+            埋点：<code>EV-RUN-01</code>（进入执行页）· <code>EV-RUN-02</code>（阶段完成）·
+            <code>EV-RUN-03</code>（设备回退）· <code>EV-RUN-04</code>（任务终态）
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ 右栏 ============ -->
+      <aside class="aside">
+        <div class="card card-tight">
+          <h4>任务信息</h4>
+          <div class="meta-list mt-2">
+            <div class="meta-row"><span class="mk">任务 ID</span><span class="mv t-mono">T-20261008-1524</span></div>
+            <div class="meta-row"><span class="mk">提交时间</span><span class="mv">2026-10-08 15:24:07</span></div>
+            <div class="meta-row"><span class="mk">数据文件</span><span class="mv" title="item_store_feature_1010_1227.csv">item_store_feature…csv</span></div>
+            <div class="meta-row"><span class="mk">序列数</span><span class="mv">113 条</span></div>
+            <div class="meta-row"><span class="mk">预测步长</span><span class="mv" id="side-hd">7 天</span></div>
+            <div class="meta-row"><span class="mk">节假日特征</span><span class="mv">开启</span></div>
+            <div class="meta-row"><span class="mk">模型版本</span><span class="mv t-mono">lstm_v1</span></div>
+          </div>
+        </div>
+
+        <div class="card card-tight">
+          <h4>序列分级（实时）</h4>
+          <div class="mt-2">
+            <div class="row-between">
+              <span class="t-xs"><span class="dot dot-success"></span> L1 模型推理</span>
+              <span class="t-mono t-bold" id="cnt-l1">81</span>
+            </div>
+            <div class="progress thin mt-1"><i id="bar-l1" style="width:71.7%"></i></div>
+          </div>
+          <div class="mt-2">
+            <div class="row-between">
+              <span class="t-xs"><span class="dot dot-warning"></span> L2 商品级降级</span>
+              <span class="t-mono t-bold" id="cnt-l2">32</span>
+            </div>
+            <div class="progress thin mt-1"><i id="bar-l2" style="width:28.3%;background:var(--warning)"></i></div>
+          </div>
+          <div class="mt-2">
+            <div class="row-between">
+              <span class="t-xs"><span class="dot dot-neutral"></span> L3 不可预测</span>
+              <span class="t-mono t-bold" id="cnt-l3">0</span>
+            </div>
+            <div class="progress thin mt-1"><i id="bar-l3" style="width:0%;background:var(--text-3)"></i></div>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <div class="alert-body">
+            <div class="alert-title">为什么不需要在线训练</div>
+            端到端 SLA 只有 60 秒，而「训练 + 网格搜索调参 + 早停」无法稳定压进这个窗口。
+            因此本系统采用<strong>纯预训练推理</strong>：模型在离线侧训练好并注册权重，在线只做加载与前向计算。
+          </div>
+        </div>
+
+        <div class="card card-tight">
+          <h4>操作</h4>
+          <div class="btn-row mt-2">
+            <button class="btn btn-secondary btn-sm" onclick="location.reload()">刷新进度</button>
+            <a class="btn btn-ghost btn-sm" href="dashboard.html">返回工作台</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+initShell('running.html');
+
+document.querySelectorAll('[data-icon]').forEach(function (el) {
+  var svg = ICONS[el.getAttribute('data-icon')];
+  if (svg) el.innerHTML = svg;
+});
+
+var TOTAL = 60000;   // 60s 硬上限
+var STAGES = [
+  { key: 'pre',      dur: 800,  name: '数据预处理', tl: 'tl-pre' },
+  { key: 'feat',     dur: 900,  name: '特征构建',   tl: 'tl-feat' },
+  { key: 'classify', dur: 200,  name: '序列分级',   tl: null },
+  { key: 'infer',    dur: 5500, name: '批量推理',   tl: 'tl-infer' },
+  { key: 'metric',   dur: 500,  name: '指标计算',   tl: 'tl-metric' },
+];
+var BUDGET = { pre: 0.8, feat: 0.9, classify: 0.2, infer: 5.5, metric: 0.5 };
+var LOGS = [
+  { t: 0.2,  cls: 'lg-hl',  msg: 'task T-20261008-1524 created · 113 series · horizon=14d' },
+  { t: 0.8,  cls: '',       msg: 'loading weights: outputs/models/lstm_v1.pt (0.13 MB) …' },
+  { t: 1.6,  cls: 'lg-ok',  msg: 'weights loaded · device=cuda:0 (MX450, cc 7.5)' },
+  { t: 2.4,  cls: '',       msg: 'preprocess: linear interpolate missing · clip spikes (promo days preserved)' },
+  { t: 3.6,  cls: 'lg-ok',  msg: 'preprocess done in 0.7s · 14,305 rows · 0 invalid' },
+  { t: 4.4,  cls: '',       msg: 'features: window=21 · lag{1,7} · roll_mean{7,14} · dow · month' },
+  { t: 8.8,  cls: 'lg-ok',  msg: 'features done in 0.8s · tensor shape [N, 21, 11]' },
+  { t: 9.4,  cls: '',       msg: 'classify: valid_points>=90 → L1 · item_agg>=90 → L2 · else L3' },
+  { t: 9.9,  cls: '',       msg: 'classify result: L1=81 L2=32 L3=0 (sparse handled by L2 rules)' },
+  { t: 10.6, cls: '',       msg: 'infer: batch_size=81 · batched forward pass (no per-series loop)' },
+];
+
+var timers = [];
+var t0 = performance.now();
+var elapsedEl = document.getElementById('elapsed');
+var mainBar = document.getElementById('main-bar');
+var pctLabel = document.getElementById('pct-label');
+var stageLabel = document.getElementById('stage-label');
+var logEl = document.getElementById('log');
+var logCount = document.getElementById('log-count');
+
+function fmtSec(ms) { return (ms / 1000).toFixed(1); }
+
+/* 主进度：按阶段推进 */
+function runProgress() {
+  var acc = 0;
+  var totalDur = STAGES.reduce(function (a, s) { return a + s.dur; }, 0);
+
+  STAGES.forEach(function (s, i) {
+    var start = acc;
+    acc += s.dur;
+    timers.push(setTimeout(function () {
+      // 标记前一个阶段完成
+      if (i > 0) {
+        var prev = document.querySelector('.stage[data-stage="' + STAGES[i - 1].key + '"]');
+        if (prev) {
+          prev.classList.remove('active');
+          prev.classList.add('done');
+          prev.querySelector('.stage-icon').innerHTML = ICONS.check;
+        }
+      }
+      var cur = document.querySelector('.stage[data-stage="' + s.key + '"]');
+      if (cur) cur.classList.add('active');
+      stageLabel.textContent = '阶段 ' + (i + 1) + '/5 · ' + s.name;
+      appendLog(fmtSec(start + 120), 'lg-hl', 'stage ' + (i + 1) + '/5 start: ' + s.name +
+        ' (budget ' + BUDGET[s.key] + 's)');
+    }, start));
+  });
+
+  timers.push(setTimeout(function () {
+    var last = document.querySelector('.stage[data-stage="metric"]');
+    if (last) last.classList.remove('active');
+    document.querySelectorAll('.stage').forEach(function (el) {
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.querySelector('.stage-icon').innerHTML = ICONS.check;
+    });
+    stageLabel.textContent = '全部阶段完成';
+    mainBar.style.width = '100%';
+    pctLabel.textContent = '100%';
+    setStatus('done');
+  }, totalDur + 400));
+}
+
+/* 时间轴分段填充 */
+function runTimeline() {
+  var acc = 0;
+  STAGES.forEach(function (s) {
+    var start = acc;
+    acc += s.dur;
+    if (!s.tl) return;
+    var el = document.getElementById(s.tl);
+    if (!el) return;
+    var pctStart = (start / TOTAL) * 100;
+    var pctEnd = (acc / TOTAL) * 100;
+    el.style.width = pctEnd + '%';
+    el.style.transition = 'none';
+    el.style.transform = 'translateX(' + (-(100 - pctStart) / (pctEnd - pctStart) * 0 + 0) + '%)';
+  });
+}
+
+/* 进度条与用时：rAF 平滑推进 */
+function runClock() {
+  var acc = 0;
+  var segs = STAGES.map(function (s) { acc += s.dur; return { at: acc, pct: (acc / STAGES.reduce(function (a, x) { return a + x.dur; }, 0)) * 100 }; });
+  (function tick() {
+    var e = performance.now() - t0;
+    elapsedEl.innerHTML = fmtSec(Math.min(e, 70000)) + '<span style="font-size:.875rem;color:var(--text-3)"> s</span>';
+    var prog = Math.min(1, e / STAGES.reduce(function (a, x) { return a + x.dur; }, 0));
+    mainBar.style.width = (prog * 100).toFixed(1) + '%';
+    pctLabel.textContent = Math.round(prog * 100) + '%';
+    if (prog < 1) timers.push(requestAnimationFrame(tick));
+  })();
+}
+
+function appendLog(t, cls, msg) {
+  var row = document.createElement('div');
+  var ts = (typeof t === 'number' ? t : parseFloat(t) || 0).toFixed(1);
+  row.innerHTML = '<span class="lg-t">[' + ts + 's]</span> <span class="' + (cls || '') + '">' + msg + '</span>';
+  logEl.appendChild(row);
+  logEl.scrollTop = logEl.scrollHeight;
+  logCount.textContent = '已输出 ' + logEl.children.length + ' 行';
+}
+
+LOGS.forEach(function (l) {
+  timers.push(setTimeout(function () { appendLog(l.t, l.cls, l.msg); }, l.t * 1000));
+});
+
+function setStatus(s) {
+  var badge = document.getElementById('status-badge');
+  if (s === 'done') {
+    badge.innerHTML = '<span class="badge badge-success">' + ICONS.check + '已完成</span>';
+    document.getElementById('card-done').classList.remove('hidden');
+    document.getElementById('card-timeout').classList.add('hidden');
+  } else if (s === 'timeout') {
+    badge.innerHTML = '<span class="badge badge-danger">' + ICONS.x + '失败 · E_TIMEOUT</span>';
+    document.getElementById('card-timeout').classList.remove('hidden');
+    document.getElementById('card-done').classList.add('hidden');
+  } else if (s === 'slow') {
+    badge.innerHTML = '<span class="badge badge-warning">' + ICONS.alert + '接近超时</span>';
+  } else {
+    badge.innerHTML = '<span class="badge badge-info"><span class="dot dot-info dot-pulse"></span>运行中</span>';
+    document.getElementById('card-timeout').classList.add('hidden');
+    document.getElementById('card-done').classList.add('hidden');
+  }
+}
+
+function clearAll() {
+  timers.forEach(function (t) { clearTimeout(t); cancelAnimationFrame(t); });
+  timers = [];
+  logEl.innerHTML = '';
+  document.querySelectorAll('.stage').forEach(function (el) {
+    el.classList.remove('active', 'done', 'fail');
+    var i = Array.prototype.indexOf.call(document.querySelectorAll('.stage'), el) + 1;
+    el.querySelector('.stage-icon').textContent = i;
+  });
+  ['tl-pre', 'tl-feat', 'tl-infer', 'tl-metric'].forEach(function (id) {
+    document.getElementById(id).style.width = '0%';
+  });
+  document.getElementById('fallback-alert').classList.add('hidden');
+  document.getElementById('device-badge').innerHTML = '<span class="badge badge-success">GPU · CUDA</span>';
+}
+
+function restart() {
+  clearAll();
+  t0 = performance.now();
+  setStatus('running');
+  runProgress();
+  runTimeline();
+  runClock();
+}
+
+var STATES = {
+  running: function () { restart(); },
+  fallback: function () {
+    restart();
+    setTimeout(function () {
+      document.getElementById('device-badge').innerHTML = '<span class="badge badge-warning">' + ICONS.alert + 'CPU 回退</span>';
+      document.getElementById('fallback-alert').classList.remove('hidden');
+      document.getElementById('dev-name').textContent = 'CPU（自动回退）';
+      document.getElementById('dev-mem').textContent = '—';
+      appendLog(11.4, 'lg-warn', 'CUDA OOM detected → falling back to CPU (NFR-REL-03, task continues)');
+      document.getElementById('elapsed').innerHTML = '51.8<span style="font-size:.875rem;color:var(--text-3)"> s</span>';
+    }, 900);
+  },
+  slow: function () {
+    restart();
+    setTimeout(function () {
+      setStatus('slow');
+      mainBar.style.width = '94%';
+      pctLabel.textContent = '94%';
+      document.getElementById('elapsed').innerHTML = '56.4<span style="font-size:.875rem;color:var(--text-3)"> s</span>';
+      appendLog(56.4, 'lg-warn', 'elapsed 56.4s exceeds 90% of 60s budget — risk of timeout');
+    }, 900);
+  },
+  timeout: function () {
+    restart();
+    setTimeout(function () {
+      clearAll();
+      setStatus('timeout');
+      mainBar.style.width = '71%';
+      pctLabel.textContent = '71%';
+      document.getElementById('elapsed').innerHTML = '61.2<span style="font-size:.875rem;color:var(--text-3)"> s</span>';
+      stageLabel.textContent = '阶段 4/5 · 批量模型推理（超时中止）';
+      var st = document.querySelector('.stage[data-stage="infer"]');
+      if (st) { st.classList.remove('active'); st.classList.add('fail'); st.querySelector('.stage-icon').innerHTML = ICONS.x; }
+      appendLog(60.0, 'lg-err', 'TIMEOUT: elapsed 60.0s reached hard limit — aborting task');
+      appendLog(60.2, 'lg-err', 'completed 42/50 series · intermediate results discarded');
+      appendLog(61.2, 'lg-err', 'task T-20261008-1524 marked FAILED with code E_TIMEOUT');
+    }, 900);
+  },
+  done: function () {
+    restart();
+    setTimeout(function () {
+      clearAll();
+      document.querySelectorAll('.stage').forEach(function (el) {
+        el.classList.add('done');
+        el.querySelector('.stage-icon').innerHTML = ICONS.check;
+      });
+      mainBar.style.width = '100%';
+      pctLabel.textContent = '100%';
+      stageLabel.textContent = '全部阶段完成';
+      elapsedEl.innerHTML = '34.3<span style="font-size:.875rem;color:var(--text-3)"> s</span>';
+      setStatus('done');
+      appendLog(34.3, 'lg-ok', 'all stages done in 34.3s · weighted_mape=14.3% baseline_improve=26.4%');
+    }, 700);
+  },
+};
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () {
+    document.querySelectorAll('.state-pill').forEach(function (q) { q.classList.remove('active'); });
+    p.classList.add('active');
+    STATES[p.dataset.state]();
+  });
+});
+
+document.querySelectorAll('.stage').forEach(function (el) {
+  el.addEventListener('click', function () {
+    var k = el.dataset.stage;
+    alert('阶段「' + el.querySelector('.stage-name').textContent + '」\n预算 ' + BUDGET[k] + ' 秒\n\n' +
+      '该阶段的中间产物仅在内存中存在，任务结束后释放，不做持久化。\n' +
+      '查看 PRD 对应需求：FR-MOD-09。');
+  });
+});
+
+/* 从参数页带过来的步长 */
+(function () {
+  var h = sessionStorage.getItem('sp_horizon') || '7';
+  document.getElementById('hd').textContent = h;
+  document.getElementById('side-hd').textContent = h + ' 天';
+  document.getElementById('pt').textContent = (113 * Number(h)).toLocaleString('zh-CN');
+})();
+
+restart();
+</script>
+</body>
+</html>

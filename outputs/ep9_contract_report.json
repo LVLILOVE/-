@@ -1,0 +1,472 @@
+{
+  "stage": "WS-9-08 契约一致性",
+  "passed": 92,
+  "failed": 0,
+  "ts_interfaces": 51,
+  "py_models": 64,
+  "backend_routes": 32,
+  "frontend_calls": 32,
+  "error_codes": 26,
+  "items": [
+    {
+      "name": "映射表覆盖后端全部模型（无未登记项）",
+      "ok": true,
+      "detail": "未登记：[]；表中有但已删除：[]"
+    },
+    {
+      "name": "映射表覆盖前端全部 interface（含 TS_ONLY 白名单）",
+      "ok": true,
+      "detail": "未登记：[]；表中有但已删除：[]"
+    },
+    {
+      "name": "A ActiveModelBrief ↔ ActiveModelBrief 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminDeleteTaskResponse ↔ AdminDeleteResult 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminLogBrief ↔ AdminLogBrief 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminLogPage → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminLogQuery ↔ AdminLogQuery 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminModelBrief ↔ AdminModelBrief 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminModelListResponse ↔ AdminModelList 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminOverviewQuery → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminOverviewResponse ↔ AdminOverview 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminTaskBrief ↔ AdminTaskBrief 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminTaskPage → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminTaskQuery ↔ AdminTaskQuery 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminUpdateUserRequest → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminUpdateUserResponse → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminUserBrief ↔ AdminUserBrief 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AdminUserPage → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A AdminUserQuery ↔ AdminUserQuery 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A ApiResponse ↔ ApiResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A AppBase → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A CompareRequest ↔ CompareRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A CompareResponse ↔ CompareResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A CompareSeries ↔ CompareSeries 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A CompareTaskSlot ↔ CompareTaskSlot 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A Coverage ↔ Coverage 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A CreateTaskRequest ↔ CreateTaskRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A CreateTaskResponse ↔ CreateTaskResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A DatasetBrief → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A DatasetDetailResponse ↔ DatasetDetailResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A DatasetPreview ↔ DatasetPreview 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A DatasetSummary ↔ DatasetSummary 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A DetailQuery ↔ PredictionDetailQuery 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A Distribution ↔ Distribution 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A ExportQuery → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A GapWarning → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A HealthResponse ↔ HealthResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A HistoryItem ↔ HistoryItem 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A HistoryPage → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A HistoryQuery ↔ HistoryQuery 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A HorizonEstimate ↔ HorizonEstimate 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A JwtPayload ↔ JwtPayload 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A LevelPreview ↔ LevelPreview 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A LoginRequest ↔ LoginRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A LoginResponse ↔ LoginResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A MapeTrendPoint ↔ MapeTrendPoint 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A MetricBundle ↔ MetricBundle 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A Paginated ↔ Paginated 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A PredictionResultResponse ↔ PredictionResultResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A PredictionRow ↔ PredictionRow 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A RegisterRequest ↔ RegisterRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A RegisterResponse ↔ RegisterResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A ResetPasswordRequest → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A ResetPasswordResponse ↔ ResetPasswordResult 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A ResolveGapRequest ↔ ResolveGapRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A SeriesCurve ↔ SeriesCurve 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A SwitchModelRequest → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A SwitchModelResponse ↔ SwitchModelResult 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A TaskBrief → 前端内联（已登记）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A TaskStatusResponse ↔ TaskStatusResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A TimingMs ↔ TimingMs 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A UpdateUserRequest ↔ UpdateUserRequest 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A UploadDatasetResponse ↔ UploadDatasetResponse 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A UserProfile ↔ UserProfile 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A ValidationErrorData ↔ ValidationErrorData 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "A WorkbenchSummary ↔ WorkbenchSummary 字段名双向一致",
+      "ok": true,
+      "detail": "（仅后端有：[]；仅前端有：[]）"
+    },
+    {
+      "name": "API-21 /health 在客户端有显式实现（healthUrl 剥 baseURL 路径）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "后端每个路由都被前端消费（无死接口）",
+      "ok": true,
+      "detail": "（前端未调用：[]）"
+    },
+    {
+      "name": "前端每个调用点都能在后端路由表中命中（无 404 隐患）",
+      "ok": true,
+      "detail": "（后端无此路由：[]）"
+    },
+    {
+      "name": "后端路由集合与登记清单完全一致（增删或改路径都必须同步登记）",
+      "ok": true,
+      "detail": "（多出：[]；缺失：[]）"
+    },
+    {
+      "name": "C TaskStatus 取值域两端一致（任务状态机四态（开发方案 §2.3，已去掉 queued））",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C GranularityLevel 取值域两端一致（建模三级 L1/L2/L3）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C TaskErrorCode 取值域两端一致（任务级失败原因码）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C UserRole 取值域两端一致（用户角色（CH-01））",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C Horizon 取值域两端一致（FR-MOD-02 三档）",
+      "ok": true,
+      "detail": "（TS=['7', '14', '30'] 后端=[7, 14, 30]）"
+    },
+    {
+      "name": "C 错误码常量表两端完全一致（PRD FR-SYS-02 / 技术文档 §5.2）",
+      "ok": true,
+      "detail": "（仅前端：[]；仅后端：[]；值不同：[]）"
+    },
+    {
+      "name": "D LIMITS.max_file_size_mb == MAX_FILE_SIZE_MB（NFR-PERF-03）",
+      "ok": true,
+      "detail": "（TS=20 后端=20）"
+    },
+    {
+      "name": "D LIMITS.max_rows == MAX_ROWS（NFR-PERF-04）",
+      "ok": true,
+      "detail": "（TS=500000 后端=500000）"
+    },
+    {
+      "name": "D LIMITS.max_series == MAX_SERIES（NFR-PERF-05）",
+      "ok": true,
+      "detail": "（TS=1000 后端=1000）"
+    },
+    {
+      "name": "D LIMITS.sla_seconds == SLA_SECONDS（NFR-PERF-01）",
+      "ok": true,
+      "detail": "（TS=60 后端=60）"
+    },
+    {
+      "name": "D LIMITS.l1_min_valid_points == L1_MIN_VALID_POINTS（FR-FEA-09）",
+      "ok": true,
+      "detail": "（TS=90 后端=90）"
+    },
+    {
+      "name": "D LIMITS.password_max_chars == PASSWORD_MAX_CHARS（JT-12）",
+      "ok": true,
+      "detail": "（TS=64 后端=64）"
+    },
+    {
+      "name": "D LIMITS.password_max_bytes == BCRYPT_MAX_BYTES（JT-12）",
+      "ok": true,
+      "detail": "（TS=72 后端=72）"
+    },
+    {
+      "name": "D LIMITS.allowed_horizons == CreateTaskRequest 的可接受取值",
+      "ok": true,
+      "detail": "（TS=[7, 14, 30] 后端=[7, 14, 30]）"
+    },
+    {
+      "name": "D LIMITS 三阈值 == app/models/metric.py 的 THRESHOLD_*",
+      "ok": true,
+      "detail": "（LIMITS=20/15/60 后端=20.0/15.0/60.0）"
+    },
+    {
+      "name": "D THRESHOLDS 三阈值 == app/models/metric.py 的 THRESHOLD_*",
+      "ok": true,
+      "detail": "（THRESHOLDS=20.0/15.0/60.0）"
+    },
+    {
+      "name": "D REQUIRED_COLUMNS 两端一致（PRD §3.2.2 强制列名契约）",
+      "ok": true,
+      "detail": "（TS=['sku_id', 'warehouse_id', 'date', 'sales'] 后端=['sku_id', 'warehouse_id', 'date', 'sales']）"
+    },
+    {
+      "name": "D EXPORT_COLUMNS(前端) == EXPORT_HEADER(后端业务表头) 且顺序相同（FR-VIS-05）",
+      "ok": true,
+      "detail": "（TS=['sku_id', 'warehouse_id', 'date', 'forecast_sales', 'granularity_level', 'actual_sales', 'error'] 后端=['sku_id', 'warehouse_id', 'date', 'forecast_sales', 'granularity_level', 'actual_sales', 'error']）"
+    },
+    {
+      "name": "D 库列序与业务表头**必须不同**（同名不同义，防止有人「顺手统一」掉）",
+      "ok": true,
+      "detail": "（库=['sku_id', 'warehouse_id', 'forecast_date', 'predicted_value', 'actual_value', 'baseline_value', 'granularity_level']；表头=['sku_id', 'warehouse_id', 'date', 'forecast_sales', 'granularity_level', 'actual_sales', 'error']）"
+    },
+    {
+      "name": "D 两者列数相同（7 列，仅列名口径不同）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D VALIDATE_ORDER 两端一致且**顺序**相同（PRD §3.2.2 越靠前越快失败）",
+      "ok": true,
+      "detail": "（TS=['扩展名', '大小/行数', '表头完整性', '日期可解析性', '销量非负', '时间连续性', '序列数上限'] 后端=['扩展名', '大小/行数', '表头完整性', '日期可解析性', '销量非负', '时间连续性', '序列数上限']）"
+    },
+    {
+      "name": "D TOKEN_VERSION_DEFAULT 两端一致（TQ-1；DDL DEFAULT 1 为同一真源）",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

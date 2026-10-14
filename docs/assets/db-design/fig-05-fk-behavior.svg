@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440">
+  <rect width="900" height="440" fill="#FFFFFF"/>
+
+  <text x="450" y="36" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="18" font-weight="bold" fill="#0C447C" text-anchor="middle">外键删除行为：三类约束的分工</text>
+  <text x="450" y="60" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12.5" fill="#5F5E5A" text-anchor="middle">共 5 条外键 · CASCADE 4 条 / RESTRICT 1 条 · 另有 3 张表刻意不建外键</text>
+
+  <!-- 列 1 CASCADE -->
+  <rect x="30" y="84" width="266" height="318" rx="10" fill="#F6FAFE" stroke="#BBD8EE" stroke-width="1.2"/>
+  <rect x="30" y="84" width="266" height="40" rx="10" fill="#185FA5"/>
+  <rect x="30" y="112" width="266" height="12" fill="#185FA5"/>
+  <text x="163" y="110" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">CASCADE · 4 条</text>
+  <text x="163" y="146" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#0C447C" text-anchor="middle">归属数据 · 随主记录一并删除</text>
+
+  <rect x="52" y="162" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#185FA5" stroke-width="1.1"/>
+  <text x="163" y="182" font-family="Consolas, monospace" font-size="12" fill="#0C447C" text-anchor="middle">users.id → datasets.user_id</text>
+  <rect x="52" y="200" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#185FA5" stroke-width="1.1"/>
+  <text x="163" y="220" font-family="Consolas, monospace" font-size="12" fill="#0C447C" text-anchor="middle">users.id → tasks.user_id</text>
+  <rect x="52" y="238" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#185FA5" stroke-width="1.1"/>
+  <text x="163" y="258" font-family="Consolas, monospace" font-size="12" fill="#0C447C" text-anchor="middle">tasks.id → predictions.task_id</text>
+  <rect x="52" y="276" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#185FA5" stroke-width="1.1"/>
+  <text x="163" y="296" font-family="Consolas, monospace" font-size="12" fill="#0C447C" text-anchor="middle">tasks.id → metrics.task_id</text>
+
+  <text x="163" y="330" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#0C447C" text-anchor="middle">语义：子记录不能脱离父记录存在</text>
+  <text x="163" y="352" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#0C447C" text-anchor="middle">删用户 → 其数据集与任务一并消失</text>
+  <text x="163" y="374" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle">删任务 → 明细与指标一并消失</text>
+
+  <!-- 列 2 RESTRICT -->
+  <rect x="317" y="84" width="266" height="318" rx="10" fill="#FFF9EC" stroke="#E8D8A8" stroke-width="1.2"/>
+  <rect x="317" y="84" width="266" height="40" rx="10" fill="#B07A18"/>
+  <rect x="317" y="112" width="266" height="12" fill="#B07A18"/>
+  <text x="450" y="110" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">RESTRICT · 1 条</text>
+  <text x="450" y="146" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#7A5610" text-anchor="middle">输入数据 · 被引用时拒绝删除</text>
+
+  <rect x="339" y="162" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#B07A18" stroke-width="1.1"/>
+  <text x="450" y="182" font-family="Consolas, monospace" font-size="12" fill="#7A5610" text-anchor="middle">datasets.id → tasks.dataset_id</text>
+
+  <text x="450" y="218" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#7A5610" text-anchor="middle">语义：预测结果必须可追溯到输入</text>
+  <text x="450" y="240" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#7A5610" text-anchor="middle">若数据集已被任务引用，删除请求</text>
+  <text x="450" y="262" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#7A5610" text-anchor="middle">将被数据库层直接拒绝</text>
+
+  <rect x="339" y="284" width="222" height="88" rx="6" fill="#FFFFFF" stroke="#E8D8A8" stroke-width="1"/>
+  <text x="450" y="306" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#7A5610" text-anchor="middle">业务侧对应做法：</text>
+  <text x="450" y="328" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#7A5610" text-anchor="middle">数据集不物理删除，改置</text>
+  <text x="450" y="348" font-family="Consolas, monospace" font-size="11.5" fill="#7A5610" text-anchor="middle">datasets.status = -1</text>
+  <text x="450" y="366" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#7A5610" text-anchor="middle">从而与 RESTRICT 互不冲突</text>
+
+  <!-- 列 3 无外键 -->
+  <rect x="604" y="84" width="266" height="318" rx="10" fill="#F4F4F2" stroke="#D6D5CF" stroke-width="1.2"/>
+  <rect x="604" y="84" width="266" height="40" rx="10" fill="#5F5E5A"/>
+  <rect x="604" y="112" width="266" height="12" fill="#5F5E5A"/>
+  <text x="737" y="110" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">无外键 · 3 张表</text>
+  <text x="737" y="146" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">审计与埋点 · 不受删除影响</text>
+
+  <rect x="626" y="162" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#B8B7B2" stroke-width="1.1"/>
+  <text x="737" y="182" font-family="Consolas, monospace" font-size="12" fill="#3F3E3A" text-anchor="middle">model_registry</text>
+  <rect x="626" y="200" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#B8B7B2" stroke-width="1.1"/>
+  <text x="737" y="220" font-family="Consolas, monospace" font-size="12" fill="#3F3E3A" text-anchor="middle">operation_logs</text>
+  <rect x="626" y="238" width="222" height="30" rx="6" fill="#FFFFFF" stroke="#B8B7B2" stroke-width="1.1"/>
+  <text x="737" y="258" font-family="Consolas, monospace" font-size="12" fill="#3F3E3A" text-anchor="middle">events</text>
+
+  <text x="737" y="292" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">语义：历史事实独立于业务实体存续</text>
+  <text x="737" y="314" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">删用户后仍须能查出其登录与上传记录</text>
+  <text x="737" y="336" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">故 user_id / task_id 只作弱引用，</text>
+  <text x="737" y="358" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">可为 NULL，且不建外键约束</text>
+
+  <text x="450" y="428" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#8A8880" text-anchor="middle">注：SQLite 默认关闭外键，须在每次连接执行 PRAGMA foreign_keys = ON（BE-13），否则上述约束形同虚设</text>
+</svg>

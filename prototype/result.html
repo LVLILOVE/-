@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>预测结果 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+
+    <!-- ============ 页头 ============ -->
+    <div class="page-head">
+      <div class="crumb">
+        <a href="history.html">历史任务</a> / T-20261008-0931 / 预测结果
+      </div>
+      <div class="row-between wrap" style="align-items:flex-end;gap:.75rem">
+        <div>
+          <h1 style="margin:0">双十一前 · 分仓备货预测</h1>
+          <p class="lede" style="margin:.375rem 0 0">
+            任务 <code>T-20261008-0931</code> · 完成于 2026-10-08 09:31 · 端到端耗时 34.3 秒
+          </p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="exportResult()">导出预测结果 CSV</button>
+          <a class="btn btn-ghost" href="compare.html">与其他任务对比</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步骤条 -->
+    <div class="row mb-3 wrap" style="gap:.5rem;font-size:.75rem">
+      <span class="badge badge-success">✓ 1 · 上传数据</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-success">✓ 2 · 确认参数</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-success">✓ 3 · 执行预测</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-primary">4 · 查看结果</span>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="pass">达标（MAPE ≤ 20%）</button>
+      <button class="state-pill" data-state="exceed">超标（MAPE &gt; 20%）</button>
+      <button class="state-pill" data-state="empty">无结果（任务失败）</button>
+      <button class="state-pill" data-state="loading">结果加载中</button>
+    </div>
+
+    <div class="stack">
+
+      <!-- ============ 0. 结果加载骨架 ============ -->
+      <section class="card hidden" id="card-loading">
+        <div class="card-head"><h3>正在加载结果…</h3></div>
+        <div class="grid-2">
+          <div class="skeleton sk-line w80" style="height:22px"></div>
+          <div class="skeleton sk-line w60" style="height:22px"></div>
+        </div>
+        <div class="skeleton mt-3" style="height:240px"></div>
+        <div class="metric-grid mt-3">
+          <div class="skeleton" style="height:78px"></div>
+          <div class="skeleton" style="height:78px"></div>
+          <div class="skeleton" style="height:78px"></div>
+          <div class="skeleton" style="height:78px"></div>
+        </div>
+      </section>
+
+      <!-- ============ 1. 判定结论 ============ -->
+      <section class="verdict pass" id="verdict">
+        <span class="vd-icon" data-icon="check"></span>
+        <div style="flex:1">
+          <div class="vd-t" id="verdict-title">本次预测达标</div>
+          <div class="vd-d" id="verdict-desc">
+            加权 MAPE <strong>14.3%</strong>，满足 &le; 20% 的门槛；加权 MAE 相对移动平均基线降低
+            <strong>26.4%</strong>，加权 RMSE 降低 <strong>27.5%</strong>，均满足 &ge; 15% 的硬约束。
+            达标序列占比 <strong>84.0%</strong>，高于 60% 目标。
+          </div>
+        </div>
+        <div class="t-right" style="flex:none">
+          <div class="t-xs t-muted">综合判定</div>
+          <div class="t-bold" style="font-size:1.125rem" id="verdict-status">达标</div>
+        </div>
+      </section>
+
+      <!-- ============ 2. MAPE 超标警告（条件展示） ============ -->
+      <section class="alert alert-danger hidden" id="mape-alert">
+        <div class="alert-body">
+          <div class="alert-title">
+            <span data-icon="alert" style="display:inline-flex;width:14px;height:14px;vertical-align:-2px"></span>
+            加权 MAPE 22.6% 已超过 20% 门槛 —— 请谨慎使用本次结果
+          </div>
+          <div class="mt-1">
+            本条警告<strong>不可折叠、不可关闭</strong>（<code>FR-VIS-06</code>）。可能原因：
+          </div>
+          <ul style="margin:.5rem 0 0;padding-left:1.25rem;font-size:.8125rem">
+            <li><strong>数据量不足</strong>：本批 113 条序列中有 <span id="al-l3n">0</span> 条有效历史不足 90 天，只能降级处理</li>
+            <li><strong>波动过大</strong>：预测窗口内包含双十一等强促销日，历史同期样本极少，模型难以外推</li>
+            <li><strong>步长偏长</strong>：当前步长 30 天，误差随步长累积放大</li>
+          </ul>
+          <div class="mt-2" style="font-size:.75rem">
+            建议：缩短步长至 7 或 14 天重跑；或对 MAPE 超标的序列改用人工作业判断。
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 3. 指标卡 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>评估指标（加权口径）</h3>
+          <div class="right t-xs t-muted">
+            评估对象：测试段 <span id="m-points">630</span> 个预测点 · 序列数 <span id="m-series">45</span> 条（L3 不参与）
+          </div>
+        </div>
+        <div class="metric-grid" id="metrics">
+          <div class="metric" id="m-mape">
+            <div class="metric-label">加权 MAPE <span class="badge badge-neutral">主口径</span></div>
+            <div class="metric-value" id="v-mape">14.3<span class="unit">%</span></div>
+            <div class="metric-foot" id="f-mape">门槛 &le; 20% · 通过</div>
+          </div>
+          <div class="metric" id="m-mae">
+            <div class="metric-label">加权 MAE</div>
+            <div class="metric-value" id="v-mae">1.3</div>
+            <div class="metric-foot up" id="f-mae">较基线降低 26.4%</div>
+          </div>
+          <div class="metric" id="m-rmse">
+            <div class="metric-label">加权 RMSE</div>
+            <div class="metric-value" id="v-rmse">3.4</div>
+            <div class="metric-foot up" id="f-rmse">较基线降低 27.5%</div>
+          </div>
+          <div class="metric" id="m-pass">
+            <div class="metric-label">达标序列占比</div>
+            <div class="metric-value" id="v-pass">84.0<span class="unit">%</span></div>
+            <div class="metric-foot" id="f-pass">目标 &ge; 60% · 通过</div>
+          </div>
+        </div>
+
+        <!-- 基线与模型对照表 -->
+        <div class="table-wrap mt-3">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>指标</th>
+                <th class="num">移动平均基线</th>
+                <th class="num">LSTM 模型</th>
+                <th class="num">相对提升</th>
+                <th>约束</th>
+                <th>判定</th>
+              </tr>
+            </thead>
+            <tbody id="cmp-tbody"></tbody>
+          </table>
+        </div>
+        <div class="t-xs t-muted mt-2">
+          基线与模型使用<strong>同一批预测点、同一序列集合</strong>计算（<code>FR-MOD-06</code> 🔒），
+          确保「降低 15%」的结论可比。
+        </div>
+      </section>
+
+      <!-- ============ 4. 覆盖率披露 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>预测覆盖率披露</h3>
+          <div class="right"><span class="badge badge-neutral">📌 必展示项</span></div>
+        </div>
+        <div class="cover-panel">
+          <div>
+            <div class="gauge" id="cover-gauge" style="--gp:92;--gc:var(--success)">
+              <div class="gv">
+                <b id="cover-pct">90.0%</b>
+                <span>可评估覆盖率</span>
+              </div>
+            </div>
+            <div class="t-xs t-muted mt-2 t-center" style="max-width:200px;margin:0 auto">
+              113 / 113 条序列输出了可用于评估的数值预测
+              （L1 模型推理 81 条 + L2 规则降级 32 条），
+              本批无不可预测序列。
+            </div>
+          </div>
+
+          <div>
+            <div class="cover-bar">
+              <i class="bar-l1" style="width:71.7%"></i>
+              <i class="bar-l2" style="width:28.3%"></i>
+              <i class="bar-l3" style="width:0%"></i>
+            </div>
+            <div class="cover-legend">
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--c1)"></span>
+                <span class="cv-name"><strong>L1</strong> · 模型推理（有效历史 &ge; 90 点）</span>
+                <span class="cv-n" id="cv-l1">81</span>
+                <span class="cv-p" id="cvp-l1">71.7%</span>
+              </div>
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--c3)"></span>
+                <span class="cv-name"><strong>L2</strong> · 商品级降级 + 按历史占比分摊</span>
+                <span class="cv-n" id="cv-l2">32</span>
+                <span class="cv-p" id="cvp-l2">28.3%</span>
+              </div>
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--text-3)"></span>
+                <span class="cv-name"><strong>L3</strong> · 不可预测（仅展示历史均值）</span>
+                <span class="cv-n" id="cv-l3">0</span>
+                <span class="cv-p" id="cvp-l3">0.0%</span>
+              </div>
+              <div class="cover-row" style="border-top:1px solid var(--border);padding-top:.5rem">
+                <span class="cv-name t-bold">合计</span>
+                <span class="cv-n" id="cv-all">113</span>
+                <span class="cv-p">100.0%</span>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-3">
+              <div class="metric" style="padding:.625rem .75rem">
+                <div class="metric-label">L1 组平均 MAPE</div>
+                <div class="metric-value" style="font-size:1.125rem" id="l1-mape">15.0<span class="unit">%</span></div>
+              </div>
+              <div class="metric" style="padding:.625rem .75rem">
+                <div class="metric-label">L2 组平均 MAPE</div>
+                <div class="metric-value" style="font-size:1.125rem" id="l2-mape">26.2<span class="unit">%</span></div>
+              </div>
+            </div>
+
+            <div class="alert alert-info mt-3" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">稀疏是常态，不是异常</div>
+                菜鸟数据集中 963 个商品仅覆盖 5 个仓中的部分组合，
+                合计约 4,815 条理论序列存在 17,063 条样本缺失。
+                L2/L3 走规则兜底是<strong>预期内的正常路径</strong>。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 5. 曲线对比 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>历史销量 vs 预测销量</h3>
+          <div class="right">
+            <span class="badge badge-neutral" id="sel-label">上海仓 · 纯棉圆领短袖T恤 男（sku 132）</span>
+          </div>
+        </div>
+
+        <div class="grid-2" style="grid-template-columns:270px minmax(0,1fr);align-items:start">
+          <!-- 左：序列选择 -->
+          <div>
+            <div class="row-between mb-1">
+              <span class="t-xs t-bold t-2">选择序列</span>
+              <span class="t-xs t-muted" id="sel-count">50 条</span>
+            </div>
+            <div class="sel-list" id="sel-list">
+              <div class="sel-search">
+                <input class="input" id="sel-q" type="text" placeholder="搜索商品名 / SKU / 仓库…" style="font-size:.75rem">
+              </div>
+              <div id="sel-items"></div>
+            </div>
+            <div class="t-xs t-muted mt-2">
+              序列按 L1 → L2 → L3 排序，标注为不可预测的序列仍可查看历史曲线。
+              （<code>FR-VIS-09</code> 为 P1 功能，此处已提前演示）
+            </div>
+          </div>
+
+          <!-- 右：图表 -->
+          <div>
+            <div class="row wrap mb-2" style="gap:.375rem">
+              <button class="state-pill active" data-series-mode="one">单序列</button>
+              <button class="state-pill" data-series-mode="multi">多序列叠加</button>
+              <button class="state-pill" data-series-mode="store">按仓库对比</button>
+            </div>
+            <div id="chart-host"></div>
+
+            <div class="param-strip mt-3" id="sel-meta"></div>
+          </div>
+        </div>
+
+        <div class="spec-note mt-3" style="margin-top:1rem">
+          <div class="sn-head">
+            <span class="sn-tag">原型说明</span>
+            <span>图表编码约定</span>
+          </div>
+          <table class="sn-table">
+            <tr><td>历史销量 —— 实线，读取 <code>actual_sales</code></td><td>与预测段在时间轴上连续</td></tr>
+            <tr><td>预测销量 —— 虚线，读取 <code>forecast_sales</code></td><td>视觉上与历史明确区分</td></tr>
+            <tr><td>置信区间 —— 阴影带</td><td>P2 功能（<code>FR-MOD-14</code>），此处提前演示</td></tr>
+            <tr><td>L3 序列的预测段留空</td><td>如实反映「不可预测」，不用均值伪装成预测（<code>FR-VIS-07</code>）</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 6. 误差分布 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>逐序列 MAPE 分布</h3>
+          <div class="right t-xs t-muted">直方图分箱数 12（&le; 20，符合 <code>FR-VIS-08</code>）</div>
+        </div>
+        <div class="grid-2" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start">
+          <div id="hist-host"></div>
+          <div>
+            <div class="meta-list">
+              <div class="meta-row"><span class="mk">中位数 MAPE</span><span class="mv t-mono" id="h-median">14.2%</span></div>
+              <div class="meta-row"><span class="mk">上四分位 P75</span><span class="mv t-mono" id="h-p75">22.8%</span></div>
+              <div class="meta-row"><span class="mk">P90</span><span class="mv t-mono" id="h-p90">34.6%</span></div>
+              <div class="meta-row"><span class="mk">最大 MAPE</span><span class="mv t-mono" id="h-max">58.3%</span></div>
+              <div class="meta-row"><span class="mk">超标序列数</span><span class="mv t-mono" id="h-over">15 / 45</span></div>
+            </div>
+            <div class="alert alert-warning mt-3" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">为什么要看分布</div>
+                平均值会掩盖长尾。本图让评审看到：多数序列误差集中在 10–25%，
+                但存在少量高误差尾部，这些序列应转人工判断而非直接采信。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 7. 预测明细表 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>分商品 · 分仓预测明细</h3>
+          <div class="right row" style="gap:.5rem">
+            <select class="select" id="tbl-filter" style="font-size:.75rem;padding:.25rem .5rem">
+              <option value="">全部序列</option>
+              <option value="L1">仅 L1（模型推理）</option>
+              <option value="L2">仅 L2（商品级降级）</option>
+              <option value="L3">仅 L3（不可预测）</option>
+              <option value="over">仅 MAPE 超标</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="exportResult()">导出</button>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="max-height:520px">
+          <table class="data sortable" id="tbl">
+            <thead>
+              <tr>
+                <th data-sort="itemName">商品名称</th>
+                <th data-sort="itemId">SKU</th>
+                <th data-sort="storeName">仓库</th>
+                <th data-sort="level">分级</th>
+                <th data-sort="seriesMape" class="num">MAPE<span class="sort-ind">↕</span></th>
+                <th data-sort="forecastTotal" class="num">预测合计<span class="sort-ind">↕</span></th>
+                <th data-sort="baselineTotal" class="num">基线合计</th>
+                <th data-sort="conf">置信度</th>
+                <th>近 14 天</th>
+                <th>判定</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-body"></tbody>
+          </table>
+        </div>
+
+        <div class="row-between mt-2">
+          <span class="t-xs t-muted" id="tbl-info">共 50 条，显示 1–20</span>
+          <div class="row" style="gap:.25rem">
+            <button class="btn btn-ghost btn-sm" onclick="pageTo(-1)">上一页</button>
+            <span class="t-xs t-mono" id="page-label">1 / 3</span>
+            <button class="btn btn-ghost btn-sm" onclick="pageTo(1)">下一页</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3" style="margin-bottom:0">
+          <div class="alert-body">
+            <div class="alert-title">L3 序列的展示口径</div>
+            L3 序列<strong>不给数值预测</strong>，表格中「预测合计」列显示「—」，
+            仅保留历史均值供参考。这是刻意的设计：把不确定的东西说成确定，比不给结论更危险。
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 8. 模型适用性说明 ============ -->
+      <section class="card">
+        <div class="card-head"><h3>模型适用性说明</h3></div>
+
+        <div class="alert alert-warning" style="margin-bottom:1rem">
+          <div class="alert-body">
+            <div class="alert-title">评估前提（<code>FR-MOD-13</code>，须随结果与导出文件一并展示）</div>
+            本次预测使用<strong>离线训练好的预训练模型 <code>lstm_v1</code></strong>，
+            <strong>未针对本次输入数据做任何微调或重训练</strong>。
+            模型在训练集上学到的模式未必适配你上传数据的分布，
+            若数据来自不同业务时期或不同品类结构，误差可能显著大于本页所示。
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h4 class="mb-1">模型能力边界</h4>
+            <div class="table-wrap">
+              <table class="fields">
+                <thead><tr><th>维度</th><th>说明</th></tr></thead>
+                <tbody>
+                  <tr><td>输入特征</td><td>仅<strong>销量时序</strong> + 时间 / 滞后 / 滚动统计特征，不含价格、库存、流量、促销标记等外部变量</td></tr>
+                  <tr><td>预测目标</td><td><code>forecast_sales</code>（销量预测值），<strong>不是</strong>补货量或目标库存</td></tr>
+                  <tr><td>空间粒度</td><td>固定「仓库 × 商品」，不输出全国汇总层预测</td></tr>
+                  <tr><td>训练数据</td><td>菜鸟「需求预测与分仓规划」数据集，2014-10-10 ~ 2015-12-27</td></tr>
+                  <tr><td>已知失效场景</td><td>突发政策、竞品动作、疫情、平台规则变更等外生冲击</td></tr>
+                  <tr><td>评估方式</td><td>时间顺序 8:1:1 切分，测试段为末段 10%，<strong>不做随机切分</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h4 class="mb-1">本次运行的技术参数</h4>
+            <div class="table-wrap">
+              <table class="fields">
+                <thead><tr><th>项</th><th>值</th></tr></thead>
+                <tbody>
+                  <tr><td>模型版本</td><td><code>lstm_v1</code></td></tr>
+                  <tr><td>网络结构</td><td>hidden=32 · layers=1 · window=14</td></tr>
+                  <tr><td>推理设备</td><td>CUDA（NVIDIA MX450）· 显存峰值 111 MB</td></tr>
+                  <tr><td>批推理规模</td><td>34 条 L1 序列一次性入批，无逐序列循环</td></tr>
+                  <tr><td>端到端耗时</td><td>34.3 s（预处理 3.1 s · 特征 5.0 s · 推理 22.4 s · 指标 3.8 s）</td></tr>
+                  <tr><td>归一化口径</td><td>每条序列独立归一化，统计量<strong>仅取自训练集</strong>，防止数据泄漏</td></tr>
+                  <tr><td>基线</td><td>移动平均，与模型同预测点、同序列集合</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 9. 免责声明 ============ -->
+      <section class="card">
+        <div class="card-head"><h3>免责声明与使用限制</h3></div>
+        <div class="disclaimer">
+          <span data-icon="shield" style="display:inline-flex;width:18px;height:18px;flex:none"></span>
+          <div>
+            <p style="margin:0 0 .5rem">
+              本页所有预测结果由<strong>历史数据 + 统计模型自动生成</strong>，用于辅助判断，
+              <strong>不构成任何形式的经营决策依据或商业承诺</strong>。
+            </p>
+            <ul style="margin:0;padding-left:1.25rem">
+              <li>模型<strong>不具备</strong>对突发事件（政策调整、竞品动作、疫情、平台规则变更）的预测能力</li>
+              <li>预测结果<strong>不考虑</strong>库存水位、在途订单、供应商交期、最小起订量等供应链约束</li>
+              <li>数据仅用于本次预测计算，<strong>不用于任何其他用途</strong>，不做跨用户共享</li>
+              <li>请结合业务实际、近期促销计划与人工经验综合判断后再做补货决策</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 无结果空态 ============ -->
+      <section class="card hidden" id="card-empty">
+        <div class="empty">
+          <div class="empty-icon" data-icon="alert"></div>
+          <h4>本次任务没有可展示的结果</h4>
+          <p>
+            任务 <code>T-20261005-1652</code> 因超过 60 秒硬上限被中止
+            （<code>E_TIMEOUT</code>），未产出完整预测。
+            半成品结果不落盘，避免误导决策。
+          </p>
+          <div class="btn-row" style="justify-content:center">
+            <a class="btn btn-primary" href="params.html">调整参数重跑</a>
+            <a class="btn btn-secondary" href="history.html">返回历史任务</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 原型说明：需求映射 ============ -->
+      <div class="spec-note">
+        <div class="sn-head">
+          <span class="sn-tag">原型说明</span>
+          <span>本页与 PRD 的对应关系</span>
+        </div>
+        <table class="sn-table">
+          <tr><td>历史实线 + 预测虚线折线对比图，时间轴连续</td><td><code>FR-VIS-01</code></td></tr>
+          <tr><td>四项加权指标卡（MAPE / MAE / RMSE / 达标序列占比）</td><td><code>FR-VIS-02</code> · <code>FR-MOD-11</code></td></tr>
+          <tr><td>分商品 / 分仓明细表，列可排序、每页 20 行</td><td><code>FR-VIS-03</code></td></tr>
+          <tr><td>每条记录标注 <code>granularity_level</code> 与置信度</td><td><code>FR-VIS-04</code> · <code>FR-MOD-08</code></td></tr>
+          <tr><td>导出 CSV，列顺序固定为 sku_id / warehouse_id / date / forecast_sales / granularity_level / actual_sales / error</td><td><code>FR-VIS-05</code></td></tr>
+          <tr><td>加权 MAPE &gt; 20% 时显著警告，不可折叠，给出可能原因</td><td><code>FR-VIS-06</code> · <code>FR-MOD-12</code></td></tr>
+          <tr><td>覆盖率披露面板：L1 / L2 / L3 序列数与占比，三类之和等于总数</td><td><code>FR-VIS-07</code> 📌</td></tr>
+          <tr><td>逐序列 MAPE 分布直方图（分箱 12 ≤ 20）</td><td><code>FR-VIS-08</code></td></tr>
+          <tr><td>多序列叠加与筛选（搜索 + 模式切换）</td><td><code>FR-VIS-09</code></td></tr>
+          <tr><td>模型未微调声明，随结果与导出展示</td><td><code>FR-MOD-13</code></td></tr>
+          <tr><td>基线与模型同预测点同序列集合计算</td><td><code>FR-MOD-06</code> 🔒</td></tr>
+          <tr><td>免责声明与使用限制</td><td>任务书 §6.1 · <code>NFR-SEC-08</code></td></tr>
+        </table>
+        <div class="sn-foot">
+          埋点：<code>EV-RES-01</code>（结果页访问）· <code>EV-RES-02</code>（序列切换）·
+          <code>EV-RES-03</code>（导出）· <code>EV-RES-04</code>（MAPE 超标警告曝光）·
+          <code>EV-RES-05</code>（覆盖率面板展开）
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+initShell('result.html');
+
+/* ================= 数据准备 ================= */
+var HORIZON = 14;
+var raw = buildDataset({ days: 200, endDate: BIZ.dateEnd, sparseSeed: 20261008 });
+var M = computeTaskMetrics(raw, HORIZON);
+
+/* ================= 图标注入 ================= */
+function injectIcons(scope) {
+  (scope || document).querySelectorAll('[data-icon]').forEach(function (el) {
+    var svg = ICONS[el.getAttribute('data-icon')];
+    if (svg) el.innerHTML = svg;
+  });
+}
+injectIcons();
+
+/* ================= 1. 指标卡 ================= */
+function renderMetrics() {
+  var mape = M.weightedMape, mae = M.weightedMae, rmse = M.weightedRmse;
+  var passRate = M.seriesPassRate;
+  var mapeOK = mape <= BIZ.weightedMapeLimit;
+  var maeOK = M.maeImprove >= BIZ.baselineImproveLimit;
+  var rmseOK = M.rmseImprove >= BIZ.baselineImproveLimit;
+  var passOK = passRate >= BIZ.seriesPassRateTarget;
+
+  document.getElementById('v-mape').innerHTML = mape.toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('f-mape').textContent = '门槛 ≤ ' + BIZ.weightedMapeLimit + '% · ' + (mapeOK ? '通过' : '超标');
+  document.getElementById('m-mape').className = 'metric ' + (mapeOK ? 'metric-pass' : 'metric-fail');
+
+  document.getElementById('v-mae').textContent = mae.toFixed(1);
+  document.getElementById('f-mae').textContent = '较基线降低 ' + M.maeImprove.toFixed(1) + '%';
+  document.getElementById('f-mae').className = 'metric-foot ' + (maeOK ? 'up' : 'down');
+  document.getElementById('m-mae').className = 'metric ' + (maeOK ? 'metric-pass' : 'metric-fail');
+
+  document.getElementById('v-rmse').textContent = rmse.toFixed(1);
+  document.getElementById('f-rmse').textContent = '较基线降低 ' + M.rmseImprove.toFixed(1) + '%';
+  document.getElementById('f-rmse').className = 'metric-foot ' + (rmseOK ? 'up' : 'down');
+  document.getElementById('m-rmse').className = 'metric ' + (rmseOK ? 'metric-pass' : 'metric-fail');
+
+  document.getElementById('v-pass').innerHTML = passRate.toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('f-pass').textContent = '目标 ≥ ' + BIZ.seriesPassRateTarget + '% · ' + (passOK ? '通过' : '未达标');
+  document.getElementById('m-pass').className = 'metric ' + (passOK ? 'metric-pass' : 'metric-warn');
+
+  document.getElementById('m-points').textContent = num(M.seriesEvaluated * HORIZON);
+  document.getElementById('m-series').textContent = M.seriesEvaluated;
+
+  // 对照表
+  var rows = [
+    { k: '加权 MAPE', b: M.baselineMape, m: mape, improve: null, limit: '≤ 20%', ok: mapeOK, unit: '%' },
+    { k: '加权 MAE', b: M.baselineMae, m: mae, improve: M.maeImprove, limit: '降低 ≥ 15%', ok: maeOK, unit: '' },
+    { k: '加权 RMSE', b: M.baselineRmse, m: rmse, improve: M.rmseImprove, limit: '降低 ≥ 15%', ok: rmseOK, unit: '' },
+  ];
+  document.getElementById('cmp-tbody').innerHTML = rows.map(function (r) {
+    var imp = r.improve === null
+      ? '<span class="t-muted">—（主口径不比基线）</span>'
+      : '<span style="color:' + (r.ok ? 'var(--success)' : 'var(--danger)') + ';font-weight:650">' +
+        (r.improve >= 0 ? '↓ ' : '↑ ') + Math.abs(r.improve).toFixed(1) + '%</span>';
+    return '<tr>' +
+      '<td class="t-bold">' + r.k + '</td>' +
+      '<td class="num t-mono">' + r.b.toFixed(2) + r.unit + '</td>' +
+      '<td class="num t-mono t-bold">' + r.m.toFixed(2) + r.unit + '</td>' +
+      '<td class="num">' + imp + '</td>' +
+      '<td class="t-xs t-muted">' + r.limit + '</td>' +
+      '<td>' + (r.ok
+        ? '<span class="badge badge-success">' + ICONS.check + '通过</span>'
+        : '<span class="badge badge-danger">' + ICONS.x + '未通过</span>') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+/* ================= 2. 判定结论 ================= */
+function renderVerdict() {
+  var ok = M.weightedMape <= BIZ.weightedMapeLimit
+    && M.maeImprove >= BIZ.baselineImproveLimit
+    && M.rmseImprove >= BIZ.baselineImproveLimit;
+  var v = document.getElementById('verdict');
+  v.className = 'verdict ' + (ok ? 'pass' : 'fail');
+  v.querySelector('.vd-icon').innerHTML = ok ? ICONS.check : ICONS.x;
+  document.getElementById('verdict-status').textContent = ok ? '达标' : '未达标';
+  document.getElementById('verdict-title').textContent = ok ? '本次预测达标' : '本次预测未达标';
+
+  var strict = M.weightedMape <= BIZ.weightedMapeLimit;
+  document.getElementById('verdict-desc').innerHTML = strict
+    ? '加权 MAPE <strong>' + M.weightedMape.toFixed(1) + '%</strong>，满足 ≤ 20% 的门槛；' +
+      '加权 MAE 相对移动平均基线降低 <strong>' + M.maeImprove.toFixed(1) + '%</strong>，' +
+      '加权 RMSE 降低 <strong>' + M.rmseImprove.toFixed(1) + '%</strong>，均满足 ≥ 15% 的硬约束。' +
+      '达标序列占比 <strong>' + M.seriesPassRate.toFixed(1) + '%</strong>，高于 60% 目标。'
+    : '加权 MAPE <strong>' + M.weightedMape.toFixed(1) + '%</strong>，<strong>已超过</strong> 20% 门槛。' +
+      '加权 MAE 降低 ' + M.maeImprove.toFixed(1) + '%，加权 RMSE 降低 ' + M.rmseImprove.toFixed(1) + '%。' +
+      '请查看下方警告后谨慎使用本次结果。';
+}
+
+/* ================= 4. 覆盖率 ================= */
+function renderCoverage() {
+  var tot = M.seriesTotal || 1;
+  var l1 = M.l1Count, l2 = M.l2Count, l3 = M.l3Count;
+  var covPct = ((l1 + l2) / tot) * 100;
+
+  document.getElementById('cover-pct').textContent = covPct.toFixed(1) + '%';
+  document.getElementById('cover-gauge').style.setProperty('--gp', covPct.toFixed(1));
+  document.getElementById('cover-gauge').style.setProperty('--gc',
+    covPct >= 80 ? 'var(--success)' : covPct >= 60 ? 'var(--warning)' : 'var(--danger)');
+
+  document.getElementById('cv-l1').textContent = l1;
+  document.getElementById('cv-l2').textContent = l2;
+  document.getElementById('cv-l3').textContent = l3;
+  document.getElementById('cv-all').textContent = tot;
+  document.getElementById('cvp-l1').textContent = ((l1 / tot) * 100).toFixed(1) + '%';
+  document.getElementById('cvp-l2').textContent = ((l2 / tot) * 100).toFixed(1) + '%';
+  document.getElementById('cvp-l3').textContent = ((l3 / tot) * 100).toFixed(1) + '%';
+
+  document.querySelector('.cover-bar .bar-l1').style.width = ((l1 / tot) * 100).toFixed(2) + '%';
+  document.querySelector('.cover-bar .bar-l2').style.width = ((l2 / tot) * 100).toFixed(2) + '%';
+  document.querySelector('.cover-bar .bar-l3').style.width = ((l3 / tot) * 100).toFixed(2) + '%';
+
+  document.getElementById('l1-mape').innerHTML = M.l1Mape === null ? '—' : M.l1Mape.toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('l2-mape').innerHTML = M.l2Mape === null ? '—' : M.l2Mape.toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('al-l3n').textContent = l3;
+}
+
+/* ================= 5. 曲线 ================= */
+var curIdx = 0;
+var seriesMode = 'one';
+
+function curSeries() { return M.perSeries[curIdx]; }
+
+function renderChart() {
+  var host = document.getElementById('chart-host');
+  var s = curSeries();
+
+  if (seriesMode === 'store') {
+    // 按仓库对比：把同一商品在各仓的预测叠加
+    var sameItem = M.perSeries.filter(function (x) { return x.itemId === s.itemId; });
+    var colors = ['--c1', '--c2', '--c3', '--c4', '--c5'];
+    var series = sameItem.map(function (x, i) {
+      return {
+        label: x.storeName + '（' + x.level + '）',
+        color: cssVar(colors[i % 5]),
+        dash: x.level !== 'L1',
+        points: x.observed.filter(function (p) { return p.value !== null; })
+          .slice(-42).map(function (p) { return { date: p.date, value: p.value }; })
+          .concat(x.forecast.filter(function (p) { return p.predict !== null; })
+            .map(function (p) { return { date: p.date, value: p.predict }; })),
+      };
+    });
+    host.innerHTML = multiLineChart({ series: series, height: 340, aria: '同商品分仓预测对比' }) +
+      '<div class="t-xs t-muted mt-2">实线 = 历史观测段，虚线 = 预测段。仅展示同一商品 <code>' +
+      s.itemId + '</code> 在各仓的对比，用于判断铺货比例。</div>';
+    return;
+  }
+
+  if (seriesMode === 'multi') {
+    // 多序列叠加：当前商品的前 4 个仓
+    var multi = M.perSeries.filter(function (x) { return x.itemId === s.itemId; }).slice(0, 4);
+    var cols = ['--c1', '--c2', '--c3', '--c5'];
+    host.innerHTML = multiLineChart({
+      series: multi.map(function (x, i) {
+        return {
+          label: x.storeName,
+          color: cssVar(cols[i % 4]),
+          dash: x.level !== 'L1',
+          points: x.observed.filter(function (p) { return p.value !== null; })
+            .slice(-35).map(function (p) { return { date: p.date, value: p.value }; })
+            .concat(x.forecast.filter(function (p) { return p.predict !== null; })
+              .map(function (p) { return { date: p.date, value: p.predict }; })),
+        };
+      }), height: 340, aria: '多序列叠加对比',
+    }) + '<div class="t-xs t-muted mt-2">虚线序列表示该仓为 L2 降级或 L3 不可预测，请勿与实线等同看待。</div>';
+    return;
+  }
+
+  // 单序列
+  var hist = s.observed.filter(function (p) { return p.value !== null; }).slice(-42);
+  var fc = s.forecast;
+  var limit = s.level === 'L2' ? Math.round(s.forecastTotal / Math.max(1, fc.length) * 1.25) : null;
+
+  host.innerHTML = lineChart({
+    history: hist,
+    forecast: fc,
+    height: 340,
+    limitLine: limit,
+    limitLabel: 'L2 参考水位',
+    aria: s.itemName + ' · ' + s.storeName + ' 历史与预测',
+  });
+
+  if (s.level === 'L3') {
+    host.innerHTML += '<div class="alert alert-danger mt-2" style="margin-bottom:0">' +
+      '<div class="alert-body"><div class="alert-title">该序列不可预测（L3）</div>' +
+      '有效历史点数仅 <strong>' + s.validAfter + '</strong> 个，不足模型最小输入要求，且商品跨仓聚合后仍不足。' +
+      '系统不输出数值预测，仅保留历史均值 <strong>' +
+      Math.round(s.observed.filter(function (p) { return p.value !== null; })
+        .slice(-28).reduce(function (a, p) { return a + p.value; }, 0) /
+        Math.max(1, s.observed.filter(function (p) { return p.value !== null; }).slice(-28).length)) +
+      '</strong> 件/天供参考。请对该商品沿用人工经验判断。</div></div>';
+  }
+}
+
+function renderSelMeta() {
+  var s = curSeries();
+  var host = document.getElementById('sel-meta');
+  if (s.level === 'L3') {
+    host.innerHTML =
+      '<div class="ps"><span class="ps-k">商品 / SKU</span><span class="ps-v" title="' + s.itemName + '">' + s.itemName + '</span></div>' +
+      '<div class="ps"><span class="ps-k">仓库</span><span class="ps-v">' + s.storeName + '（' + s.storeCode + '）</span></div>' +
+      '<div class="ps"><span class="ps-k">分级</span><span class="ps-v">L3 · 不可预测</span></div>' +
+      '<div class="ps"><span class="ps-k">有效历史点数</span><span class="ps-v">' + s.validAfter + '</span></div>' +
+      '<div class="ps"><span class="ps-k">数值预测</span><span class="ps-v" style="color:var(--danger)">不输出</span></div>';
+    return;
+  }
+  host.innerHTML =
+    '<div class="ps"><span class="ps-k">商品 / SKU</span><span class="ps-v" title="' + s.itemName + '">' + s.itemName + '</span></div>' +
+    '<div class="ps"><span class="ps-k">仓库</span><span class="ps-v">' + s.storeName + '（' + s.storeCode + '）</span></div>' +
+    '<div class="ps"><span class="ps-k">分级</span><span class="ps-v">' + s.level + '</span></div>' +
+    '<div class="ps"><span class="ps-k">序列 MAPE</span><span class="ps-v" style="color:' + (s.pass ? 'var(--success)' : 'var(--danger)') + '">' + s.seriesMape.toFixed(1) + '%</span></div>' +
+    '<div class="ps"><span class="ps-k">预测合计（' + HORIZON + '天）</span><span class="ps-v">' + num(s.forecastTotal) + ' 件</span></div>' +
+    '<div class="ps"><span class="ps-k">基线合计</span><span class="ps-v">' + num(s.baselineTotal) + ' 件</span></div>';
+}
+
+function renderSelList(q) {
+  q = (q || '').toLowerCase();
+  var order = { L1: 0, L2: 1, L3: 2 };
+  var list = M.perSeries.slice().sort(function (a, b) {
+    if (order[a.level] !== order[b.level]) return order[a.level] - order[b.level];
+    return a.itemId.localeCompare(b.itemId);
+  });
+  if (q) {
+    list = list.filter(function (s) {
+      return (s.itemName + s.itemId + s.storeName + s.level).toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  document.getElementById('sel-items').innerHTML = list.map(function (s) {
+    var idx = M.perSeries.indexOf(s);
+    var dot = s.level === 'L1' ? 'dot-success' : s.level === 'L2' ? 'dot-warning' : 'dot-neutral';
+    return '<button class="sel-item ' + (idx === curIdx ? 'active' : '') + '" data-idx="' + idx + '">' +
+      '<span class="dot ' + dot + '"></span>' +
+      '<span class="si-name">' + s.itemName + ' · ' + s.storeName + '</span>' +
+      '<span class="si-meta">' + (s.level === 'L3' ? '—' : s.seriesMape.toFixed(0) + '%') + '</span>' +
+      '</button>';
+  }).join('');
+  document.getElementById('sel-count').textContent = list.length + ' 条';
+
+  document.querySelectorAll('.sel-item').forEach(function (b) {
+    b.addEventListener('click', function () {
+      curIdx = Number(b.dataset.idx);
+      renderSelList(document.getElementById('sel-q').value);
+      renderChart(); renderSelMeta();
+      document.getElementById('sel-label').textContent =
+        curSeries().storeName + ' · ' + curSeries().itemName + '（sku ' + curSeries().itemId + '）';
+    });
+  });
+}
+
+/* ================= 6. 直方图 ================= */
+function renderHist() {
+  var vals = M.perSeries.filter(function (s) { return s.level !== 'L3'; })
+    .map(function (s) { return s.seriesMape; });
+  document.getElementById('hist-host').innerHTML = histChart(vals, BIZ.weightedMapeLimit, 12);
+
+  var sorted = vals.slice().sort(function (a, b) { return a - b; });
+  function q(p) {
+    var i = (sorted.length - 1) * p;
+    var lo = Math.floor(i), hi = Math.ceil(i);
+    return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+  }
+  document.getElementById('h-median').textContent = q(0.5).toFixed(1) + '%';
+  document.getElementById('h-p75').textContent = q(0.75).toFixed(1) + '%';
+  document.getElementById('h-p90').textContent = q(0.9).toFixed(1) + '%';
+  document.getElementById('h-max').textContent = Math.max.apply(null, vals).toFixed(1) + '%';
+  var over = vals.filter(function (v) { return v > BIZ.weightedMapeLimit; }).length;
+  document.getElementById('h-over').textContent = over + ' / ' + vals.length;
+}
+
+/* ================= 7. 明细表 ================= */
+var page = 0, PAGE = 20, sortKey = null, sortDir = 1;
+
+function tableRows() {
+  var f = document.getElementById('tbl-filter').value;
+  var list = M.perSeries.slice();
+  if (f === 'L1' || f === 'L2' || f === 'L3') list = list.filter(function (s) { return s.level === f; });
+  if (f === 'over') list = list.filter(function (s) { return s.level !== 'L3' && !s.pass; });
+  if (sortKey) {
+    list.sort(function (a, b) {
+      var x = a[sortKey], y = b[sortKey];
+      if (sortKey === 'level') { x = { L1: 0, L2: 1, L3: 2 }[a.level]; y = { L1: 0, L2: 1, L3: 2 }[b.level]; }
+      if (typeof x === 'string') return x.localeCompare(y) * sortDir;
+      return ((x === null ? -1e9 : x) - (y === null ? -1e9 : y)) * sortDir;
+    });
+  }
+  return list;
+}
+
+function renderTable() {
+  var list = tableRows();
+  var pages = Math.max(1, Math.ceil(list.length / PAGE));
+  if (page >= pages) page = pages - 1;
+  var slice = list.slice(page * PAGE, page * PAGE + PAGE);
+
+  document.getElementById('tbl-body').innerHTML = slice.map(function (s) {
+    var lvlDot = s.level === 'L1' ? 'dot-success' : s.level === 'L2' ? 'dot-warning' : 'dot-neutral';
+    var mapeCell = s.level === 'L3'
+      ? '<span class="t-muted">—</span>'
+      : '<span class="cell-bar"><span class="cb-track"><span class="cb-fill ' + (s.pass ? '' : 'over') +
+        '" style="width:' + Math.min(100, s.seriesMape) + '%"></span></span>' +
+        '<span class="t-mono" style="color:' + (s.pass ? 'var(--text)' : 'var(--danger)') + '">' +
+        s.seriesMape.toFixed(1) + '%</span></span>';
+    var fcCell = s.level === 'L3'
+      ? '<span class="t-muted" title="L3 序列不输出数值预测">—</span>'
+      : '<span class="t-mono t-bold">' + num(s.forecastTotal) + '</span>';
+    var baseCell = s.level === 'L3'
+      ? '<span class="t-muted">—</span>'
+      : '<span class="t-mono t-muted">' + num(s.baselineTotal) + '</span>';
+    var verdictCell = s.level === 'L3'
+      ? '<span class="badge badge-neutral">不评判</span>'
+      : (s.pass ? '<span class="badge badge-success">达标</span>' : '<span class="badge badge-danger">超标</span>');
+
+    // 稀疏序列的内联提示
+    var note = s.validAfter < 60
+      ? ' <span class="badge badge-neutral" title="有效历史点数偏少">历史 ' + s.validAfter + ' 点</span>' : '';
+
+    return '<tr>' +
+      '<td>' + s.itemName + note + '</td>' +
+      '<td class="mono">' + s.itemId + '</td>' +
+      '<td>' + s.storeName + '</td>' +
+      '<td><span class="dot ' + lvlDot + '" style="display:inline-block;margin-right:4px"></span>' + s.level + '</td>' +
+      '<td class="num">' + mapeCell + '</td>' +
+      '<td class="num">' + fcCell + '</td>' +
+      '<td class="num">' + baseCell + '</td>' +
+      '<td>' + confBadge(s.level) + '</td>' +
+      '<td>' + sparkline(s.itemId.charCodeAt(0) + Number(s.storeCode) * 17, s.level === 'L1') + '</td>' +
+      '<td>' + verdictCell + '</td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('tbl-info').textContent = list.length
+    ? '共 ' + list.length + ' 条，显示 ' + (page * PAGE + 1) + '–' + Math.min(list.length, (page + 1) * PAGE)
+    : '无匹配记录';
+  document.getElementById('page-label').textContent = (page + 1) + ' / ' + pages;
+}
+
+function pageTo(d) {
+  var pages = Math.max(1, Math.ceil(tableRows().length / PAGE));
+  page = Math.min(pages - 1, Math.max(0, page + d));
+  renderTable();
+}
+
+document.querySelectorAll('#tbl thead th[data-sort]').forEach(function (th) {
+  th.addEventListener('click', function () {
+    var k = th.dataset.sort;
+    if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+    document.querySelectorAll('#tbl thead .sort-ind').forEach(function (i) { i.classList.remove('on'); i.textContent = '↕'; });
+    var ind = th.querySelector('.sort-ind');
+    if (ind) { ind.classList.add('on'); ind.textContent = sortDir === 1 ? '↑' : '↓'; }
+    page = 0; renderTable();
+  });
+});
+
+document.getElementById('tbl-filter').addEventListener('change', function () { page = 0; renderTable(); });
+document.getElementById('sel-q').addEventListener('input', function () { renderSelList(this.value); });
+
+document.querySelectorAll('[data-series-mode]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('[data-series-mode]').forEach(function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    seriesMode = b.dataset.seriesMode;
+    renderChart();
+  });
+});
+
+/* ================= 导出 ================= */
+function exportResult() {
+  var rows = M.perSeries.map(function (s) {
+    return {
+      sku_id: s.itemId,
+      warehouse_id: s.storeCode,
+      date: HORIZON === 0 ? '' : (s.forecast[HORIZON - 1] ? s.forecast[HORIZON - 1].date : ''),
+      forecast_sales: s.level === 'L3' ? '' : s.forecastTotal,
+      granularity_level: s.level,
+      actual_sales: '',
+      error: s.level === 'L3' ? '' : (s.seriesMape / 100).toFixed(4),
+    };
+  });
+  // 逐日展开更贴近真实导出（列顺序按 FR-VIS-05 固定）
+  var daily = [];
+  M.perSeries.forEach(function (s) {
+    s.forecast.forEach(function (p) {
+      daily.push({
+        sku_id: s.itemId,
+        warehouse_id: s.storeCode,
+        date: p.date,
+        forecast_sales: p.predict === null ? '' : p.predict,
+        granularity_level: s.level,
+        actual_sales: '',
+        error: '',
+      });
+    });
+  });
+  exportCsv('forecast_T-20261008-0931.csv', daily,
+    ['sku_id', 'warehouse_id', 'date', 'forecast_sales', 'granularity_level', 'actual_sales', 'error']);
+}
+
+/* ================= 状态切换 ================= */
+function setState(s) {
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.classList.toggle('active', p.dataset.state === s);
+  });
+  var body = ['verdict', 'metrics', 'cover', 'chart', 'hist', 'tbl', 'spec'];
+  var show = function (id, v) { var e = document.getElementById(id); if (e) e.classList.toggle('hidden', !v); };
+
+  // 用卡片索引控制：默认全显示
+  var cards = document.querySelectorAll('main .stack > section, main .stack > .spec-note');
+  cards.forEach(function (c) { c.classList.remove('hidden'); });
+  document.getElementById('card-loading').classList.add('hidden');
+  document.getElementById('card-empty').classList.add('hidden');
+  document.getElementById('mape-alert').classList.add('hidden');
+
+  var BASE = { mape: M.weightedMape, maeImprove: M.maeImprove, rmseImprove: M.rmseImprove, passRate: M.seriesPassRate };
+  var DEMO = { mape: 22.6, maeImprove: 11.2, rmseImprove: 9.4, passRate: 41.3 };
+
+  if (s === 'loading') {
+    cards.forEach(function (c) { c.classList.add('hidden'); });
+    document.getElementById('card-loading').classList.remove('hidden');
+    setTimeout(function () { setState('pass'); }, 1300);
+    return;
+  }
+  if (s === 'empty') {
+    cards.forEach(function (c) { c.classList.add('hidden'); });
+    document.getElementById('card-empty').classList.remove('hidden');
+    return;
+  }
+
+  // 覆盖 M 的展示值（不改动原始数据，仅切换展示）
+  var use = s === 'exceed' ? DEMO : BASE;
+  M.weightedMape = use.mape;
+  M.maeImprove = use.maeImprove;
+  M.rmseImprove = use.rmseImprove;
+  M.seriesPassRate = use.passRate;
+
+  renderVerdict(); renderMetrics(); renderCoverage(); renderHist(); renderTable();
+
+  if (s === 'exceed') {
+    document.getElementById('mape-alert').classList.remove('hidden');
+    document.getElementById('al-l3n').textContent = M.l3Count;
+  }
+  renderChart(); renderSelMeta();
+}
+
+/* ================= 初始化 ================= */
+renderVerdict();
+renderMetrics();
+renderCoverage();
+renderSelList();
+renderChart();
+renderSelMeta();
+renderHist();
+renderTable();
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () { setState(p.dataset.state); });
+});
+
+// 主题切换后重绘图表
+document.addEventListener('themechange', function () {
+  renderChart();
+  renderHist();
+  renderTable();
+});
+</script>
+</body>
+</html>

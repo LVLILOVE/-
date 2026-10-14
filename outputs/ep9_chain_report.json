@@ -1,0 +1,283 @@
+{
+  "stage": "WS-9-09 校验链全绿（清单守卫）",
+  "passed": 55,
+  "failed": 0,
+  "chain_size": 38,
+  "items": [
+    {
+      "name": "[算法] self_check.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\self_check.py）"
+    },
+    {
+      "name": "[算法] eval_report.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\eval_report.py）"
+    },
+    {
+      "name": "[静态] verify_orm.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_orm.py）"
+    },
+    {
+      "name": "[静态] verify_schema.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_schema.py）"
+    },
+    {
+      "name": "[静态] verify_schemas.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_schemas.py）"
+    },
+    {
+      "name": "[前端静态] verify_types.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_types.mjs）"
+    },
+    {
+      "name": "[前端静态] verify_tokens.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_tokens.py）"
+    },
+    {
+      "name": "[前端静态] verify_prototype.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_prototype.mjs）"
+    },
+    {
+      "name": "[文档] verify_doc_refs.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_doc_refs.py）"
+    },
+    {
+      "name": "[文档] verify_doc_sql.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_doc_sql.py）"
+    },
+    {
+      "name": "[API] verify_auth.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_auth.py）"
+    },
+    {
+      "name": "[静态] verify_ep3.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep3.py）"
+    },
+    {
+      "name": "[静态] verify_ep4.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep4.py）"
+    },
+    {
+      "name": "[静态] verify_ep5.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep5.py）"
+    },
+    {
+      "name": "[静态] verify_ep6.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep6.py）"
+    },
+    {
+      "name": "[静态] verify_ep7.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep7.py）"
+    },
+    {
+      "name": "[静态] verify_ep8.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep8.py）"
+    },
+    {
+      "name": "[API] verify_ep4_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep4_api.py）"
+    },
+    {
+      "name": "[API] verify_ep5_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep5_api.py）"
+    },
+    {
+      "name": "[API] verify_ep5_equiv.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep5_equiv.py）"
+    },
+    {
+      "name": "[API] verify_ep6_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep6_api.py）"
+    },
+    {
+      "name": "[API] verify_ep7_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep7_api.py）"
+    },
+    {
+      "name": "[API] verify_ep8_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep8_api.py）"
+    },
+    {
+      "name": "[浏览器] verify_ep3_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep3_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] verify_ep4_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep4_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] verify_ep5_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep5_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] verify_ep6_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep6_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] verify_ep7_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep7_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] verify_ep8_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep8_browser.mjs）"
+    },
+    {
+      "name": "[浏览器] a11y_audit.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\a11y_audit.py）"
+    },
+    {
+      "name": "[API] verify_ep9_api.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep9_api.py）"
+    },
+    {
+      "name": "[性能] verify_ep9_perf.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep9_perf.py）"
+    },
+    {
+      "name": "[浏览器] verify_ep9_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep9_browser.mjs）"
+    },
+    {
+      "name": "[契约] verify_ep9_contract.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep9_contract.py）"
+    },
+    {
+      "name": "[静态] verify_ep9.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_ep9.py）"
+    },
+    {
+      "name": "[浏览器] verify_docs_browser.mjs 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_docs_browser.mjs）"
+    },
+    {
+      "name": "[API] verify_demo_data.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_demo_data.py）"
+    },
+    {
+      "name": "[静态] verify_doc_exports.py 存在",
+      "ok": true,
+      "detail": "（缺失：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\scripts\\verify_doc_exports.py）"
+    },
+    {
+      "name": "scripts/ 下 37 个校验脚本全部已登记（无漏网）",
+      "ok": true,
+      "detail": "（未登记：[]）"
+    },
+    {
+      "name": "清单中的脚本都在磁盘上（无幽灵条目）",
+      "ok": true,
+      "detail": "（清单有但不存在：[]）"
+    },
+    {
+      "name": "verify_ep9_api.py 含 §9.4 全部 B-01~B-25 编号（无漏测）",
+      "ok": true,
+      "detail": "（缺：[]）"
+    },
+    {
+      "name": "技术文档 §9.4 表格含全部 B-01~B-25（脚本与文档同步）",
+      "ok": true,
+      "detail": "（缺：[]）"
+    },
+    {
+      "name": "verify_ep9_perf.py 覆盖 §9.7 全部 7 项",
+      "ok": true,
+      "detail": "（缺：[]）"
+    },
+    {
+      "name": "技术文档 §9.7 表格仍为 7 行（性能基线未被改动）",
+      "ok": true,
+      "detail": "（实际匹配 7 行：['端到端耗时', '极限规模', '并发', '首屏', '预览接口', '历史列表', 'GPU 回退']）"
+    },
+    {
+      "name": "交付物存在：ep9_perf_report.json（性能与集成实测数据（WS-9-01/9-04/9-05））",
+      "ok": true,
+      "detail": "（缺：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\outputs\\ep9_perf_report.json）"
+    },
+    {
+      "name": "交付物存在：ep9_contract_report.json（契约一致性报告（WS-9-08））",
+      "ok": true,
+      "detail": "（缺：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\outputs\\ep9_contract_report.json）"
+    },
+    {
+      "name": "交付物存在：ep9_a11y_log.txt（无障碍审计落盘日志（WS-9-07 退出码 0 的证据））",
+      "ok": true,
+      "detail": "（缺：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\outputs\\ep9_a11y_log.txt）"
+    },
+    {
+      "name": "交付物存在：ep9-shots（兼容性走查截图目录（WS-9-06））",
+      "ok": true,
+      "detail": "（缺：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\outputs\\ep9-shots）"
+    },
+    {
+      "name": "交付物存在：电商销量预测系统_测试报告_V1.0.md（EP-9 核心交付物：测试报告）",
+      "ok": true,
+      "detail": "（缺：C:\\Users\\Administrator\\WorkBuddy\\销量预测\\docs\\电商销量预测系统_测试报告_V1.0.md）"
+    },
+    {
+      "name": "测试报告含必备章节「通过用例」（DOD-EP9 第 7 条）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "测试报告含必备章节「失败用例」（DOD-EP9 第 7 条）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "测试报告含必备章节「修复记录」（DOD-EP9 第 7 条）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "测试报告含必备章节「遗留问题」（DOD-EP9 第 7 条）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "前端可构建（web/dist/index.html 存在，WS-9-06 走查前置）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "前端提供 typecheck 脚本（§11.1 提交前自检）",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

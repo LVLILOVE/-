@@ -1,0 +1,88 @@
+{
+  "browser": "Chrome",
+  "api": "http://127.0.0.1:8021",
+  "passed": 16,
+  "total": 16,
+  "results": [
+    {
+      "name": "①-1 /docs HTTP 200",
+      "ok": true,
+      "detail": "实际 200"
+    },
+    {
+      "name": "①-2 HTML 内零外部 http(s) 资源引用（静态口径）",
+      "ok": true,
+      "detail": "（HTML 里出现了 CDN 外链）"
+    },
+    {
+      "name": "①-3 🔒 Swagger UI **真的渲染了**（.opblock > 0）",
+      "ok": true,
+      "detail": "实际 opblocks=32（资源没加载时恒为 0）"
+    },
+    {
+      "name": "①-4 DOM 内零外部资源引用（运行时口径）",
+      "ok": true,
+      "detail": "外链：[]"
+    },
+    {
+      "name": "①-5 引用的均为本地 /static/ 资源",
+      "ok": true,
+      "detail": "本地引用：[\"/static/vendor/swagger-ui/swagger-ui.css\",\"/static/vendor/swagger-ui/favicon-32x32.png\",\"/static/vendor/swagger-ui/swagger-ui-bundle.js\"]"
+    },
+    {
+      "name": "①-6 零网络加载失败（Network.loadingFailed 空）",
+      "ok": true,
+      "detail": "失败：[]"
+    },
+    {
+      "name": "①-7 零 4xx/5xx 响应",
+      "ok": true,
+      "detail": "异常响应：[]"
+    },
+    {
+      "name": "①-8 零控制台 error",
+      "ok": true,
+      "detail": "报错：[]"
+    },
+    {
+      "name": "①-9 接口分组标题可见（正文含系统名或分组）",
+      "ok": true,
+      "detail": "正文头：电商销量预测系统 API 1.0.0 OAS 3.1 /openapi.json system GET /health Health auth POST /ap"
+    },
+    {
+      "name": "②-1 /redoc HTTP 200",
+      "ok": true,
+      "detail": "实际 200"
+    },
+    {
+      "name": "②-2 ReDoc 真的渲染出接口内容（正文含 /api/v1/ 路径）",
+      "ok": true,
+      "detail": "正文头：system auth users datasets predictions 历史记录 管理端 API docs by Redocly 电商销量预测系统 API"
+    },
+    {
+      "name": "②-3 DOM 内零外部资源引用（with_google_fonts=False 生效）",
+      "ok": true,
+      "detail": "外链：[]"
+    },
+    {
+      "name": "②-4 零网络加载失败",
+      "ok": true,
+      "detail": "失败：[]"
+    },
+    {
+      "name": "②-5 零控制台 error",
+      "ok": true,
+      "detail": "报错：[]"
+    },
+    {
+      "name": "③-1 不存在的静态资源返回 404（而不是 200 + HTML）",
+      "ok": true,
+      "detail": "实际 404"
+    },
+    {
+      "name": "③-2 404 响应不是 HTML（避免调用方拿到外壳当资源）",
+      "ok": true,
+      "detail": "content-type=application/json"
+    }
+  ]
+}

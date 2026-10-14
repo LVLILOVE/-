@@ -1,0 +1,266 @@
+{
+  "checked_at": "2026-10-13 09:40:44",
+  "demo_dir": "demo",
+  "stage_ms": {
+    "上传数据集": 87.8,
+    "创建任务(h=7)": 838.7,
+    "结果接口(API-14)": 44.1,
+    "明细接口(API-15)": 18.7,
+    "导出 CSV(API-16)": 12.6
+  },
+  "stage_total_ms": 1001.9,
+  "passed": 50,
+  "failed": 0,
+  "results": [
+    {
+      "name": "0-1 /health 可用（同一 lifespan 内）",
+      "ok": true,
+      "detail": "200 ok"
+    },
+    {
+      "name": "1-1 demo/演示数据_正常.csv 存在且非空",
+      "ok": true,
+      "detail": "实际 79526 字节"
+    },
+    {
+      "name": "1-2 demo/演示数据_失败_缺仓库列.csv 存在且非空",
+      "ok": true,
+      "detail": "实际 57223 字节"
+    },
+    {
+      "name": "1-3 demo/演示数据_失败_负销量.csv 存在且非空",
+      "ok": true,
+      "detail": "实际 79541 字节"
+    },
+    {
+      "name": "1-4 demo/README.md 存在且非空",
+      "ok": true,
+      "detail": "实际 3111 字节"
+    },
+    {
+      "name": "1-5 正常数据表头恰为 sku_id/warehouse_id/date/sales",
+      "ok": true,
+      "detail": "['sku_id', 'warehouse_id', 'date', 'sales']"
+    },
+    {
+      "name": "1-6 🔒 正常数据是「干净数据」：无缺失值、无负销量、日期连续无断档",
+      "ok": true,
+      "detail": "2229 行 / 9 序列 / 273 个连续日期"
+    },
+    {
+      "name": "1-7 README 声明的行数与文件实际一致（防「文档写一套、数据另一套」）",
+      "ok": true,
+      "detail": "README=2,229 / 实际=2229"
+    },
+    {
+      "name": "1-8 README 声明的序列数与文件实际一致",
+      "ok": true,
+      "detail": "README=9 / 实际=9"
+    },
+    {
+      "name": "1-9 README 声明的日期跨度与文件实际一致",
+      "ok": true,
+      "detail": "README=2026-01-01~2026-09-30 / 实际=2026-01-01~2026-09-30"
+    },
+    {
+      "name": "1-10 README 声明的商品数/仓库数与文件实际一致",
+      "ok": true,
+      "detail": "README=6/3 / 实际=6/3"
+    },
+    {
+      "name": "1.5-1 演示账号注册成功",
+      "ok": true,
+      "detail": "200 code=0 注册成功"
+    },
+    {
+      "name": "1.5-2 演示账号登录成功并取得 Token",
+      "ok": true,
+      "detail": "200 code=0 ok"
+    },
+    {
+      "name": "1.5-3 契约提醒：游客导出返回 401（故演示必须登录）",
+      "ok": true,
+      "detail": "游客导出 → 该断言是「演示必须登录」的依据"
+    },
+    {
+      "name": "2-1 上传成功（code=0，无任何校验错误）",
+      "ok": true,
+      "detail": "200 数据校验通过"
+    },
+    {
+      "name": "2-2 序列数与文件实际一致",
+      "ok": true,
+      "detail": "接口=9 / 文件=9"
+    },
+    {
+      "name": "2-3 行数与文件实际一致",
+      "ok": true,
+      "detail": "接口=2229 / 文件=2229"
+    },
+    {
+      "name": "2-4 预览表列为 4 列（🔒 动态列，不写死）",
+      "ok": true,
+      "detail": "['sku_id', 'warehouse_id', 'date', 'sales']"
+    },
+    {
+      "name": "2-5 无日期断档（gap_warning.has_gap=False）",
+      "ok": true,
+      "detail": "{'has_gap': False, 'gap_count': 0, 'ranges': [], 'interpolated': False}"
+    },
+    {
+      "name": "2-6 商品数 6 / 仓库数 3（与冻结数据一致）",
+      "ok": true,
+      "detail": "sku=6 wh=3"
+    },
+    {
+      "name": "3-1 任务同步返回终态 succeeded（≤60 s 硬预算）",
+      "ok": true,
+      "detail": "200 code=0 status=succeeded 预测完成，结果已生成"
+    },
+    {
+      "name": "3-2 🔒 端到端耗时 ≤ 60 s（占预算 < 60%）",
+      "ok": true,
+      "detail": "duration_ms=825 / 预算=60000"
+    },
+    {
+      "name": "3-3 覆盖率三项之和 = total",
+      "ok": true,
+      "detail": "{'L1': 8, 'L2': 1, 'L3': 0, 'total': 9, 'L1_pct': 88.88888888888889, 'L2_pct': 11.11111111111111, 'L3_pct': 0.0, 'predictable': 9, 'predictable_pct': 100.0}"
+    },
+    {
+      "name": "3-4 🔒 覆盖率中**同时出现 L1 与 L2**（演示脚本要向评委解释的关键点）",
+      "ok": true,
+      "detail": "L1=8 L2=1 L3=0"
+    },
+    {
+      "name": "3-5 L2 恰好 1 条（item_1008/广州仓，45 天 < 90 阈值）",
+      "ok": true,
+      "detail": "L2=1"
+    },
+    {
+      "name": "3-6 本演示数据不含 L3（全部可预测）",
+      "ok": true,
+      "detail": "L3=0"
+    },
+    {
+      "name": "3-7 加权 MAPE 为有限值且 ≤ 20%",
+      "ok": true,
+      "detail": "mape=13.0555"
+    },
+    {
+      "name": "3-8 分段耗时齐备（执行页时间轴数据源）",
+      "ok": true,
+      "detail": "stages={'validate': 4, 'preprocess': 59, 'features': 64, 'inference': 122, 'metrics': 14}"
+    },
+    {
+      "name": "4-1 API-14 结果接口可用",
+      "ok": true,
+      "detail": "200 ok"
+    },
+    {
+      "name": "4-2 含四项硬指标（MAPE / MAE / RMSE / 达标序列占比）",
+      "ok": true,
+      "detail": "顶层键=['coverage', 'dataset', 'detail_total', 'distribution', 'eval_note', 'is_over_threshold', 'metrics', 'series', 'task', 'timing_ms', 'truncated']"
+    },
+    {
+      "name": "4-3 指标结构含 mape / mae / rmse / 基线对比字段",
+      "ok": true,
+      "detail": "metrics 键=['baseline_mae', 'baseline_mape', 'baseline_rmse', 'l1_mape', 'l2_mape', 'mae_improve_pct', 'rmse_improve_pct', 'series_evaluated', 'series_pass_rate', 'series_passed', 'weighted_mae', 'weighted_mape']"
+    },
+    {
+      "name": "4-4 逐序列曲线齐备（折线图三线数据源）",
+      "ok": true,
+      "detail": "序列数=9"
+    },
+    {
+      "name": "4-5 API-15 明细分页可用",
+      "ok": true,
+      "detail": "200 ok"
+    },
+    {
+      "name": "4-6 明细分页结构含 items / total / page / size",
+      "ok": true,
+      "detail": "total=63 items=20"
+    },
+    {
+      "name": "4-7 API-16 CSV 导出可用（HTTP 200）",
+      "ok": true,
+      "detail": "实际 200"
+    },
+    {
+      "name": "4-8 🔒 CSV 带 UTF-8 BOM（Excel 中文不乱码）",
+      "ok": true,
+      "detail": "首 3 字节=b'\\xef\\xbb\\xbf'"
+    },
+    {
+      "name": "4-9 CSV 为 7 列（与契约一致）",
+      "ok": true,
+      "detail": "表头=['sku_id', 'warehouse_id', 'date', 'forecast_sales', 'granularity_level', 'actual_sales', 'error']"
+    },
+    {
+      "name": "4-10 CSV 含数据行（非空导出）",
+      "ok": true,
+      "detail": "数据行=63"
+    },
+    {
+      "name": "5-1 🔒 被拒且返回 40001（仓库列缺失即拒，FR-UPL-05）",
+      "ok": true,
+      "detail": "code=40001 msg=缺少必需字段：warehouse_id"
+    },
+    {
+      "name": "5-2 定位载荷点明缺哪一列",
+      "ok": true,
+      "detail": "['warehouse_id']"
+    },
+    {
+      "name": "5-3 fail_stage 为「表头完整性」（错在哪）",
+      "ok": true,
+      "detail": "表头完整性"
+    },
+    {
+      "name": "5-4 建议非空且点明英文列名（怎么改，NFR-USE-03）",
+      "ok": true,
+      "detail": "本系统只接受英文列名 sku_id / warehouse_id / date / sales（区分大小写），不支持中文列名。请下载标准模板后按模板填写。当前表头：sku_id、date、sales"
+    },
+    {
+      "name": "5-5 🔒 失败也建了记录（dataset_id 非空，供前端引导）",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "6-1 🔒 被拒且返回 40003（销量非负）",
+      "ok": true,
+      "detail": "code=40003 msg=销量列存在 20 个负值"
+    },
+    {
+      "name": "6-2 定位载荷含负值行清单（精确到行）",
+      "ok": true,
+      "detail": "负值行数=20"
+    },
+    {
+      "name": "6-3 fail_stage 为「销量非负」",
+      "ok": true,
+      "detail": "销量非负"
+    },
+    {
+      "name": "6-4 失败也建了记录（dataset_id 非空）",
+      "ok": true,
+      "detail": "3"
+    },
+    {
+      "name": "6-5 🔒 错误明细 CSV 可下载（异常处理完整，不是只弹个提示）",
+      "ok": true,
+      "detail": "HTTP 200 / 1192 字节"
+    },
+    {
+      "name": "7-1 🔒 主链路总耗时 < 300 s（5 分钟演示硬线）",
+      "ok": true,
+      "detail": "实际 1.0 s"
+    },
+    {
+      "name": "7-2 自动化链路耗时 < 60 s（留足人讲解时间）",
+      "ok": true,
+      "detail": "实际 1.0 s（自动化部分，人工讲解另计）"
+    }
+  ]
+}

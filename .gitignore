@@ -1,0 +1,35 @@
+# ===== 环境变量（含密钥，禁止提交） =====
+.env
+
+# ===== 运行期数据（工作区内，不入库） =====
+data/
+
+# ===== 前端依赖与构建产物 =====
+web/node_modules/
+web/dist/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ===== 编辑器 / 系统 =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ===== 临时文件 =====
+*.log
+*.tmp
+
+# ===== 工作区内部记忆（AI 协作过程的笔记，不属交付物） =====
+.workbuddy/
+
+# ===== 测试证据截图与大体量测试样例（走查留痕，不入库） =====
+# 命中 outputs/ep2-shots/ ... ep10-shots/ 与 outputs/prototype-shots/
+# 注：outputs/ 根目录的正式交付物（PDF / Word / PPT / 接口文档 / 模型）
+#     与 outputs/models/、outputs/电商销量预测系统_答辩演示_V1.0/ 不受影响
+outputs/*-shots/

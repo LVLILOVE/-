@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参数配置 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 新建预测 / 确认参数</div>
+      <h1>确认预测参数</h1>
+      <p class="lede">
+        数据已通过校验。请确认预测步长与节假日开关，随后提交任务。
+        系统使用<strong>已完成离线训练的模型</strong>进行推理，<strong>不包含在线重训练</strong>，
+        端到端耗时不超过 60 秒。
+      </p>
+    </div>
+
+    <!-- 步骤条 -->
+    <div class="row mb-3 wrap" style="gap:.5rem;font-size:.75rem">
+      <span class="badge badge-success">✓ 1 · 上传数据</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-primary">2 · 确认参数</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">3 · 执行预测</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">4 · 查看结果</span>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="normal">正常</button>
+      <button class="state-pill" data-state="warn">存在不可预测序列</button>
+      <button class="state-pill" data-state="slow">预计耗时逼近上限</button>
+      <button class="state-pill" data-state="loading">提交中</button>
+      <button class="state-pill" data-state="error">提交失败</button>
+    </div>
+
+    <div class="with-aside">
+      <div class="stack">
+
+        <!-- ================= 1. 数据概要 ================= -->
+        <section class="card">
+          <div class="card-head">
+            <h3>1. 本次数据概要</h3>
+            <div class="right"><span class="badge badge-success">校验通过</span></div>
+          </div>
+          <div class="param-strip">
+            <div class="ps"><span class="ps-k">文件</span><span class="ps-v" title="item_store_feature_1010_1227.csv">item_store_feature_1010_1227.csv</span></div>
+            <div class="ps"><span class="ps-k">数据行数</span><span class="ps-v">14,305</span></div>
+            <div class="ps"><span class="ps-k">商品数</span><span class="ps-v">40</span></div>
+            <div class="ps"><span class="ps-k">仓库数</span><span class="ps-v">5</span></div>
+            <div class="ps"><span class="ps-k">序列数</span><span class="ps-v">113</span></div>
+            <div class="ps"><span class="ps-k">时间范围</span><span class="ps-v">2015-08-30 ~ 2015-12-27</span></div>
+          </div>
+          <div class="alert alert-info mt-2" style="margin-bottom:0">
+            <div class="alert-body">
+              <div class="alert-title">序列分级预判</div>
+              按「有效历史长度 ≥ 90 点」规则预判：<strong>L1 模型推理 81 条</strong>、
+              <strong>L2 商品级降级 32 条</strong>、<strong>L3 不可预测 0 条</strong>。
+              L2/L3 为数据集长尾特征的正常结果，不是异常。
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 2. 预测设置 ================= -->
+        <section class="card">
+          <div class="card-head"><h3>2. 预测设置</h3></div>
+
+          <!-- 粒度（只读，已确认决策） -->
+          <div class="field">
+            <label>预测粒度</label>
+            <div class="readonly-field">
+              <span>仓库 × 商品（warehouse_id × sku_id）</span>
+              <span class="badge badge-neutral">已固定</span>
+            </div>
+            <div class="field-help">
+              按 <code>FR-MOD-01</code> 规定，粒度固定为「仓库 × 商品」，用户不可修改。
+              数据集中的全国汇总行（<code>warehouse_id = all</code>）不参与预测。
+            </div>
+          </div>
+
+          <!-- 步长 -->
+          <div class="field mt-3">
+            <label>预测步长 <span class="t-muted t-xs">（必选，默认 7 天）</span></label>
+            <div class="choice-grid">
+              <label class="choice">
+                <input type="radio" name="horizon" value="7" checked>
+                <span class="ch-t">7 天</span>
+                <span class="ch-d">短期补货，精度最高</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="horizon" value="14">
+                <span class="ch-t">14 天</span>
+                <span class="ch-d">双周备货，推荐</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="horizon" value="30">
+                <span class="ch-t">30 天</span>
+                <span class="ch-d">月度规划，误差偏大</span>
+              </label>
+            </div>
+            <div class="field-help">
+              对应 <code>FR-MOD-02</code>。步长越长误差累积越明显，30 天场景下系统会在结果页
+              自动追加误差放大提示。
+            </div>
+          </div>
+
+          <!-- 节假日 -->
+          <div class="field mt-3">
+            <label>节假日特征</label>
+            <div class="row-between" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:.625rem .875rem">
+              <div>
+                <div class="t-md t-bold">启用节假日特征</div>
+                <div class="t-xs t-muted mt-1">
+                  使用内置节假日表（含双十一、双十二、圣诞、元旦、年货节），
+                  对未来窗口内的节假日日做销量抬升修正。对应 <code>FR-FEA-10</code>。
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sw-holiday" checked>
+                <span class="switch-track"></span>
+                <span class="switch-text">开启</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 时间窗口（高级，默认折叠） -->
+          <details class="mt-3">
+            <summary class="t-md" style="cursor:pointer;color:var(--text-2);font-weight:600">
+              高级设置（滑动窗口长度 / 模型版本）
+            </summary>
+            <div class="grid-2 mt-2">
+              <div class="field">
+                <label>滑动窗口长度</label>
+                <select class="select" id="sel-window">
+                  <option value="7">7 天</option>
+                  <option value="14" selected>14 天（默认）</option>
+                  <option value="21">21 天</option>
+                  <option value="28">28 天</option>
+                </select>
+                <div class="field-help">对应 <code>FR-FEA-02</code>。修改会改变模型输入张量形状，仅在与训练配置一致时有效。</div>
+              </div>
+              <div class="field">
+                <label>模型版本</label>
+                <select class="select" id="sel-model">
+                  <option value="lstm_v1" selected>lstm_v1（当前生产版本）</option>
+                  <option value="lstm_v0">lstm_v0（历史版本，仅供回溯）</option>
+                </select>
+                <div class="field-help">对应 <code>FR-MOD-08</code>。权重由离线脚本注册，系统不做在线更新。</div>
+              </div>
+            </div>
+            <div class="alert alert-warning mt-2" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">关于在线训练</div>
+                本系统<strong>不提供在线重训练</strong>（📌 已确认决策）。
+                若需替换模型，请在离线侧运行 <code>scripts/train_and_register.py</code> 后重启服务。
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <!-- ================= 3. 耗时预估 ================= -->
+        <section class="card" id="card-est">
+          <div class="card-head"><h3>3. 耗时预估与资源</h3></div>
+          <div class="metric-grid">
+            <div class="metric metric-brand">
+              <div class="metric-label">预估端到端耗时</div>
+              <div class="metric-value" id="est-total">34.3<span class="unit">s</span></div>
+              <div class="metric-foot" id="est-foot">上限 60 s · 余量 42.8%</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">预估推理设备</div>
+              <div class="metric-value" style="font-size:1.125rem">GPU<span class="unit">CUDA</span></div>
+              <div class="metric-foot">显存占用峰值约 111 MB</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">L1 序列批量规模</div>
+              <div class="metric-value">81<span class="unit">条</span></div>
+              <div class="metric-foot">单批推理，不逐条循环</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">失败回退</div>
+              <div class="metric-value" style="font-size:1.125rem">CPU</div>
+              <div class="metric-foot">显存不足时自动回退</div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="row-between mb-1">
+              <span class="t-xs t-bold t-2">时间预算分配（总计 60 s 硬上限）</span>
+              <span class="t-xs t-muted">参考附录 D 实测数据</span>
+            </div>
+            <div class="budget-grid">
+              <div class="budget-row">
+                <span class="bg-name">数据预处理</span>
+                <span class="bg-track"><i class="bg-fill" style="width:5.3%"></i></span>
+                <span class="bg-num">≈ 3.2 s</span>
+              </div>
+              <div class="budget-row">
+                <span class="bg-name">特征构建</span>
+                <span class="bg-track"><i class="bg-fill" style="width:8.5%"></i></span>
+                <span class="bg-num">≈ 5.1 s</span>
+              </div>
+              <div class="budget-row">
+                <span class="bg-name">模型推理</span>
+                <span class="bg-track"><i class="bg-fill" style="width:36.7%"></i></span>
+                <span class="bg-num">≈ 22.0 s</span>
+              </div>
+              <div class="budget-row">
+                <span class="bg-name">指标计算</span>
+                <span class="bg-track"><i class="bg-fill" style="width:6.5%"></i></span>
+                <span class="bg-num">≈ 3.9 s</span>
+              </div>
+              <div class="budget-row">
+                <span class="bg-name">预留余量</span>
+                <span class="bg-track"><i class="bg-fill" style="width:42.8%;background:var(--text-3)"></i></span>
+                <span class="bg-num">≈ 25.7 s</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 4. 提交 ================= -->
+        <section class="card">
+          <div class="card-head"><h3>4. 提交任务</h3></div>
+
+          <div class="field">
+            <label>任务名称 <span class="t-muted t-xs">（可选，留空使用默认命名）</span></label>
+            <input class="input" id="task-name" type="text" placeholder="例如：双十一前 · 分仓备货预测" maxlength="40">
+            <div class="field-error hidden" id="err-name">任务名称不能超过 40 个字符。</div>
+          </div>
+
+          <div class="mt-3" id="btn-row">
+            <div class="btn-row">
+              <button class="btn btn-primary btn-lg" id="btn-submit" onclick="submitTask()">
+                提交预测任务
+              </button>
+              <a class="btn btn-secondary btn-lg" href="upload.html">返回修改数据</a>
+            </div>
+            <div class="t-xs t-muted mt-2">
+              提交后将立即执行推理，最长等待 60 秒。期间可停留在执行页查看进度，也可离开，
+              任务完成后可在「历史任务」中查看结果。
+            </div>
+          </div>
+
+          <div class="hidden" id="submitting">
+            <div class="alert alert-info" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">正在提交任务…</div>
+                正在登记任务并初始化推理环境，请勿关闭页面。
+                <div class="progress mt-2"><i id="sub-bar" style="width:0%"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hidden" id="submit-error">
+            <div class="alert alert-danger" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">任务提交失败 · E_INFER_FAIL（50002）</div>
+                推理环境初始化超时，未能在 5 秒内加载模型权重。
+                已登记的排队任务已回滚，不会计入历史。
+                <div class="row mt-2" style="gap:.5rem">
+                  <button class="btn btn-secondary btn-sm" onclick="setState('normal')">重试</button>
+                  <a class="btn btn-ghost btn-sm" href="README.html#troubleshoot">查看排查指引</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 原型说明：需求映射 ============ -->
+        <div class="spec-note">
+          <div class="sn-head">
+            <span class="sn-tag">原型说明</span>
+            <span>本页与 PRD 的对应关系</span>
+          </div>
+          <table class="sn-table">
+            <tr>
+              <td>预测粒度只读展示、全国汇总行不参与预测</td>
+              <td><code>FR-MOD-01</code> · <code>FR-MOD-03</code></td>
+            </tr>
+            <tr>
+              <td>步长 7 / 14 / 30 三档单选，默认 7 天</td>
+              <td><code>FR-MOD-02</code></td>
+            </tr>
+            <tr>
+              <td>节假日特征开关（内置节假日表）</td>
+              <td><code>FR-FEA-10</code> · <code>FR-MOD-04</code></td>
+            </tr>
+            <tr>
+              <td>滑动窗口长度、模型版本（高级设置）</td>
+              <td><code>FR-FEA-02</code> · <code>FR-MOD-08</code></td>
+            </tr>
+            <tr>
+              <td>序列分级预判结果展示（L1 / L2 / L3）</td>
+              <td><code>FR-MOD-05</code> · <code>FR-MOD-11</code></td>
+            </tr>
+            <tr>
+              <td>耗时预估与 60 秒硬上限、CPU 回退说明</td>
+              <td><code>FR-MOD-12</code> · <code>NFR-PERF-01</code> · <code>NFR-PERF-06</code></td>
+            </tr>
+            <tr>
+              <td>明确的「无在线重训练」声明</td>
+              <td>📌 已确认决策（开发方案附录 C）</td>
+            </tr>
+            <tr>
+              <td>提交失败的结构化错误码 <code>E_INFER_FAIL</code></td>
+              <td><code>FR-SYS-07</code> · 开发方案 §2.3 错误码表</td>
+            </tr>
+          </table>
+          <div class="sn-foot">
+            埋点：<code>EV-PARAM-01</code>（参数页进入）· <code>EV-PARAM-02</code>（提交任务）·
+            <code>EV-PARAM-03</code>（修改高级设置）
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ 右栏 ============ -->
+      <aside class="aside">
+        <div class="card card-tight">
+          <h4>当前选择</h4>
+          <div class="meta-list mt-2">
+            <div class="meta-row"><span class="mk">预测粒度</span><span class="mv">仓库 × 商品</span></div>
+            <div class="meta-row"><span class="mk">预测步长</span><span class="mv" id="sum-horizon">7 天</span></div>
+            <div class="meta-row"><span class="mk">节假日特征</span><span class="mv" id="sum-holiday">开启</span></div>
+            <div class="meta-row"><span class="mk">滑动窗口</span><span class="mv" id="sum-window">21 天</span></div>
+            <div class="meta-row"><span class="mk">模型版本</span><span class="mv" id="sum-model">lstm_v1</span></div>
+            <div class="meta-row"><span class="mk">序列数</span><span class="mv">113 条</span></div>
+            <div class="meta-row"><span class="mk">输出预测点</span><span class="mv" id="sum-points">791 个</span></div>
+          </div>
+        </div>
+
+        <div class="card card-tight">
+          <h4>预测窗口</h4>
+          <p class="t-xs t-muted mt-1">
+            基于数据末尾日期 <code>2015-12-27</code> 向后推算：
+          </p>
+          <div class="mt-2">
+            <div class="meta-row"><span class="mk">窗口起</span><span class="mv" id="win-start">2015-12-28</span></div>
+            <div class="meta-row"><span class="mk">窗口止</span><span class="mv" id="win-end">2016-01-03</span></div>
+            <div class="meta-row"><span class="mk">窗口内节假日</span><span class="mv" id="win-holiday">元旦</span></div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning">
+          <div class="alert-body">
+            <div class="alert-title">数据集稀疏性提示</div>
+            菜鸟数据集中大量商品仅覆盖 1–2 个仓，序列稀疏是<strong>常态</strong>。
+            L2/L3 序列走规则兜底而非模型推理，请在结果页查看覆盖率披露后再做决策。
+          </div>
+        </div>
+
+        <div class="card card-tight">
+          <h4>快捷跳转</h4>
+          <div class="btn-row mt-2">
+            <a class="btn btn-secondary btn-sm" href="running.html">查看执行进度</a>
+            <a class="btn btn-ghost btn-sm" href="result.html">直接看结果示例</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+initShell('params.html');
+
+/* ---------- 状态机 ---------- */
+function setState(s) {
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.classList.toggle('active', p.dataset.state === s);
+  });
+  document.getElementById('btn-row').classList.remove('hidden');
+  document.getElementById('submitting').classList.add('hidden');
+  document.getElementById('submit-error').classList.add('hidden');
+  document.getElementById('card-est').classList.remove('hidden');
+
+  if (s === 'loading') {
+    document.getElementById('btn-row').classList.add('hidden');
+    document.getElementById('submitting').classList.remove('hidden');
+    var bar = document.getElementById('sub-bar');
+    var t0 = performance.now();
+    (function tick(now) {
+      var t = Math.min(1, (now - t0) / 1400);
+      bar.style.width = Math.round(t * 100) + '%';
+      if (t < 1) requestAnimationFrame(tick);
+      else location.href = 'running.html';
+    })(performance.now());
+  }
+  if (s === 'error') {
+    document.getElementById('btn-row').classList.add('hidden');
+    document.getElementById('submit-error').classList.remove('hidden');
+  }
+  if (s === 'warn') {
+    document.getElementById('card-est').classList.add('hidden');
+  }
+  if (s === 'slow') {
+    var el = document.getElementById('est-total');
+    el.innerHTML = '56.4<span class="unit">s</span>';
+    var foot = document.getElementById('est-foot');
+    foot.textContent = '上限 60 s · 余量仅 6.0%，存在超时风险';
+    foot.className = 'metric-foot down';
+  }
+  if (s === 'normal') {
+    var e2 = document.getElementById('est-total');
+    e2.innerHTML = '34.3<span class="unit">s</span>';
+    var f2 = document.getElementById('est-foot');
+    f2.textContent = '上限 60 s · 余量 42.8%';
+    f2.className = 'metric-foot';
+  }
+}
+
+function submitTask() {
+  var name = document.getElementById('task-name').value.trim();
+  if (name.length > 40) {
+    document.getElementById('err-name').classList.remove('hidden');
+    return;
+  }
+  setState('loading');
+}
+
+/* ---------- 联动 ---------- */
+var HOLIDAY_IN_WINDOW = {
+  7:  { start: '2015-12-28', end: '2016-01-03', note: '元旦' },
+  14: { start: '2015-12-28', end: '2016-01-10', note: '元旦、年货节预热' },
+  30: { start: '2015-12-28', end: '2016-01-26', note: '元旦、年货节、春节前备货' },
+};
+
+function syncSummary() {
+  var h = document.querySelector('input[name="horizon"]:checked').value;
+  var holiday = document.getElementById('sw-holiday').checked;
+  var win = document.getElementById('sel-window').value;
+  var model = document.getElementById('sel-model').value;
+
+  document.getElementById('sum-horizon').textContent = h + ' 天';
+  document.getElementById('sum-holiday').textContent = holiday ? '开启' : '关闭';
+  document.getElementById('sum-window').textContent = win + ' 天';
+  document.getElementById('sum-model').textContent = model;
+  document.getElementById('sum-points').textContent = (113 * Number(h)).toLocaleString('zh-CN') + ' 个';
+
+  var w = HOLIDAY_IN_WINDOW[h];
+  document.getElementById('win-start').textContent = w.start;
+  document.getElementById('win-end').textContent = w.end;
+  document.getElementById('win-holiday').textContent = holiday ? w.note : '未启用';
+
+  // 耗时随步长线性增长
+  var est = 34.3 * (Number(h) / 7);
+  var el = document.getElementById('est-total');
+  var foot = document.getElementById('est-foot');
+  if (!el.classList.contains('hidden')) {
+    el.innerHTML = est.toFixed(1) + '<span class="unit">s</span>';
+    var margin = ((60 - est) / 60) * 100;
+    foot.textContent = '上限 60 s · 余量 ' + margin.toFixed(1) + '%';
+    foot.className = 'metric-foot' + (margin < 12 ? ' down' : '');
+  }
+}
+
+document.querySelectorAll('input[name="horizon"]').forEach(function (r) {
+  r.addEventListener('change', syncSummary);
+});
+document.getElementById('sw-holiday').addEventListener('change', function () {
+  this.parentElement.querySelector('.switch-text').textContent = this.checked ? '开启' : '关闭';
+  syncSummary();
+});
+document.getElementById('sel-window').addEventListener('change', syncSummary);
+document.getElementById('sel-model').addEventListener('change', syncSummary);
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () { setState(p.dataset.state); });
+});
+
+syncSummary();
+</script>
+</body>
+</html>

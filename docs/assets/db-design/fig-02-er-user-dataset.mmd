@@ -1,0 +1,35 @@
+%% FIG-02 用户与数据集域 ER 图（关键字段展开）
+erDiagram
+    users ||--o{ datasets : "1:N 拥有 CASCADE"
+    users ||--o{ tasks : "1:N 拥有 CASCADE"
+    datasets ||--o{ tasks : "1:N 作为输入 RESTRICT"
+
+    users {
+        INTEGER id PK "主键，自增；0 为游客哨兵"
+        TEXT email UK "登录名，NOCASE 唯一"
+        TEXT password_hash "bcrypt 哈希，禁止明文"
+        INTEGER token_version "JWT 版本号，改密自增"
+        INTEGER status "1 正常 0 停用"
+        INTEGER fail_count "连续密码错误次数"
+        TEXT locked_until "冷却截止，NULL 未锁定"
+        TEXT last_login_at "上次登录时间"
+        TEXT created_at "创建时间"
+    }
+
+    datasets {
+        INTEGER id PK "主键，自增"
+        INTEGER user_id FK "归属；0 表示游客"
+        TEXT file_name "用户原始文件名，仅展示"
+        TEXT stored_name "落盘文件名 UUID 重命名"
+        TEXT file_path "相对工作区根目录路径"
+        INTEGER row_count "有效数据行数"
+        INTEGER sku_count "去重商品数"
+        INTEGER warehouse_count "去重仓库数"
+        INTEGER valid_series_count "有效序列数"
+        TEXT date_start "数据起始日期"
+        TEXT date_end "数据结束日期"
+        INTEGER gap_filled "是否执行过插值补齐"
+        INTEGER gap_count "补齐断档天数合计"
+        INTEGER is_sample "是否内置示例数据"
+        INTEGER status "1 可用 -1 已失效"
+    }

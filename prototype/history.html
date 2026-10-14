@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>历史任务 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 历史任务</div>
+      <div class="row-between wrap" style="align-items:flex-end;gap:.75rem">
+        <div>
+          <h1 style="margin:0">历史预测任务</h1>
+          <p class="lede" style="margin:.375rem 0 0">
+            共 <span id="total-n">5</span> 个任务，仅展示<strong>你自己</strong>提交的任务。
+            任务结果保留 180 天，到期自动清理。
+          </p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="upload.html">新建预测</a>
+          <button class="btn btn-secondary" onclick="exportAll()">导出列表</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="list">有记录</button>
+      <button class="state-pill" data-state="empty">空状态（首次使用）</button>
+      <button class="state-pill" data-state="confirm">删除二次确认</button>
+      <button class="state-pill" data-state="loading">加载中</button>
+    </div>
+
+    <div class="stack">
+
+      <!-- ============ 汇总条 ============ -->
+      <section class="card" id="card-summary">
+        <div class="metric-grid">
+          <div class="metric metric-brand">
+            <div class="metric-label">任务总数</div>
+            <div class="metric-value" id="s-total">5</div>
+            <div class="metric-foot">近 30 天</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">成功</div>
+            <div class="metric-value" id="s-ok">4</div>
+            <div class="metric-foot">成功率 80.0%</div>
+          </div>
+          <div class="metric metric-fail">
+            <div class="metric-label">失败</div>
+            <div class="metric-value" id="s-fail">1</div>
+            <div class="metric-foot">全部为 E_TIMEOUT</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">平均加权 MAPE</div>
+            <div class="metric-value" id="s-mape">14.5<span class="unit">%</span></div>
+            <div class="metric-foot">仅统计成功任务</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">平均耗时</div>
+            <div class="metric-value" id="s-dur">9.3<span class="unit">s</span></div>
+            <div class="metric-foot">上限 60 s</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 筛选栏 ============ -->
+      <section class="card" id="card-filter">
+        <div class="row wrap" style="gap:.5rem">
+          <input class="input" id="q" type="text" placeholder="搜索任务名称 / 数据文件 / 任务 ID…" style="flex:1 1 240px;font-size:.8125rem">
+          <select class="select" id="f-status" style="font-size:.8125rem;width:auto">
+            <option value="">全部状态</option>
+            <option value="succeeded">已完成</option>
+            <option value="failed">失败</option>
+          </select>
+          <select class="select" id="f-horizon" style="font-size:.8125rem;width:auto">
+            <option value="">全部步长</option>
+            <option value="7">7 天</option>
+            <option value="14">14 天</option>
+            <option value="30">30 天</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="renderList()">查询</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetFilter()">重置</button>
+        </div>
+      </section>
+
+      <!-- ============ 加载骨架 ============ -->
+      <section class="card hidden" id="card-loading">
+        <div class="skeleton sk-line w40" style="height:18px"></div>
+        <div class="skeleton mt-2" style="height:46px"></div>
+        <div class="skeleton mt-1" style="height:46px"></div>
+        <div class="skeleton mt-1" style="height:46px"></div>
+      </section>
+
+      <!-- ============ 空状态 ============ -->
+      <section class="card hidden" id="card-empty">
+        <div class="empty">
+          <div class="empty-icon" data-icon="history"></div>
+          <h4>还没有任何预测任务</h4>
+          <p>
+            上传一份包含 <code>sku_id</code>、<code>warehouse_id</code>、<code>date</code>、<code>sales</code>
+            的历史销量表，一分钟内就能拿到分仓预测结果。
+          </p>
+          <div class="btn-row" style="justify-content:center">
+            <a class="btn btn-primary" href="upload.html">上传数据开始预测</a>
+            <a class="btn btn-secondary" href="README.html#dataset">查看数据格式要求</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 列表 ============ -->
+      <section class="card" id="card-list">
+        <div class="card-head">
+          <h3>任务列表</h3>
+          <div class="right t-xs t-muted" id="list-count">共 5 条</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>任务</th>
+                <th>提交时间</th>
+                <th>步长</th>
+                <th class="num">序列数</th>
+                <th class="num">加权 MAPE</th>
+                <th class="num">基线提升</th>
+                <th>分级 L1/L2/L3</th>
+                <th class="num">耗时</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="list-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 删除确认弹层 ============ -->
+      <section class="card hidden" id="card-confirm">
+        <div class="card-head"><h3>删除任务确认</h3></div>
+        <div class="alert alert-danger" style="margin-bottom:1rem">
+          <div class="alert-body">
+            <div class="alert-title">此操作不可撤销</div>
+            删除后该任务的<strong>预测结果、指标记录与导出记录将一并永久移除</strong>，
+            无法恢复。若只是不想在列表中看到，请使用筛选而非删除。
+          </div>
+        </div>
+        <div class="table-wrap mb-3">
+          <table class="data">
+            <thead><tr><th>将删除的任务</th><th>提交时间</th><th>序列数</th><th>加权 MAPE</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="t-bold">测试 · 断档数据</td>
+                <td class="t-mono">2026-10-05 16:52</td>
+                <td class="num">50</td>
+                <td class="num t-muted">—</td>
+                <td><span class="badge badge-danger">失败 · E_TIMEOUT</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="field mb-3">
+          <label>请输入任务 ID 以确认删除</label>
+          <input class="input" type="text" placeholder="T-20261005-1652" style="max-width:280px">
+          <div class="field-help">需逐字输入 <code>T-20261005-1652</code>，避免误触。</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-danger" onclick="alert('已删除（原型演示，未真正执行）')">确认删除</button>
+          <button class="btn btn-secondary" onclick="setState('list')">取消</button>
+        </div>
+      </section>
+
+      <!-- ============ 原型说明：需求映射 ============ -->
+      <div class="spec-note">
+        <div class="sn-head">
+          <span class="sn-tag">原型说明</span>
+          <span>本页与 PRD 的对应关系</span>
+        </div>
+        <table class="sn-table">
+          <tr><td>任务列表：名称、时间、参数、指标、状态</td><td><code>FR-HIS-01</code></td></tr>
+          <tr><td>按状态 / 步长 / 关键词筛选</td><td><code>FR-HIS-02</code></td></tr>
+          <tr><td>列表导出（列定义与结果页一致）</td><td><code>FR-HIS-03</code></td></tr>
+          <tr><td>点击任务进入详情，查看当时的完整结果</td><td><code>FR-HIS-04</code></td></tr>
+          <tr><td>删除任务需二次确认 + 输入任务 ID</td><td><code>FR-HIS-05</code> · <code>NFR-USE-03</code></td></tr>
+          <tr><td>仅展示当前用户自己的任务（数据隔离）</td><td><code>NFR-SEC-07</code> · <code>FR-USR-09</code></td></tr>
+          <tr><td>结果保留 180 天后自动清理</td><td><code>NFR-SEC-10</code></td></tr>
+          <tr><td>空状态给出明确下一步动作</td><td><code>NFR-USE-05</code></td></tr>
+        </table>
+        <div class="sn-foot">
+          埋点：<code>EV-HIS-01</code>（列表访问）· <code>EV-HIS-02</code>（筛选）·
+          <code>EV-HIS-03</code>（打开详情）· <code>EV-HIS-04</code>（删除）
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+initShell('history.html');
+
+document.querySelectorAll('[data-icon]').forEach(function (el) {
+  var svg = ICONS[el.getAttribute('data-icon')];
+  if (svg) el.innerHTML = svg;
+});
+
+function renderList() {
+  var q = document.getElementById('q').value.trim().toLowerCase();
+  var fs = document.getElementById('f-status').value;
+  var fh = document.getElementById('f-horizon').value;
+
+  var list = HISTORY.filter(function (h) {
+    if (q && !(h.name + h.dataset + h.id).toLowerCase().includes(q)) return false;
+    if (fs && h.status !== fs) return false;
+    if (fh && String(h.horizon) !== fh) return false;
+    return true;
+  });
+
+  document.getElementById('list-count').textContent = '共 ' + list.length + ' 条';
+  document.getElementById('total-n').textContent = HISTORY.length;
+
+  if (!list.length) {
+    document.getElementById('list-body').innerHTML =
+      '<tr><td colspan="10"><div class="empty" style="padding:1.75rem">' +
+      '<p style="margin:0">没有符合筛选条件的任务。请调整筛选条件后重试。</p></div></td></tr>';
+    return;
+  }
+
+  document.getElementById('list-body').innerHTML = list.map(function (h) {
+    var mapeCell = h.weightedMape === null
+      ? '<span class="t-muted">—</span>'
+      : '<span class="t-mono t-bold" style="color:' + (h.weightedMape <= BIZ.weightedMapeLimit ? 'var(--success)' : 'var(--danger)') + '">' +
+        h.weightedMape.toFixed(1) + '%</span>';
+    var impCell = h.maeImprove === null
+      ? '<span class="t-muted">—</span>'
+      : '<span class="t-mono" style="color:' + (h.maeImprove >= BIZ.baselineImproveLimit ? 'var(--success)' : 'var(--danger)') + '">↓ ' +
+        h.maeImprove.toFixed(1) + '%</span>';
+    var lvlCell = h.status === 'failed'
+      ? '<span class="t-muted">—</span>'
+      : '<span class="t-mono t-xs"><span class="dot dot-success" style="display:inline-block;margin-right:3px"></span>' + h.l1 +
+        ' <span class="dot dot-warning" style="display:inline-block;margin:0 3px 0 6px"></span>' + h.l2 +
+        ' <span class="dot dot-neutral" style="display:inline-block;margin:0 3px 0 6px"></span>' + h.l3 + '</span>';
+    var action = h.status === 'failed'
+      ? '<a class="btn btn-ghost btn-sm" href="result.html">看失败详情</a>'
+      : '<a class="btn btn-ghost btn-sm" href="history-detail.html">查看详情</a>';
+
+    return '<tr>' +
+      '<td><div class="t-bold">' + h.name + '</div>' +
+      '<div class="t-xs t-muted t-mono">' + h.id + ' · ' + h.dataset + '</div></td>' +
+      '<td class="t-mono t-xs">' + h.createdAt + '</td>' +
+      '<td>' + h.horizon + ' 天</td>' +
+      '<td class="num t-mono">' + h.seriesCount + '</td>' +
+      '<td class="num">' + mapeCell + '</td>' +
+      '<td class="num">' + impCell + '</td>' +
+      '<td>' + lvlCell + '</td>' +
+      '<td class="num t-mono t-xs">' + (h.durationMs / 1000).toFixed(1) + ' s</td>' +
+      '<td>' + statusBadge(h.status, h.errorCode) + '</td>' +
+      '<td>' + action + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function resetFilter() {
+  document.getElementById('q').value = '';
+  document.getElementById('f-status').value = '';
+  document.getElementById('f-horizon').value = '';
+  renderList();
+}
+
+function exportAll() {
+  exportCsv('history.csv', HISTORY.map(function (h) {
+    return {
+      task_id: h.id, name: h.name, created_at: h.createdAt, dataset: h.dataset,
+      horizon_days: h.horizon, series_count: h.seriesCount,
+      weighted_mape: h.weightedMape === null ? '' : (h.weightedMape / 100).toFixed(4),
+      mae_improve: h.maeImprove === null ? '' : (h.maeImprove / 100).toFixed(4),
+      series_pass_rate: h.seriesPassRate === null ? '' : (h.seriesPassRate / 100).toFixed(4),
+      l1_count: h.l1, l2_count: h.l2, l3_count: h.l3,
+      duration_ms: h.durationMs, status: h.status, error_code: h.errorCode || '',
+    };
+  }), ['task_id', 'name', 'created_at', 'dataset', 'horizon_days', 'series_count',
+       'weighted_mape', 'mae_improve', 'series_pass_rate', 'l1_count', 'l2_count',
+       'l3_count', 'duration_ms', 'status', 'error_code']);
+}
+
+function setState(s) {
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.classList.toggle('active', p.dataset.state === s);
+  });
+  ['card-summary', 'card-filter', 'card-list', 'card-empty', 'card-loading', 'card-confirm']
+    .forEach(function (id) { document.getElementById(id).classList.add('hidden'); });
+
+  if (s === 'empty') { document.getElementById('card-empty').classList.remove('hidden'); return; }
+  if (s === 'confirm') {
+    document.getElementById('card-summary').classList.remove('hidden');
+    document.getElementById('card-list').classList.remove('hidden');
+    document.getElementById('card-confirm').classList.remove('hidden');
+    return;
+  }
+  if (s === 'loading') {
+    document.getElementById('card-loading').classList.remove('hidden');
+    setTimeout(function () { setState('list'); }, 1200);
+    return;
+  }
+  document.getElementById('card-summary').classList.remove('hidden');
+  document.getElementById('card-filter').classList.remove('hidden');
+  document.getElementById('card-list').classList.remove('hidden');
+}
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () { setState(p.dataset.state); });
+});
+
+/* 汇总数据 */
+(function () {
+  var ok = HISTORY.filter(function (h) { return h.status === 'succeeded'; });
+  document.getElementById('s-total').textContent = HISTORY.length;
+  document.getElementById('s-ok').textContent = ok.length;
+  document.getElementById('s-fail').textContent = HISTORY.length - ok.length;
+  document.getElementById('s-mape').innerHTML =
+    (ok.reduce(function (a, h) { return a + h.weightedMape; }, 0) / ok.length).toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('s-dur').innerHTML =
+    (HISTORY.reduce(function (a, h) { return a + h.durationMs; }, 0) / HISTORY.length / 1000).toFixed(1) + '<span class="unit">s</span>';
+})();
+
+renderList();
+</script>
+</body>
+</html>

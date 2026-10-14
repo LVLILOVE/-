@@ -1,0 +1,67 @@
+{
+  "horizon": 14,
+  "model": "outputs\\models\\lstm_v1.pt",
+  "coverage": {
+    "L1": 81,
+    "L2": 32,
+    "L3": 0,
+    "total": 113,
+    "L1_pct": 71.68141592920354,
+    "L2_pct": 28.31858407079646,
+    "L3_pct": 0.0,
+    "predictable": 113,
+    "predictable_pct": 100.0
+  },
+  "timing_ms": {
+    "preprocess_ms": 675,
+    "features_ms": 763,
+    "inference_ms": 21,
+    "metrics_ms": 473,
+    "total_ms": 7873
+  },
+  "metrics": {
+    "weighted_mape": 14.26,
+    "weighted_mae": 1.32,
+    "weighted_rmse": 3.37,
+    "baseline_mae": 1.8,
+    "baseline_rmse": 4.65,
+    "mae_improve_pct": 26.42,
+    "rmse_improve_pct": 27.52,
+    "series_pass_rate": 83.95,
+    "series_passed": 68,
+    "series_evaluated": 81
+  },
+  "verdict": {
+    "all_ok": true,
+    "checks": [
+      {
+        "name": "加权 MAPE ≤ 20%",
+        "value": 14.25852073872085,
+        "limit": 20.0,
+        "ok": true,
+        "unit": "%"
+      },
+      {
+        "name": "MAE 优于基线 ≥ 15%",
+        "value": 26.419562011472852,
+        "limit": 15.0,
+        "ok": true,
+        "unit": "%"
+      },
+      {
+        "name": "RMSE 优于基线 ≥ 15%",
+        "value": 27.51796493078712,
+        "limit": 15.0,
+        "ok": true,
+        "unit": "%"
+      },
+      {
+        "name": "达标序列占比 ≥ 60%",
+        "value": 83.9506172839506,
+        "limit": 60.0,
+        "ok": true,
+        "unit": "%"
+      }
+    ]
+  }
+}

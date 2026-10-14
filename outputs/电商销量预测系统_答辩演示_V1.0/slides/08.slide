@@ -1,0 +1,133 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>02 技术方案 · 算法约束</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>算法设计的五条铁律</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>每一条都由一次失败实验换来</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 646, height: 512, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: '16px 20px', flexDirection: 'column' }}>
+                <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2 }}>算法主链路</Text>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 84, background: '#FFFFFF', borderLeft: '4px solid #1E4FA8', borderRadius: 6, padding: '0 18px', marginTop: 10 }}>
+                    <Box style={{ width: 32, height: 32, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>01</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 14 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>原始序列清洗</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 4 }}>缺失线性插值 + 异常尖峰截断</Text>
+                    </Box>
+                    <Text style={{ fontSize: 16, color: '#3D7BD9' }}>864,772 行</Text>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 84, background: '#FFFFFF', borderLeft: '4px solid #1E4FA8', borderRadius: 6, padding: '0 18px', marginTop: 10 }}>
+                    <Box style={{ width: 32, height: 32, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>02</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 14 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>按序列切分 8 : 1 : 1</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 4 }}>训练 / 验证 / 测试按时间轴切</Text>
+                    </Box>
+                    <Text style={{ fontSize: 16, color: '#3D7BD9' }}>不按样本切</Text>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 84, background: '#FFFFFF', borderLeft: '4px solid #1E4FA8', borderRadius: 6, padding: '0 18px', marginTop: 10 }}>
+                    <Box style={{ width: 32, height: 32, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>03</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 14 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>滑动窗口特征构建</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 4 }}>星期、月份、节假日、滞后、滚动均值</Text>
+                    </Box>
+                    <Text style={{ fontSize: 16, color: '#3D7BD9' }}>11 维 / window 21</Text>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 84, background: '#FFFFFF', borderLeft: '4px solid #1E4FA8', borderRadius: 6, padding: '0 18px', marginTop: 10 }}>
+                    <Box style={{ width: 32, height: 32, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>04</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 14 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>多层 LSTM 训练</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 4 }}>MSE + Adam + 学习率衰减 + 早停</Text>
+                    </Box>
+                    <Text style={{ fontSize: 16, color: '#3D7BD9' }}>31,729 参数</Text>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 84, background: '#FFFFFF', borderLeft: '4px solid #1E4FA8', borderRadius: 6, padding: '0 18px', marginTop: 10 }}>
+                    <Box style={{ width: 32, height: 32, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>05</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 14 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>样本外回测评估</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 4 }}>先砍末尾 horizon 天再预测</Text>
+                    </Box>
+                    <Text style={{ fontSize: 16, color: '#3D7BD9' }}>对比移动平均基线</Text>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 554, height: 512, paddingLeft: 24, flexDirection: 'column', justifyContent: 'center' }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'flex-start', height: 100, borderBottom: '1px solid #E5E7EB', paddingTop: 8 }}>
+                    <Box style={{ width: 26, height: 26, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>1</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>学残差，不学绝对值</Text>
+                        <Text style={{ fontSize: 16, color: '#4A5568', lineHeight: 1.45, marginTop: 5 }}>反例：学绝对值时预测 std / 真值 std 只剩 0.26</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'flex-start', height: 100, borderBottom: '1px solid #E5E7EB', paddingTop: 8 }}>
+                    <Box style={{ width: 26, height: 26, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>2</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>按序列切分，不按样本切</Text>
+                        <Text style={{ fontSize: 16, color: '#4A5568', lineHeight: 1.45, marginTop: 5 }}>反例：按样本切会让相邻两天泄漏答案</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'flex-start', height: 100, borderBottom: '1px solid #E5E7EB', paddingTop: 8 }}>
+                    <Box style={{ width: 26, height: 26, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>3</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>过滤退化序列</Text>
+                        <Text style={{ fontSize: 16, color: '#4A5568', lineHeight: 1.45, marginTop: 5 }}>反例：σ ≈ 0.03 的近常量序列污染全局 loss</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'flex-start', height: 100, borderBottom: '1px solid #E5E7EB', paddingTop: 8 }}>
+                    <Box style={{ width: 26, height: 26, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>4</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>保护营销节点</Text>
+                        <Text style={{ fontSize: 16, color: '#4A5568', lineHeight: 1.45, marginTop: 5 }}>反例：无条件截断会削掉双十一尖峰</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'flex-start', height: 100, paddingTop: 8 }}>
+                    <Box style={{ width: 26, height: 26, background: '#1E4FA8', borderRadius: 6, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 15, color: '#FFFFFF', fontWeight: 'bold' }}>5</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 21, color: '#0E3F8C', fontWeight: 'bold' }}>主指标只算 L1</Text>
+                        <Text style={{ fontSize: 16, color: '#4A5568', lineHeight: 1.45, marginTop: 5 }}>反例：混入 L2 会把 13.6% 抬到 25.9%</Text>
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>08 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>

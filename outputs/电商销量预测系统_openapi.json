@@ -1,0 +1,5973 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "电商销量预测系统 API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "description": "健康检查：返回结构符合技术文档 §5.8 响应体约定。",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "注册",
+        "description": "邮箱 + 密码注册（`FR-USR-01`/`02`/`03`）。\n\n密码强度、字符数与 UTF-8 字节数（≤72）的校验在 `RegisterRequest` 内完成，\n不满足时由统一异常处理器返回 `40011` / `40012`。\n邮箱重复由**唯一索引**拦截并映射为 `40105`（`API-01-1`）。",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_RegisterResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "登录",
+        "description": "登录并签发 JWT（`FR-USR-04`），含失败限流（`FR-USR-06`）。\n\n错误码：\n  - `40103` 邮箱或密码错误 —— ⚠️ 不区分二者，防账号枚举（`API-02-1`）；\n    `data` 附带 `fail_count` / `max_fail` / `lock_seconds`，供前端渲染\n    「这是第 N 次失败…」（`UX-P02-02`）。\n  - `40104` 冷却中 —— `data.retry_after_seconds` 给出剩余秒数（`BE-19`）。",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_LoginResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "登出",
+        "description": "使当前 Token 立即失效（`FR-USR-05`）。\n\n实现：把 Token 的 `jti` 写入内存黑名单（`BE-19` 方案 B），\n`get_auth_context` 每次校验都会先查黑名单。\n\n⚠️ 需 `AuthCtx` 而非 `CurrentUser`：登出必须拿到 `jti` 与 `exp`\n   才能精确拉黑**这一个** Token（改密走的是 `token_version`，量级不同）。",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "当前用户",
+        "description": "前端刷新页面后恢复登录态（`FR-USR-07`，`API-04-1`）。\n\n前端在应用挂载时调用一次；返回 401（`40101`/`40102`）即清 Token 跳登录。",
+        "operationId": "get_me_api_v1_users_me_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UserProfile_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "修改资料/密码",
+        "description": "部分更新：昵称、密码（`FR-USR-07`）。未传字段不变。\n\n🔒 改密后 `token_version + 1`，该用户**全部**旧 Token 立即失效，\n   前端须引导重新登录（`API-05-1`）。响应仍返回更新后的资料，\n   便于前端在跳登录前把昵称等展示信息刷新到位。",
+        "operationId": "update_me_api_v1_users_me_patch",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UserProfile_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/template": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "下载标准 CSV 模板",
+        "description": "`FR-UPL-08`：表头 + 2 行示例数据。\n\n🔒 带 UTF-8 BOM，保证 Excel 双击打开不乱码（`NFR-COMP-05` / `API-08-1`）。\n   模板里的示例行是**合法数据**，用户直接提交也应通过校验 ——\n   这是「模板可用性」的最低标准，故模板内容由 `services` 统一维护。",
+        "operationId": "download_template_api_v1_datasets_template_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/sample": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "加载示例数据",
+        "description": "`FR-UPL-02`：一键加载菜鸟数据集抽样，让零基础用户也能跑通全流程。\n\n幂等：同一调用者重复调用返回**同一条** `datasets` 记录（`API-07-1`）。\n解析与分级属 CPU 密集，放线程池避免阻塞事件循环。",
+        "operationId": "load_sample_api_v1_datasets_sample_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UploadDatasetResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets": {
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "上传 CSV 数据集",
+        "description": "上传 + 七步校验 + 落盘 + 预览（`FR-UPL-01` ~ `FR-UPL-15`）。\n\n🔒 校验顺序严格按 `FR-UPL-09` / PRD §3.2.2，任一步失败即终止。\n🔒 扩展名（第 1 步）在**落盘之前**就拒绝；大小超限（第 2 步）在**流式过程中**\n   中断 —— 这两种情形不产生 `datasets` 记录（`EP-4` 裁定 A）。\n\n耗时预算 ≤ 10 s（`NFR-PERF-02`）。",
+        "operationId": "upload_dataset_api_v1_datasets_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_dataset_api_v1_datasets_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UploadDatasetResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/gap": {
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "断档处置",
+        "description": "`FR-UPL-13`：用户显式选择「自动插值补齐」或「放弃上传」。\n\n🔒 未选择前系统不得自动继续（`WS-4-05`）—— 故本接口只接受\n   `action = interpolate | abort` 两个确定值，不存在「默认继续」。",
+        "operationId": "resolve_gap_api_v1_datasets_gap_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveGapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_UploadDatasetResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/{dataset_id}": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "数据集详情",
+        "description": "参数页 `UX-P06` 的数据概要 + 序列分级预判（`API-09-1`）。\n\n⚠️ `API-09-2`：本接口会执行一次完整读取与分级（50 万行约 2 秒）。\n   参数页应在数据集加载后只调用一次，**不要**在每次参数变更时重复调用。",
+        "operationId": "dataset_detail_api_v1_datasets__dataset_id__get",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DatasetDetailResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/{dataset_id}/preview": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "数据预览",
+        "description": "`FR-UPL-07`：让用户确认「系统读到的和我想的一致」。\n\n`total` 恒为数据集总行数（`API-10-1`），`shown` 为本次返回行数。",
+        "operationId": "dataset_preview_api_v1_datasets__dataset_id__preview_get",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "返回行数",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "返回行数"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按商品 / 仓库模糊搜索（对应原型搜索框）",
+              "title": "Keyword"
+            },
+            "description": "按商品 / 仓库模糊搜索（对应原型搜索框）"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DatasetPreview_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/{dataset_id}/errors": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "下载错误明细",
+        "description": "`FR-UPL-06`：仅含不合格行，保留原始列并追加 `error_reason`（`API-11`）。\n\n🔒 临时文件位于 `data/exports/tmp/`，TTL 1 小时，与正式导出产物**分目录**\n   （`JT-11` / `API-11-2`），由独立清理逻辑处理。",
+        "operationId": "download_errors_api_v1_datasets__dataset_id__errors_get",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions": {
+      "post": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "创建预测任务",
+        "description": "创建并**同步执行**预测任务（`FR-MOD-07` ~ `FR-MOD-13`）。\n\n🔒 耗时预算 ≤ 60 s（`NFR-PERF-01`），`EP-5` 本机实测约 20 s。\n   超预算**不**返回 502/504，而是 `code: 0` + `data.status = \"failed\"`\n   + `data.error_code = \"E_TIMEOUT\"` + 三条建议（`API-12-2`）。\n\n🔒 `granularity` 的取值约束由 `CreateTaskRequest`（`code/backend/schemas.py`）\n   在解析阶段强制 —— 传 `sku` 等值会走统一参数异常处理器返回 `40012`，\n   与 §5.6 错误码表一致。**刻意不在本函数里再判一次**：那会让\n   「同一约束两处实现、两处可各自漂移」，正是本项目要避免的形态。\n\n⚠️ 推理是 CPU/GPU 密集的**阻塞**调用（数十秒），必须放线程池：\n   直接在 `async def` 里同步调用会占住事件循环，期间连 `/health`\n   都无法响应 —— 表现为「任务在跑，但整个服务像挂了」。",
+        "operationId": "create_prediction_api_v1_predictions_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CreateTaskResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/{task_id}/status": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "查询任务状态",
+        "description": "执行页 `UX-P07` 的五阶段进度、设备与耗时（§5.6 `API-13`）。\n\n📌 同步模式下前端**不需要**轮询：`API-12` 返回时任务已入终态。\n   本接口保留是为两件事：\n     ① 页面刷新后恢复进度显示（内存态丢失时由 DB 降级推断，见 `_from_db`）；\n     ② 将来任务变重时平滑演进为真异步，前端无需改造。\n\n⚠️ `API-13-1`：`inference` 阶段真实耗时仅约 21 ms（`outputs/eval_report.json`），\n   进度条会在该阶段「瞬间跳过」。**这不是缺陷，也不在这里补偿** ——\n   平滑动效由前端按 `estimated_ms` 做时间轴插值实现（`UX-GOV-07`）：\n   真实耗时优先，不得为了好看而伪造阶段回调。",
+        "operationId": "task_status_api_v1_predictions__task_id__status_get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_TaskStatusResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/{task_id}": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "获取预测结果",
+        "description": "结果页（`UX-P08`）的全部数据：结论 + 指标 + 覆盖率 + 曲线 + 分布。\n\n🔒 **本接口不做任何指标重算**，全部取自 `EP-5` 落库的\n   `metrics` / `predictions` 表（理由见 `services/result_service.py` 模块头）。\n\n⚠️ 用 `OptionalUserId` 而非强制登录：`FR-USR-08` 要求游客链路\n   能跑到结果页，而「看到结果」必经本接口。归属隔离由\n   `result_service._owned_task` 守住（越权 → `40301`，不存在 → `40401`）。",
+        "operationId": "prediction_result_api_v1_predictions__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "with_series",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "With Series"
+            }
+          },
+          {
+            "name": "series_limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "内联曲线最大条数",
+              "default": 50,
+              "title": "Series Limit"
+            },
+            "description": "内联曲线最大条数"
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(L1|L2|L3)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按分级过滤曲线",
+              "title": "Level"
+            },
+            "description": "按分级过滤曲线"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_PredictionResultResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/{task_id}/detail": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "结果明细分页",
+        "description": "结果页明细表：排序 + 分页 + 过滤（`FR-VIS-03`，默认每页 20 行）。\n\n🔒 **不并入 `API-14`**：单响应若带全部明细，1,000 序列 × 30 天\n   = 30,000 行，响应体可达数十 MB，移动端与弱网直接超时。",
+        "operationId": "prediction_detail_api_v1_predictions__task_id__detail_get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "页码，从 1 开始",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码，从 1 开始"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "每页条数，上限 100（FR-VIS-03 默认 20）",
+              "default": 20,
+              "title": "Size"
+            },
+            "description": "每页条数，上限 100（FR-VIS-03 默认 20）"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "排序列，取值：('sku_id', 'warehouse_id', 'forecast_date', 'predicted_value', 'error')",
+              "default": "sku_id",
+              "title": "Sort By"
+            },
+            "description": "排序列，取值：('sku_id', 'warehouse_id', 'forecast_date', 'predicted_value', 'error')"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "排序方向",
+              "default": "asc",
+              "title": "Order"
+            },
+            "description": "排序方向"
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "分级过滤：('L1', 'L2', 'L3')",
+              "title": "Level"
+            },
+            "description": "分级过滤：('L1', 'L2', 'L3')"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "商品 / 仓库模糊搜索",
+              "title": "Keyword"
+            },
+            "description": "商品 / 仓库模糊搜索"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Paginated_PredictionRow__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/{task_id}/export": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "导出预测结果（CSV / Excel）",
+        "description": "导出 CSV / xlsx（`FR-VIS-05` / `UX-P08-08`）。\n\n🔒 **导出要求登录**（`CurrentUser`，与 `API-14`/`API-15` 不同）：\n   `FR-USR-08` 允许游客**看**结果，但数据导出是把数据带走，必须鉴权。\n   这是同一份技术文档 §5 两处表述的唯一自洽解（见模块头注释）。\n\n🔒 **文件名双写**（`API-16-3`）：\n   `filename*=UTF-8''<percent-encoded>` 是 RFC 5987 标准写法，中文名在\n   各浏览器下都不会乱码；同时保留 ASCII 兜底 `filename=\"...\"`，\n   供不认识 `filename*` 的老客户端兜底（它会退化成 `task_42_export.csv`，\n   而不是拿到一个乱码名或直接 404）。",
+        "operationId": "prediction_export_api_v1_predictions__task_id__export_get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(csv|xlsx)$",
+              "description": "导出格式：csv（带 UTF-8 BOM）/ xlsx",
+              "default": "csv",
+              "title": "Format"
+            },
+            "description": "导出格式：csv（带 UTF-8 BOM）/ xlsx"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/history/compare": {
+      "post": {
+        "tags": [
+          "历史记录"
+        ],
+        "summary": "API-18 跨任务对比",
+        "description": "跨任务曲线对比（`UX-P11`）。\n\n🔒 耗时预算 ≤ 3 s（`API-18` 契约）。服务层对每个任务只取 20 条曲线\n   且**跳过历史段 CSV 读取**（对比图不需要历史段），实测 4 个任务\n   在毫秒级完成。\n\n⚠️ 归属校验是「全或全无」：任一 `task_id` 不属于当前用户 → `40301`，\n   **不返回部分结果**（`API-18-1` / `NFR-SEC-02`）。",
+        "operationId": "compare_tasks_api_v1_history_compare_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CompareResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/history": {
+      "get": {
+        "tags": [
+          "历史记录"
+        ],
+        "summary": "API-17 历史任务列表",
+        "description": "历史任务列表（`UX-P09`）。\n\n🔒 耗时预算 ≤ 1 s（`NFR-PERF-08`）：走 `v_task_summary` 视图 +\n   `IX-03` 索引，`ORDER BY created_at DESC` 不产生临时 B 树\n   （该索引第三列正是它）。",
+        "operationId": "list_history_api_v1_history_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "页码",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "每页条数，上限 100",
+              "default": 20,
+              "title": "Size"
+            },
+            "description": "每页条数，上限 100"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "任务名 / 数据集名模糊搜索",
+              "title": "Keyword"
+            },
+            "description": "任务名 / 数据集名模糊搜索"
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "起始日期 YYYY-MM-DD",
+              "title": "Date From"
+            },
+            "description": "起始日期 YYYY-MM-DD"
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "结束日期 YYYY-MM-DD",
+              "title": "Date To"
+            },
+            "description": "结束日期 YYYY-MM-DD"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "succeeded / failed",
+              "title": "Status"
+            },
+            "description": "succeeded / failed"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HistoryPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/history/dashboard": {
+      "get": {
+        "tags": [
+          "历史记录"
+        ],
+        "summary": "UX-P04 工作台概览",
+        "description": "工作台概览（`UX-P04`）。\n\n📌 **最近任务复用 `API-17` 的列表函数**，不另写查询 ——\n   两处口径分叉会让「工作台最近任务」与「历史列表首屏」对不上\n   （`DOD-EP7` 的验收点之一）。",
+        "operationId": "workbench_api_v1_history_dashboard_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_WorkbenchSummary_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/history/{task_id}": {
+      "get": {
+        "tags": [
+          "历史记录"
+        ],
+        "summary": "API-19 历史任务详情",
+        "description": "任务详情（`UX-P10`）。\n\n📌 **成功任务的响应结构与 `API-14` 完全一致**（复用同一 schema），\n   天然保证「详情内容与当时结果一致」（`FR-HIS-02`）。\n\n⚠️ **失败任务不走这条路的同一分支**：`metrics` 为 null、`series` 为空，\n   并额外返回 `error_code` / `error_msg` / `completed_stage`。\n   结果页刻意不给半成品（`EP-6` 决定），但历史详情**必须**告诉用户\n   「为什么失败、卡在哪一步」—— 这是两个不同的诉求。",
+        "operationId": "history_detail_api_v1_history__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_PredictionResultResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "历史记录"
+        ],
+        "summary": "API-20 删除历史任务",
+        "description": "软删除任务（`FR-HIS-05`）。\n\n🔒 **只置 `tasks.is_deleted = 1`**，`predictions` / `metrics` 一律保留\n   —— 验收要求「删除后可通过数据库查回，满足可追溯」。\n   级联软删关联表反而让「查回」变复杂（`API-20-2`）。\n\n⚠️ 幂等：重复删除仍返回成功。用户点两次「确认」却看到「任务不存在」\n   会以为第一次没删掉。",
+        "operationId": "delete_history_api_v1_history__task_id__delete",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/overview": {
+      "get": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-22 运营看板概览",
+        "description": "运营看板概览（`AD-P01` 顶部）。\n\n⚠️ `days` 非法值返回 `40012` 而**不是静默兜底成 30** ——\n   静默兜底会让运营以为在看半年的数据，实际只有一个月。",
+        "operationId": "admin_overview_api_v1_admin_overview_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminOverviewResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-23 用户列表",
+        "description": "用户列表（跨用户）。\n\n🔒 响应**不含 `password_hash`** —— 由 schema白名单保证\n   （`AdminUserBrief` 没有该字段，pydantic 不会凭空造出来）。",
+        "operationId": "admin_list_users_api_v1_admin_users_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Size"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminUserPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{user_id}": {
+      "patch": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-24 启停用与角色变更",
+        "description": "启停用 / 改角色（`AD-P02` 用户管理 Tab）。\n\n🔒 服务层有**三条自我保护**，缺一条就会出现「管理员把自己锁在门外」：\n   不能停用自己、不能降级自己、不能动最后一个管理员。\n🔒 `status=0` 时**同时 `token_version + 1`** —— 否则旧 Token 仍可用，\n   停用只挡住了新登录。\n🔒 写 `operation_logs`（`action='admin'`，`sub=enable/disable/role_change`）。",
+        "operationId": "admin_update_user_api_v1_admin_users__user_id__patch",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminUpdateUserResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{user_id}/reset-password": {
+      "post": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-25 重置用户密码",
+        "description": "重置用户密码（`AD-P02` 用户管理 Tab）。\n\n🔒 **必须同时 `token_version + 1`**（数据库设计文档 §10.5）：\n   JWT 无状态，改密码本身不影响已签发的 Token。不 bump 的话，\n   攻击者手上的旧 Token 仍能用到自然过期 —— **重置形同虚设**。\n   这条联动已在 `EP-2` 的改密逻辑里验证过，此处复用。",
+        "operationId": "admin_reset_password_api_v1_admin_users__user_id__reset_password_post",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_ResetPasswordResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tasks": {
+      "get": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-26 全量任务列表",
+        "description": "全量任务列表（跨用户）。\n\n⚠️ **含已软删除的任务**（`is_deleted=1`）并带该标记：管理端是运维视角，\n   用户侧列表才过滤软删除。",
+        "operationId": "admin_list_tasks_api_v1_admin_tasks_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Size"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminTaskPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tasks/{task_id}": {
+      "delete": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-27 强制删除任务",
+        "description": "强制删除任务（**硬删除** + 级联，`QD-03`）。\n\n🔒 与用户侧软删除的**语义差异**（界面上文案必须区分）：\n   本接口物理删除 `tasks` 行 + 级联 `predictions` / `metrics`；\n   `datasets` **不动**（`RESTRICT`，可能被其他任务引用）；\n   `operation_logs` **保留**（审计不随任务消失）。\n   用户侧 `API-20` 是软删除、可恢复 —— 把两者文案写混是误导。\n\n🔒 返回**连带删除的行数**：不可逆操作必须有回执，\n   否则管理员不敢点。",
+        "operationId": "admin_delete_task_api_v1_admin_tasks__task_id__delete",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminDeleteTaskResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/models": {
+      "get": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-28 模型版本列表",
+        "description": "模型版本列表（`AD-P01` 模型版本表）。\n\n📌 与 `API-29` **必须分离**（`QD-07`）：单路径承担读写两种语义会让\n   权限与缓存策略无法各自独立演进。",
+        "operationId": "admin_list_models_api_v1_admin_models_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminModelListResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/models/{version}": {
+      "patch": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-29 切换启用模型版本",
+        "description": "切换启用模型版本（`AD-P01` 模型版本卡片）。\n\n🔒 `BE-ADM-02`：**同一事务内先降旧、再升新**，顺序固定。\n   `model_registry` 上有部分唯一索引\n   `ux_model_active ON model_registry (is_active) WHERE is_active = 1`，\n   ⏱️ 实测把两个 `is_active` 都置 1 会被\n   `UNIQUE constraint failed: model_registry.is_active` 拒绝。\n   **先升新再降旧同样会撞索引** —— 这不是风格偏好，是数据库强制的。\n\n🔒 `BE-ADM-03`：切换后校验与 `.env` 的 `ACTIVE_MODEL` 一致。\n   不一致 =「数据库说 v2、进程跑 v1」的静默故障。实现方式是提交后\n   立即 `reload_active_model()` 热切换；若 `.env` 未同步则**仍返回成功\n   但带 `warnings`** —— 把 `.env` 写进数据库不是接口该做的事，\n   而悄悄失败更糟。",
+        "operationId": "admin_switch_model_api_v1_admin_models__version__patch",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "title": "Version"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchModelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_SwitchModelResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/logs": {
+      "get": {
+        "tags": [
+          "管理端"
+        ],
+        "summary": "API-30 操作日志查询",
+        "description": "操作日志查询（`AD-P02` 日志 Tab）。\n\n⚠️ `action` / `result` **刻意不在 schema 层收窄取值域**：\n   收窄会抛 pydantic `ValidationError` → 500，\n   而非法筛选值应按本项目契约返 `40012`（与 `EP-7` 的\n   `HistoryQuery.status` 同理）。",
+        "operationId": "admin_list_logs_api_v1_admin_logs_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Size"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "name": "result",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Result"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AdminLogPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActiveModelBrief": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "window_size": {
+            "type": "integer",
+            "title": "Window Size"
+          },
+          "hidden_size": {
+            "type": "integer",
+            "title": "Hidden Size"
+          },
+          "num_layers": {
+            "type": "integer",
+            "title": "Num Layers"
+          },
+          "param_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Param Count"
+          },
+          "val_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Val Mape"
+          },
+          "trained_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trained At"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "env_match": {
+            "type": "boolean",
+            "title": "Env Match",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "window_size",
+          "hidden_size",
+          "num_layers"
+        ],
+        "title": "ActiveModelBrief",
+        "description": "`API-22` 当前启用模型摘要。\n\n🔒 `env_match` 是 `BE-ADM-03` 的可视化落点：`.env` 的 `ACTIVE_MODEL`\n   与库不一致时，看板必须**显眼地**告诉运营「需要改 `.env` 并重启」，\n   否则会出现「数据库说 v2、进程跑v1」的静默故障。"
+      },
+      "AdminDeleteTaskResponse": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "deleted_predictions": {
+            "type": "integer",
+            "title": "Deleted Predictions"
+          },
+          "deleted_metrics": {
+            "type": "integer",
+            "title": "Deleted Metrics"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "deleted_predictions",
+          "deleted_metrics",
+          "message"
+        ],
+        "title": "AdminDeleteTaskResponse",
+        "description": "`API-27` 强制删除回执。\n\n🔒 返回**连带删除的行数**是产品要求，不是顺手加的：不可逆操作\n   没有回执，管理员不敢点。"
+      },
+      "AdminLogBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "result": {
+            "type": "string",
+            "title": "Result"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "sub_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub Action"
+          },
+          "operator_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator Id"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "action",
+          "result",
+          "created_at"
+        ],
+        "title": "AdminLogBrief",
+        "description": "`API-30` 日志条目。\n\n🔒 `sub_action` 是**结构化拆好**的子动作（`detail` 里的 `sub=`），\n   不是让前端自己 `split(';')` —— 格式由后端保证，前端只管渲染。"
+      },
+      "AdminLogPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminLogBrief"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "title": "AdminLogPage"
+      },
+      "AdminModelBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "window_size": {
+            "type": "integer",
+            "title": "Window Size"
+          },
+          "hidden_size": {
+            "type": "integer",
+            "title": "Hidden Size"
+          },
+          "num_layers": {
+            "type": "integer",
+            "title": "Num Layers"
+          },
+          "dropout": {
+            "type": "number",
+            "title": "Dropout"
+          },
+          "learning_rate": {
+            "type": "number",
+            "title": "Learning Rate"
+          },
+          "batch_size": {
+            "type": "integer",
+            "title": "Batch Size"
+          },
+          "param_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Param Count"
+          },
+          "val_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Val Mape"
+          },
+          "val_mae": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Val Mae"
+          },
+          "val_rmse": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Val Rmse"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "peak_memory_mb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peak Memory Mb"
+          },
+          "train_data_range": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Train Data Range"
+          },
+          "trained_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trained At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": false
+          },
+          "env_match": {
+            "type": "boolean",
+            "title": "Env Match",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "window_size",
+          "hidden_size",
+          "num_layers",
+          "dropout",
+          "learning_rate",
+          "batch_size",
+          "created_at"
+        ],
+        "title": "AdminModelBrief",
+        "description": "`API-28` 模型版本摘要。"
+      },
+      "AdminModelListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminModelBrief"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "active_version": {
+            "type": "string",
+            "title": "Active Version"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "active_version"
+        ],
+        "title": "AdminModelListResponse"
+      },
+      "AdminOverviewResponse": {
+        "properties": {
+          "user_count": {
+            "type": "integer",
+            "title": "User Count"
+          },
+          "admin_count": {
+            "type": "integer",
+            "title": "Admin Count"
+          },
+          "dataset_count": {
+            "type": "integer",
+            "title": "Dataset Count"
+          },
+          "task_count": {
+            "type": "integer",
+            "title": "Task Count"
+          },
+          "success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success Rate"
+          },
+          "avg_duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Duration Ms"
+          },
+          "avg_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Mape"
+          },
+          "mape_trend": {
+            "items": {
+              "$ref": "#/components/schemas/MapeTrendPoint"
+            },
+            "type": "array",
+            "title": "Mape Trend"
+          },
+          "active_model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActiveModelBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Event Counts"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 30
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_count",
+          "admin_count",
+          "dataset_count",
+          "task_count"
+        ],
+        "title": "AdminOverviewResponse",
+        "description": "`API-22` 运营看板概览。"
+      },
+      "AdminTaskBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "task_name": {
+            "type": "string",
+            "title": "Task Name"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "owner_email": {
+            "type": "string",
+            "title": "Owner Email"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_deleted": {
+            "type": "integer",
+            "title": "Is Deleted",
+            "default": 0
+          },
+          "granularity": {
+            "type": "string",
+            "title": "Granularity"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "weighted_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mape"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "task_name",
+          "user_id",
+          "owner_email",
+          "status",
+          "granularity",
+          "horizon",
+          "created_at"
+        ],
+        "title": "AdminTaskBrief",
+        "description": "`API-26` 任务摘要（跨用户）。\n\n⚠️ `is_deleted=1` 的任务**也在列表里**并带该标记：管理端是运维视角，\n   需要看清用户删过什么（用户侧列表才过滤）。"
+      },
+      "AdminTaskPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminTaskBrief"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "title": "AdminTaskPage"
+      },
+      "AdminUpdateUserRequest": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "admin"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "title": "AdminUpdateUserRequest",
+        "description": "`API-24` 启停用 + 角色变更。两项都可选，但**至少要传一项**。\n\n🔒「至少一项」由服务层校验（返 `40012`）而不是用 pydantic 的\n   `model_validator` —— 因为本项目约定「业务规则属 services 层」，\n   而「两个可选项不能同时为空」本质是业务规则。\n\n⚠️ **类名必须带 `Admin` 前缀**：本模块上方另有一个 `UpdateUserRequest`\n（`API-05` 用户改自己的昵称/密码，字段 `nickname`/`old_password`/`new_password`）。\n两者字段完全不同。若此处沿用同名 —— Python 会**静默用后定义者覆盖先定义者**，\n后果是 `API-05` 读到的是本类（无 `nickname` 属性），一调用就 `AttributeError` → 500。\n📌 这是 `EP-9` 全量回归 `verify_schemas.py` 时抓到的真实缺陷；已加重名守卫。"
+      },
+      "AdminUpdateUserResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AdminUserBrief"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user"
+        ],
+        "title": "AdminUpdateUserResponse",
+        "description": "`API-24` 更新后的用户摘要。"
+      },
+      "AdminUserBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "status",
+          "role",
+          "created_at"
+        ],
+        "title": "AdminUserBrief",
+        "description": "`API-23` 用户摘要。\n\n🔒 **无 `password_hash` 字段且永不可加**（`NFR-SEC-05`）——\n   这是本项目「最小暴露」的第一条红线，`verify_ep8.py` 对此断言。"
+      },
+      "AdminUserPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserBrief"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "title": "AdminUserPage"
+      },
+      "ApiResponse_AdminDeleteTaskResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminDeleteTaskResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminDeleteTaskResponse]"
+      },
+      "ApiResponse_AdminLogPage_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminLogPage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminLogPage]"
+      },
+      "ApiResponse_AdminModelListResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminModelListResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminModelListResponse]"
+      },
+      "ApiResponse_AdminOverviewResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminOverviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminOverviewResponse]"
+      },
+      "ApiResponse_AdminTaskPage_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminTaskPage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminTaskPage]"
+      },
+      "ApiResponse_AdminUpdateUserResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminUpdateUserResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminUpdateUserResponse]"
+      },
+      "ApiResponse_AdminUserPage_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminUserPage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[AdminUserPage]"
+      },
+      "ApiResponse_CompareResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompareResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[CompareResponse]"
+      },
+      "ApiResponse_CreateTaskResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreateTaskResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[CreateTaskResponse]"
+      },
+      "ApiResponse_DatasetDetailResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasetDetailResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DatasetDetailResponse]"
+      },
+      "ApiResponse_DatasetPreview_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasetPreview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DatasetPreview]"
+      },
+      "ApiResponse_HistoryPage_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HistoryPage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[HistoryPage]"
+      },
+      "ApiResponse_LoginResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LoginResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[LoginResponse]"
+      },
+      "ApiResponse_NoneType_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[NoneType]"
+      },
+      "ApiResponse_Paginated_PredictionRow__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Paginated_PredictionRow_"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[Paginated[PredictionRow]]"
+      },
+      "ApiResponse_PredictionResultResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PredictionResultResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[PredictionResultResponse]"
+      },
+      "ApiResponse_RegisterResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RegisterResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[RegisterResponse]"
+      },
+      "ApiResponse_ResetPasswordResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResetPasswordResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[ResetPasswordResponse]"
+      },
+      "ApiResponse_SwitchModelResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SwitchModelResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[SwitchModelResponse]"
+      },
+      "ApiResponse_TaskStatusResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskStatusResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[TaskStatusResponse]"
+      },
+      "ApiResponse_UploadDatasetResponse_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadDatasetResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[UploadDatasetResponse]"
+      },
+      "ApiResponse_UserProfile_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[UserProfile]"
+      },
+      "ApiResponse_WorkbenchSummary_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkbenchSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[WorkbenchSummary]"
+      },
+      "Body_upload_dataset_api_v1_datasets_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "CSV 文件（≤20 MB，≤500,000 行）"
+          },
+          "gap_action": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "interpolate",
+                  "abort"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Action",
+            "description": "断档处置（FR-UPL-13）。首次上传不传，由用户在页面上显式选择"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_dataset_api_v1_datasets_post"
+      },
+      "CompareRequest": {
+        "properties": {
+          "task_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Task Ids"
+          },
+          "sku_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sku Ids"
+          },
+          "warehouse_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warehouse Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_ids"
+        ],
+        "title": "CompareRequest"
+      },
+      "CompareResponse": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/CompareTaskSlot"
+            },
+            "type": "array",
+            "title": "Tasks"
+          },
+          "attribution": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Attribution"
+          },
+          "dataset_consistent": {
+            "type": "boolean",
+            "title": "Dataset Consistent",
+            "default": true
+          },
+          "overlap_dates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overlap Dates"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tasks"
+        ],
+        "title": "CompareResponse"
+      },
+      "CompareSeries": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "granularity_level": {
+            "type": "string",
+            "enum": [
+              "L1",
+              "L2",
+              "L3"
+            ],
+            "title": "Granularity Level"
+          },
+          "forecast_dates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Forecast Dates"
+          },
+          "predicted": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Predicted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "granularity_level",
+          "forecast_dates",
+          "predicted"
+        ],
+        "title": "CompareSeries",
+        "description": "`API-18` 对比曲线。\n\n🔒 **刻意复用不了 `SeriesCurve`**：那条曲线带 `history_dates` /\n   `history_sales` / `baseline` / `actual`，而对比页只画预测值。\n   若硬塞进 `SeriesCurve`，要么为省流量传空数组（声明非空 → 校验失败），\n   要么让 4 个任务各读一遍 CSV 历史段（`API-18` 的 ≤ 3 s 预算直接爆）。"
+      },
+      "CompareTaskSlot": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "task_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Name"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "dataset_name": {
+            "type": "string",
+            "title": "Dataset Name"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "succeeded"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MetricBundle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coverage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coverage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/CompareSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "horizon",
+          "dataset_name",
+          "created_at"
+        ],
+        "title": "CompareTaskSlot"
+      },
+      "Coverage": {
+        "properties": {
+          "L1": {
+            "type": "integer",
+            "title": "L1"
+          },
+          "L2": {
+            "type": "integer",
+            "title": "L2"
+          },
+          "L3": {
+            "type": "integer",
+            "title": "L3"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "L1_pct": {
+            "type": "number",
+            "title": "L1 Pct"
+          },
+          "L2_pct": {
+            "type": "number",
+            "title": "L2 Pct"
+          },
+          "L3_pct": {
+            "type": "number",
+            "title": "L3 Pct"
+          },
+          "predictable": {
+            "type": "integer",
+            "title": "Predictable"
+          },
+          "predictable_pct": {
+            "type": "number",
+            "title": "Predictable Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "L1",
+          "L2",
+          "L3",
+          "total",
+          "L1_pct",
+          "L2_pct",
+          "L3_pct",
+          "predictable",
+          "predictable_pct"
+        ],
+        "title": "Coverage",
+        "description": "三项计数之和必须等于 total（UI/UX UX-AC-06、FR-VIS-07）。"
+      },
+      "CreateTaskRequest": {
+        "properties": {
+          "dataset_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Dataset Id"
+          },
+          "granularity": {
+            "type": "string",
+            "enum": [
+              "warehouse_sku"
+            ],
+            "const": "warehouse_sku",
+            "title": "Granularity",
+            "default": "warehouse_sku"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "use_holiday_feature": {
+            "type": "integer",
+            "title": "Use Holiday Feature",
+            "default": 1
+          },
+          "task_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_id",
+          "horizon"
+        ],
+        "title": "CreateTaskRequest"
+      },
+      "CreateTaskResponse": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "series_count": {
+            "type": "integer",
+            "title": "Series Count"
+          },
+          "estimated_ms": {
+            "type": "integer",
+            "title": "Estimated Ms",
+            "description": "实测耗时（ms），前端进度条刻度依据"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cuda",
+                  "cpu"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "device_fallback": {
+            "type": "integer",
+            "title": "Device Fallback",
+            "default": 0
+          },
+          "coverage": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage",
+            "description": "覆盖率披露 {L1,L2,L3,total,L1_pct,...}，与 eval_report 同源"
+          },
+          "mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mape",
+            "description": "本次任务的加权 MAPE（百分比）"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "timing": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timing",
+            "description": "🆕 EP-5：本次任务的真实分段耗时（与 metrics.timing_json 同源）。执行页 UX-P07-01 要求「一眼看出哪一段最贵」，而同步 API-12 下前端在任务运行期间拿不到 task_id（响应即终态），无法轮询 API-13；故直接把真实分段耗时随响应返回，完成后用它绘制时间轴。"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "E_TIMEOUT",
+                  "E_TOO_MANY_SERIES",
+                  "E_INFER_FAIL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_msg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Msg"
+          },
+          "completed_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Stage",
+            "description": "软失败时已完成到的阶段（validate/preprocess/features/inference/metrics）"
+          },
+          "suggestions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestions",
+            "description": "`UX-P07-05` 要求的三条处置建议"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status",
+          "model_version",
+          "series_count",
+          "estimated_ms"
+        ],
+        "title": "CreateTaskResponse",
+        "description": "`API-12` 响应。\n\n⚠️ `EP-5` 契约修正（两处，均为「让响应能承载文档已要求的信息」）：\n\n① **`status` 取值域扩为四态**。原文写 `Literal[\"created\", \"running\"]`，\n   但本接口是**同步执行**的（§5.6「📌 同步语义：60 秒内必然返回」），\n   返回时任务已进入终态；且 `API-12-2` 明确要求「超预算时**返回** `code: 0`\n   但**任务状态为 `failed`**」。若严格只允许两个值，pydantic 会拒绝\n   `succeeded` / `failed` 的响应体，接口直接 500 —— 契约与自身语义打架。\n\n② **补齐软失败与结果摘要字段**。文档 `API-12-2` 要求「在 `data` 中给出\n   已完成阶段与建议」，`FR-MOD-10` 要求披露设备回退。这些字段此前没进模型，\n   而 `AppBase` 走 pydantic 默认的 `extra='ignore'`，**多余键会被静默丢弃**\n   —— 于是「任务失败的原因」在前端永远是空的。"
+      },
+      "DatasetBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "sku_count": {
+            "type": "integer",
+            "title": "Sku Count"
+          },
+          "warehouse_count": {
+            "type": "integer",
+            "title": "Warehouse Count"
+          },
+          "date_start": {
+            "type": "string",
+            "title": "Date Start"
+          },
+          "date_end": {
+            "type": "string",
+            "title": "Date End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "file_name",
+          "row_count",
+          "sku_count",
+          "warehouse_count",
+          "date_start",
+          "date_end"
+        ],
+        "title": "DatasetBrief"
+      },
+      "DatasetDetailResponse": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/DatasetSummary"
+          },
+          "level_preview": {
+            "$ref": "#/components/schemas/LevelPreview"
+          },
+          "estimated_ms": {
+            "type": "integer",
+            "title": "Estimated Ms"
+          },
+          "over_budget_risk": {
+            "type": "boolean",
+            "title": "Over Budget Risk"
+          },
+          "estimate_by_horizon": {
+            "items": {
+              "$ref": "#/components/schemas/HorizonEstimate"
+            },
+            "type": "array",
+            "title": "Estimate By Horizon"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "level_preview",
+          "estimated_ms",
+          "over_budget_risk"
+        ],
+        "title": "DatasetDetailResponse",
+        "description": "`API-09` 响应：数据集概要 + 分级预判 + 耗时预估。"
+      },
+      "DatasetPreview": {
+        "properties": {
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "shown": {
+            "type": "integer",
+            "title": "Shown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "columns",
+          "rows",
+          "total",
+          "shown"
+        ],
+        "title": "DatasetPreview"
+      },
+      "DatasetSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "file_size": {
+            "type": "integer",
+            "title": "File Size"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "sku_count": {
+            "type": "integer",
+            "title": "Sku Count"
+          },
+          "warehouse_count": {
+            "type": "integer",
+            "title": "Warehouse Count"
+          },
+          "valid_series_count": {
+            "type": "integer",
+            "title": "Valid Series Count"
+          },
+          "date_start": {
+            "type": "string",
+            "title": "Date Start"
+          },
+          "date_end": {
+            "type": "string",
+            "title": "Date End"
+          },
+          "gap_filled": {
+            "type": "integer",
+            "title": "Gap Filled",
+            "default": 0
+          },
+          "gap_count": {
+            "type": "integer",
+            "title": "Gap Count",
+            "default": 0
+          },
+          "is_sample": {
+            "type": "integer",
+            "title": "Is Sample",
+            "default": 0
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 1
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "file_name",
+          "file_size",
+          "row_count",
+          "sku_count",
+          "warehouse_count",
+          "valid_series_count",
+          "date_start",
+          "date_end",
+          "created_at"
+        ],
+        "title": "DatasetSummary"
+      },
+      "Distribution": {
+        "properties": {
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
+          "p75": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P75"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90"
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          },
+          "over_count": {
+            "type": "integer",
+            "title": "Over Count"
+          },
+          "threshold": {
+            "type": "number",
+            "title": "Threshold",
+            "default": 20.0
+          },
+          "buckets": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buckets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "over_count"
+        ],
+        "title": "Distribution",
+        "description": "逐序列 MAPE 分布。\n\n🔒 分位数允许为 null：没有可评估序列时 `series_mape_distribution` 返回\n   全 NaN，落库为 NULL。同样不可声明为 `float`（见 `MetricBundle` 说明）。"
+      },
+      "GapWarning": {
+        "properties": {
+          "has_gap": {
+            "type": "boolean",
+            "title": "Has Gap"
+          },
+          "gap_count": {
+            "type": "integer",
+            "title": "Gap Count",
+            "default": 0
+          },
+          "ranges": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Ranges"
+          },
+          "interpolated": {
+            "type": "boolean",
+            "title": "Interpolated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "has_gap"
+        ],
+        "title": "GapWarning"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HistoryItem": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "task_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "granularity": {
+            "type": "string",
+            "title": "Granularity"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "dataset_name": {
+            "type": "string",
+            "title": "Dataset Name"
+          },
+          "series_total": {
+            "type": "integer",
+            "title": "Series Total"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "device_fallback": {
+            "type": "integer",
+            "title": "Device Fallback",
+            "default": 0
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "weighted_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mape"
+          },
+          "weighted_mae": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mae"
+          },
+          "weighted_rmse": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Rmse"
+          },
+          "mae_improve_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mae Improve Pct"
+          },
+          "rmse_improve_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rmse Improve Pct"
+          },
+          "series_pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Pass Rate"
+          },
+          "is_over_threshold": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Over Threshold"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status",
+          "granularity",
+          "horizon",
+          "dataset_name",
+          "series_total",
+          "model_version",
+          "created_at"
+        ],
+        "title": "HistoryItem",
+        "description": "对应数据库视图 v_task_summary，避免前端多次拼接。"
+      },
+      "HistoryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 20
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "HistoryPage",
+        "description": "`API-17` 响应体。"
+      },
+      "HorizonEstimate": {
+        "properties": {
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "estimated_ms": {
+            "type": "integer",
+            "title": "Estimated Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "horizon",
+          "estimated_ms"
+        ],
+        "title": "HorizonEstimate",
+        "description": "某一预测步长下的端到端预估耗时（`API-09` / `UX-P06-06`）。\n\n⚠️ 与 `estimated_ms` 是**两个不同的量**，不可互相替代：\n  - `estimated_ms`           = 单遍算法评测（`eval_report.timing_ms`）按序列折算，\n                               用来与「算法基准」对照，`EP-3`/`EP-4` 已钉住；\n  - `estimate_by_horizon[*]` = **真实任务**的端到端预估（两遍流水线 + 逐序列\n                               滚动 + 落库），随步长变化。参数页展示的是后者。"
+      },
+      "LevelPreview": {
+        "properties": {
+          "L1": {
+            "type": "integer",
+            "title": "L1"
+          },
+          "L2": {
+            "type": "integer",
+            "title": "L2"
+          },
+          "L3": {
+            "type": "integer",
+            "title": "L3"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "L1",
+          "L2",
+          "L3",
+          "total"
+        ],
+        "title": "LevelPreview",
+        "description": "序列三级分级预判（`FR-FEA-09`）—— 参数页右栏的数据源（`API-09`）。\n\n字段名保持 `L1/L2/L3` 大写：与 `algo/classify.py` 的 `LevelCounts`、\n前端 `types.ts` 以及原型 `params.html` 的展示文案四处同名同源。"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "LoginResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "bearer"
+            ],
+            "const": "bearer",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "有效期，单位秒"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in",
+          "user"
+        ],
+        "title": "LoginResponse"
+      },
+      "MapeTrendPoint": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "task_name": {
+            "type": "string",
+            "title": "Task Name"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "weighted_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mape"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "task_name",
+          "created_at",
+          "status"
+        ],
+        "title": "MapeTrendPoint",
+        "description": "`API-22` 折线点。`weighted_mape` 可空（任务未成功 → 无 metrics）。"
+      },
+      "MetricBundle": {
+        "properties": {
+          "weighted_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mape"
+          },
+          "weighted_mae": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Mae"
+          },
+          "weighted_rmse": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighted Rmse"
+          },
+          "baseline_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Mape"
+          },
+          "baseline_mae": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Mae"
+          },
+          "baseline_rmse": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Rmse"
+          },
+          "mae_improve_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mae Improve Pct"
+          },
+          "rmse_improve_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rmse Improve Pct"
+          },
+          "series_evaluated": {
+            "type": "integer",
+            "title": "Series Evaluated"
+          },
+          "series_passed": {
+            "type": "integer",
+            "title": "Series Passed"
+          },
+          "series_pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Pass Rate"
+          },
+          "l1_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L1 Mape"
+          },
+          "l2_mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L2 Mape"
+          }
+        },
+        "type": "object",
+        "required": [
+          "series_evaluated",
+          "series_passed"
+        ],
+        "title": "MetricBundle",
+        "description": "与 outputs/eval_report.json 的 metrics 段一一对应，保证同源可核对。\n\n🔒 **除 `series_evaluated` / `series_passed` 外全部允许为 null**。\n   这不是宽松设计，而是必需：`compute_task_metrics` 在**没有任何可评估\n   序列**时（`levels_for_main=(\"L1\",)` 且 L1 数量为 0 —— 例如用户上传的\n   数据全是 5 天的短序列，全部落入 L2/L3）会把所有误差指标置为 NaN，\n   落库时经 `_f()` 转成 NULL。此时若声明成 `float`，pydantic 会抛\n   ValidationError → `API-14` 返回 500，**整个结果页白屏**。\n\n   ⚠️ 这条分支在示例数据集上永远走不到（L1=81），只有上传稀疏数据\n      才会触发 —— `verify_ep6_api.py` 的 ⑥ 用例专门构造它。\n\n   前端契约：拿到 null 时显示「—」并把该指标判为「无法评估」，\n   **不得**显示 0（0 会被读成「误差为零」，比空白更糟）。"
+      },
+      "Paginated_PredictionRow_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PredictionRow"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total",
+          "pages"
+        ],
+        "title": "Paginated[PredictionRow]"
+      },
+      "PredictionResultResponse": {
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/TaskBrief"
+          },
+          "dataset": {
+            "$ref": "#/components/schemas/DatasetBrief"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MetricBundle"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "distribution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Distribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timing_ms": {
+            "$ref": "#/components/schemas/TimingMs"
+          },
+          "is_over_threshold": {
+            "type": "boolean",
+            "title": "Is Over Threshold"
+          },
+          "eval_note": {
+            "type": "string",
+            "title": "Eval Note",
+            "description": "评估前提，必须原样展示（FR-MOD-13）：本结果使用预训练模型推理，未针对本次输入数据微调。"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesCurve"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "detail_total": {
+            "type": "integer",
+            "title": "Detail Total",
+            "default": 0
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "task",
+          "dataset",
+          "metrics",
+          "coverage",
+          "timing_ms",
+          "is_over_threshold",
+          "eval_note"
+        ],
+        "title": "PredictionResultResponse"
+      },
+      "PredictionRow": {
+        "properties": {
+          "sku_id": {
+            "type": "string",
+            "title": "Sku Id"
+          },
+          "warehouse_id": {
+            "type": "string",
+            "title": "Warehouse Id"
+          },
+          "forecast_date": {
+            "type": "string",
+            "title": "Forecast Date"
+          },
+          "predicted_value": {
+            "type": "number",
+            "title": "Predicted Value"
+          },
+          "actual_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Value"
+          },
+          "baseline_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Value"
+          },
+          "granularity_level": {
+            "type": "string",
+            "enum": [
+              "L1",
+              "L2",
+              "L3"
+            ],
+            "title": "Granularity Level"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "error_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku_id",
+          "warehouse_id",
+          "forecast_date",
+          "predicted_value",
+          "granularity_level"
+        ],
+        "title": "PredictionRow"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 8,
+            "title": "Password"
+          },
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "RegisterResponse": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email"
+        ],
+        "title": "RegisterResponse"
+      },
+      "ResetPasswordRequest": {
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 8,
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_password"
+        ],
+        "title": "ResetPasswordRequest",
+        "description": "`API-25` 重置密码。\n\n🔒 强度规则与 `RegisterRequest` **完全同源**（≥8 位、含字母与数字、\n   ≤72 字节）：管理员重置出来的密码必须满足与用户自己注册一样的门槛，\n   否则会出现「管理员设的密码比用户能设的还弱」。"
+      },
+      "ResetPasswordResponse": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "token_version": {
+            "type": "integer",
+            "title": "Token Version"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "token_version",
+          "message"
+        ],
+        "title": "ResetPasswordResponse",
+        "description": "`API-25` 重置结果。\n\n🔒 返回 `token_version`（已 +1）是刻意的：让管理员能确认\n   「旧登录态确实全部失效了」，而不必自己去查库。"
+      },
+      "ResolveGapRequest": {
+        "properties": {
+          "dataset_id": {
+            "type": "integer",
+            "title": "Dataset Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "interpolate",
+              "abort"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_id",
+          "action"
+        ],
+        "title": "ResolveGapRequest",
+        "description": "FR-UPL-13：断档处置必须由用户显式选择，系统不得自动继续。"
+      },
+      "SeriesCurve": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "sku_id": {
+            "type": "string",
+            "title": "Sku Id"
+          },
+          "warehouse_id": {
+            "type": "string",
+            "title": "Warehouse Id"
+          },
+          "granularity_level": {
+            "type": "string",
+            "enum": [
+              "L1",
+              "L2",
+              "L3"
+            ],
+            "title": "Granularity Level"
+          },
+          "mape": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mape"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed",
+            "default": false
+          },
+          "forecast_dates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Forecast Dates"
+          },
+          "predicted": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Predicted"
+          },
+          "actual": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual"
+          },
+          "baseline": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Baseline"
+          },
+          "history_dates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "History Dates"
+          },
+          "history_sales": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "History Sales"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "sku_id",
+          "warehouse_id",
+          "granularity_level",
+          "forecast_dates",
+          "predicted",
+          "baseline",
+          "history_dates",
+          "history_sales"
+        ],
+        "title": "SeriesCurve"
+      },
+      "SwitchModelRequest": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "SwitchModelRequest",
+        "description": "`API-29` 切换启用版本。"
+      },
+      "SwitchModelResponse": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "changed": {
+            "type": "boolean",
+            "title": "Changed",
+            "default": false
+          },
+          "previous_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Version"
+          },
+          "env_match": {
+            "type": "boolean",
+            "title": "Env Match",
+            "default": true
+          },
+          "reloaded": {
+            "type": "boolean",
+            "title": "Reloaded",
+            "default": false
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "message"
+        ],
+        "title": "SwitchModelResponse",
+        "description": "`API-29` 切换结果。\n\n🔒 `warnings` **不可省**：`BE-ADM-03` 要求切换后校验与 `.env` 一致，\n   不一致时接口仍返回成功（数据确实切了），但必须把「需要改 .env\n   并重启」显式告诉前端 —— 否则就是静默故障。"
+      },
+      "TaskBrief": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "task_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "granularity": {
+            "type": "string",
+            "title": "Granularity",
+            "default": "warehouse_sku"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          },
+          "device_fallback": {
+            "type": "integer",
+            "title": "Device Fallback",
+            "default": 0
+          },
+          "series_total": {
+            "type": "integer",
+            "title": "Series Total"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_msg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Msg"
+          },
+          "completed_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Stage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "horizon",
+          "model_version",
+          "device",
+          "series_total",
+          "duration_ms",
+          "created_at"
+        ],
+        "title": "TaskBrief"
+      },
+      "TaskStatusResponse": {
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "stage_index": {
+            "type": "integer",
+            "title": "Stage Index",
+            "default": 0
+          },
+          "stage_total": {
+            "type": "integer",
+            "title": "Stage Total",
+            "default": 5
+          },
+          "progress_pct": {
+            "type": "number",
+            "title": "Progress Pct",
+            "default": 0.0
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cuda",
+                  "cpu"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "device_fallback": {
+            "type": "integer",
+            "title": "Device Fallback",
+            "default": 0
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "title": "Elapsed Ms",
+            "default": 0
+          },
+          "budget_ms": {
+            "type": "integer",
+            "title": "Budget Ms",
+            "default": 60000
+          },
+          "series_count": {
+            "type": "integer",
+            "title": "Series Count",
+            "default": 0
+          },
+          "l1_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L1 Count"
+          },
+          "l2_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L2 Count"
+          },
+          "l3_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L3 Count"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_msg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Msg"
+          },
+          "completed_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Stage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status"
+        ],
+        "title": "TaskStatusResponse"
+      },
+      "TimingMs": {
+        "properties": {
+          "preprocess_ms": {
+            "type": "integer",
+            "title": "Preprocess Ms"
+          },
+          "features_ms": {
+            "type": "integer",
+            "title": "Features Ms"
+          },
+          "inference_ms": {
+            "type": "integer",
+            "title": "Inference Ms"
+          },
+          "metrics_ms": {
+            "type": "integer",
+            "title": "Metrics Ms"
+          },
+          "total_ms": {
+            "type": "integer",
+            "title": "Total Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "preprocess_ms",
+          "features_ms",
+          "inference_ms",
+          "metrics_ms",
+          "total_ms"
+        ],
+        "title": "TimingMs"
+      },
+      "UpdateUserRequest": {
+        "properties": {
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "old_password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Password"
+          },
+          "new_password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "title": "UpdateUserRequest"
+      },
+      "UploadDatasetResponse": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/DatasetSummary"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/DatasetPreview"
+          },
+          "series_count": {
+            "type": "integer",
+            "title": "Series Count"
+          },
+          "series_limit": {
+            "type": "integer",
+            "title": "Series Limit",
+            "default": 1000
+          },
+          "gap_warning": {
+            "$ref": "#/components/schemas/GapWarning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "preview",
+          "series_count",
+          "gap_warning"
+        ],
+        "title": "UploadDatasetResponse"
+      },
+      "UserProfile": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "title": "Role",
+            "default": "user"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "created_at"
+        ],
+        "title": "UserProfile"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WorkbenchSummary": {
+        "properties": {
+          "is_guest": {
+            "type": "boolean",
+            "title": "Is Guest",
+            "default": false
+          },
+          "stats": {
+            "type": "object",
+            "title": "Stats"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryItem"
+            },
+            "type": "array",
+            "title": "Recent"
+          },
+          "has_dataset": {
+            "type": "boolean",
+            "title": "Has Dataset",
+            "default": false
+          },
+          "has_model": {
+            "type": "boolean",
+            "title": "Has Model",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "WorkbenchSummary",
+        "description": "`UX-P04` 工作台概览。"
+      }
+    }
+  }
+}

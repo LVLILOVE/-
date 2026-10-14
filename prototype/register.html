@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注册 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .auth-wrap { min-height: 100vh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,480px); }
+  @media (max-width: 900px) { .auth-wrap { grid-template-columns: 1fr; } .auth-aside { display: none; } }
+  .auth-aside {
+    padding: 2.5rem; display: flex; flex-direction: column; justify-content: center;
+    background:
+      radial-gradient(900px 500px at 12% 8%, oklch(0.62 0.145 205 / .16), transparent 62%),
+      radial-gradient(700px 420px at 88% 92%, oklch(0.66 0.16 265 / .14), transparent 60%),
+      var(--bg-subtle);
+    border-right: 1px solid var(--border);
+  }
+  .auth-aside .aa-inner { max-width: 440px; }
+  .auth-aside h1 { font-size: 1.75rem; letter-spacing: -.02em; margin-bottom: .75rem; }
+  .auth-aside h1 em {
+    font-style: normal;
+    background: linear-gradient(100deg, var(--primary), oklch(0.68 0.16 265));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .auth-aside p { color: var(--text-2); font-size: .875rem; line-height: 1.8; margin-bottom: 1.5rem; }
+  .privacy-box {
+    margin-top: 1.5rem; padding: .875rem 1rem; border-radius: var(--radius-sm);
+    background: var(--info-soft); border: 1px solid oklch(0.68 0.13 250 / .32);
+    font-size: .75rem; line-height: 1.75; color: var(--text-2);
+  }
+  .privacy-box .pb-title {
+    display: flex; align-items: center; gap: .375rem; font-weight: 700;
+    color: var(--text); margin-bottom: .4375rem;
+  }
+  .privacy-box .pb-title svg { width: 14px; height: 14px; color: var(--info); }
+
+  .auth-main { display: flex; align-items: center; justify-content: center; padding: 2rem 1.5rem; }
+  .auth-card { width: 100%; max-width: 392px; }
+  .auth-card .ac-head { margin-bottom: 1.375rem; }
+  .auth-card .ac-head h2 { font-size: 1.25rem; margin-bottom: .25rem; }
+  .auth-card .ac-head p { font-size: .8125rem; color: var(--text-3); }
+  .auth-foot {
+    margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    font-size: .75rem; color: var(--text-3); text-align: center;
+  }
+  .pw-meter { display: flex; gap: 3px; margin-top: .4375rem; }
+  .pw-meter i { height: 3px; flex: 1; border-radius: 99px; background: var(--border-strong); transition: background-color .25s; }
+  .pw-meter.s1 i:nth-child(-n+1) { background: var(--danger); }
+  .pw-meter.s2 i:nth-child(-n+2) { background: var(--warning); }
+  .pw-meter.s3 i:nth-child(-n+3) { background: oklch(0.72 0.14 130); }
+  .pw-meter.s4 i { background: var(--success); }
+  .pw-rules { margin-top: .5rem; display: flex; flex-direction: column; gap: .1875rem; }
+  .pw-rule { display: flex; align-items: center; gap: .375rem; font-size: .6875rem; color: var(--text-3); }
+  .pw-rule .pr-dot {
+    width: 12px; height: 12px; border-radius: 50%; flex: none;
+    border: 1px solid var(--border-strong); display: grid; place-items: center;
+  }
+  .pw-rule .pr-dot svg { width: 8px; height: 8px; opacity: 0; }
+  .pw-rule.ok { color: oklch(0.58 0.15 155); }
+  .pw-rule.ok .pr-dot { background: var(--success); border-color: var(--success); color: #fff; }
+  .pw-rule.ok .pr-dot svg { opacity: 1; }
+  html.dark .pw-rule.ok { color: oklch(0.82 0.15 155); }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <div class="aa-inner">
+      <a class="brand" href="index.html" style="margin-bottom:1.75rem">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8 4 5"/></svg></span>
+        <span>销量预测</span>
+      </a>
+      <h1>三步开始你的<br><em>第一次预测</em></h1>
+      <p>
+        注册后上传历史销量 CSV，系统会自动完成字段校验、数据清洗与预测，
+        无需任何算法背景。也可先加载内置示例数据零成本试用。
+      </p>
+      <div class="privacy-box">
+        <div class="pb-title"><span data-icon="shield"></span>关于你的数据</div>
+        上传的销量数据<strong>仅用于本次预测计算</strong>，不作其他用途；
+        原始文件按用户目录隔离存储，其他用户无法访问；
+        传输全程启用 HTTPS。该说明同时写入用户协议。
+      </div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="ac-head">
+        <h2>创建账号</h2>
+        <p>已有账号？<a href="login.html">直接登录</a></p>
+      </div>
+
+      <!-- 状态切换（原型演示用） -->
+      <div class="row wrap mb-2" style="gap:.375rem">
+        <span class="t-xs t-muted">演示状态：</span>
+        <button class="state-pill active" data-state="normal">正常</button>
+        <button class="state-pill" data-state="weak">弱密码</button>
+        <button class="state-pill" data-state="dup">邮箱已注册</button>
+      </div>
+
+      <div class="alert alert-danger hidden" id="reg-alert">
+        <span data-icon="alert"></span>
+        <div class="alert-body">
+          <div class="alert-title" id="ra-title"></div>
+          <p id="ra-text"></p>
+        </div>
+      </div>
+
+      <form onsubmit="return false" novalidate>
+        <div class="field">
+          <label for="nickname">昵称</label>
+          <input class="input" id="nickname" placeholder="用于界面显示，如 王琳" value="王琳">
+        </div>
+
+        <div class="field">
+          <label for="email">邮箱 <span class="t-muted t-xs">（将作为登录账号）</span></label>
+          <input class="input" type="email" id="email" placeholder="you@example.com"
+                 autocomplete="username" value="newoffice@shop-demo.cn">
+          <div class="hint">邮箱全局唯一，注册后不可修改</div>
+        </div>
+
+        <div class="field">
+          <label for="password">密码</label>
+          <input class="input" type="password" id="password" placeholder="至少 8 位，含字母与数字"
+                 autocomplete="new-password" value="demo1234" oninput="checkPw(this.value)">
+          <div class="pw-meter" id="pw-meter"><i></i><i></i><i></i><i></i></div>
+          <div class="pw-rules">
+            <div class="pw-rule" id="rule-len"><span class="pr-dot" data-icon="check"></span>长度不少于 8 位</div>
+            <div class="pw-rule" id="rule-alpha"><span class="pr-dot" data-icon="check"></span>至少包含 1 个字母</div>
+            <div class="pw-rule" id="rule-num"><span class="pr-dot" data-icon="check"></span>至少包含 1 个数字</div>
+          </div>
+          <div class="field-error hidden" id="err-pw">
+            <span data-icon="alert"></span>
+            <span id="err-pw-text">密码需至少 8 位且同时包含字母与数字</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password2">确认密码</label>
+          <input class="input" type="password" id="password2" placeholder="再次输入密码"
+                 autocomplete="new-password" value="demo1234">
+        </div>
+
+        <div class="field">
+          <label class="switch" style="gap:.5rem;align-items:flex-start">
+            <input type="checkbox" id="agree" checked style="margin-top:3px">
+            <span class="switch-track" style="margin-top:3px"></span>
+            <span class="switch-text t-sm" style="line-height:1.6">
+              我已阅读并同意《用户协议》与《数据用途说明》
+            </span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" id="reg-btn" type="submit">
+          <span id="reg-btn-text">创建账号</span>
+        </button>
+      </form>
+
+      <div class="auth-foot">
+        注册后自动登录，可直接进入工作台
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/demo-data.js"></script>
+<script>
+  document.querySelectorAll('[data-icon]').forEach(function (el) {
+    var svg = ICONS[el.getAttribute('data-icon')];
+    if (svg) el.innerHTML = svg;
+  });
+
+  var alertBox = document.getElementById('reg-alert');
+  var state = 'normal';
+
+  /* 密码强度实时校验（对应 PRD FR-USR-02） */
+  function checkPw(v) {
+    var okLen = v.length >= 8;
+    var okAlpha = /[A-Za-z]/.test(v);
+    var okNum = /\d/.test(v);
+
+    document.getElementById('rule-len').classList.toggle('ok', okLen);
+    document.getElementById('rule-alpha').classList.toggle('ok', okAlpha);
+    document.getElementById('rule-num').classList.toggle('ok', okNum);
+
+    // 强度分级：满足基础规则后按长度与字符多样性加分
+    var score = 0;
+    if (okLen) score++;
+    if (okAlpha && okNum) score++;
+    if (v.length >= 12) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    var meter = document.getElementById('pw-meter');
+    meter.className = 'pw-meter' + (v ? ' s' + Math.max(1, score) : '');
+
+    var invalid = !(okLen && okAlpha && okNum);
+    document.getElementById('password').setAttribute('aria-invalid', invalid && state === 'weak' ? 'true' : 'false');
+    return !invalid;
+  }
+  checkPw(document.getElementById('password').value);
+
+  function setState(s) {
+    state = s;
+    document.querySelectorAll('.state-pill').forEach(function (p) {
+      p.classList.toggle('active', p.dataset.state === s);
+    });
+    alertBox.className = 'alert alert-danger hidden';
+    document.getElementById('err-pw').className = 'field-error hidden';
+    document.getElementById('reg-btn').disabled = false;
+    document.getElementById('reg-btn-text').textContent = '创建账号';
+    document.getElementById('password').setAttribute('aria-invalid', 'false');
+
+    if (s === 'weak') {
+      document.getElementById('password').value = '12345678';
+      checkPw('12345678');
+      document.getElementById('password').setAttribute('aria-invalid', 'true');
+      document.getElementById('err-pw').className = 'field-error';
+      document.getElementById('err-pw-text').textContent =
+        '密码需至少 8 位且同时包含字母与数字，当前仅含数字';
+    }
+    if (s === 'dup') {
+      document.getElementById('email').setAttribute('aria-invalid', 'true');
+      alertBox.className = 'alert alert-danger';
+      document.getElementById('ra-title').textContent = '该邮箱已被注册';
+      document.getElementById('ra-text').textContent =
+        'newoffice@shop-demo.cn 已存在账号。可直接登录，或更换邮箱后重试。';
+    }
+  }
+
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.addEventListener('click', function () { setState(p.dataset.state); });
+  });
+
+  document.getElementById('reg-btn').addEventListener('click', function () {
+    if (this.disabled) return;
+    if (!checkPw(document.getElementById('password').value)) {
+      setState('weak'); return;
+    }
+    this.disabled = true;
+    document.getElementById('reg-btn-text').textContent = '创建中…';
+    setTimeout(function () { window.location.href = 'dashboard.html'; }, 900);
+  });
+</script>
+</body>
+</html>

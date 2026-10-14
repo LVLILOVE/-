@@ -1,0 +1,105 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>03 实现过程 · 阶段与门禁</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>11 阶段推进：每个阶段都有验收门禁</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>阶段表本身即答辩时可被逐条核对的清单</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 716, height: 512, flexDirection: 'column' }}>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-0</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>项目启动与范围冻结</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>需求清单 + 优先级</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-1</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>文档先行的设计与口径推导</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>PRD / 方案不分叉</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-2</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>数据接入与校验契约</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>仓库列缺失即拒</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-3</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>特征工程与预处理管线</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>插值 + 尖峰保护</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-4</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>接口契约与后端骨架</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>OpenAPI 可自动校验</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-5</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>LSTM 模型训练与调参</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>基线对比达标</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-6</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>前端页面与交互实现</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>13 页可走通</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-7</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>结果可视化与导出</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>CSV 含实际值与误差</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-8</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>用户体系与数据隔离</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>越权读返回 403</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46, borderBottom: '1px solid #E5E7EB' }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-9</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>性能、兼容与无障碍验收</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>真实浏览器渲染验证</Text>
+                </Box>
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 46 }}>
+                    <Text style={{ width: 92, fontSize: 18, color: '#1E4FA8', fontWeight: 'bold' }}>EP-10</Text>
+                    <Text style={{ flex: 1, fontSize: 19, color: '#1A2230' }}>文档交付与答辩准备</Text>
+                    <Text style={{ width: 198, fontSize: 15, color: '#8B97A8', textAlign: 'right' }}>六份文档口径统一</Text>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 484, height: 512, paddingLeft: 24, flexDirection: 'column' }}>
+                <Box style={{ height: 250, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 14, flexDirection: 'column' }}>
+                    <Box style={{ width: '100%', height: 196, borderRadius: 6, overflow: 'hidden', background: '#FFFFFF' }}>
+                        <Image src='assets/history.png' style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+                    </Box>
+                    <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 8 }}>历史记录页：任务状态与完成时间可回溯</Text>
+                </Box>
+
+                <Box style={{ height: 246, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 10, padding: '18px 20px', flexDirection: 'column', marginTop: 16 }}>
+                    <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>三道不可跳过的门禁</Text>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 44, marginTop: 10 }}>
+                        <Box style={{ width: 24, height: 24, background: '#1E4FA8', borderRadius: 5 }} />
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568', paddingLeft: 12 }}>接口契约可被脚本自动校验</Text>
+                    </Box>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 44 }}>
+                        <Box style={{ width: 24, height: 24, background: '#1E4FA8', borderRadius: 5 }} />
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568', paddingLeft: 12 }}>真实浏览器渲染验证后才可交付</Text>
+                    </Box>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', height: 44 }}>
+                        <Box style={{ width: 24, height: 24, background: '#1E4FA8', borderRadius: 5 }} />
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568', paddingLeft: 12 }}>指标必须样本外回测，不看训练集</Text>
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>11 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>

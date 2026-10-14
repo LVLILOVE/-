@@ -1,0 +1,41 @@
+数据集：C:\Users\Administrator\WorkBuddy\销量预测\outputs\models\demo_sales.csv（合成）
+  行数 14,305  商品 40  仓库 5
+  校验 + 清洗 604ms
+  分级：L1 81（71.7%）  L2 32（28.3%）  L3 0（0.0%）  共 113 条
+  特征：8,990 样本 × 21 窗口 × 11 特征  1160ms  （用 70 条 L1 序列）
+        目标模式 resid  残差 std 0.832（≈1 表示归一化正确）
+训练：hidden=48 layers=2 window=21 device=cuda
+    epoch  10  train 0.486773  val 0.563756
+    epoch  20  train 0.441181  val 0.513416
+    epoch  30  train 0.384484  val 0.502051
+    epoch  40  train 0.335501  val 0.485093
+    epoch  50  train 0.302008  val 0.501012
+    早停于 epoch 51（最佳 epoch 31，验证损失 0.474054）
+  完成：51 epoch（最佳 31）  41.70s  设备 cuda  参数量 31,729
+  ⏱ 训练耗时仅供离线参考 —— 线上不做训练（1 分钟 SLA）
+
+===== 离线评估（测试段）=====
+  加权 MAPE       14.07%   （阈值 ≤ 20.0%）  ✓
+  加权 MAE         1.33    基线 1.81  降低 26.54%  ✓
+  加权 RMSE        3.06    基线 4.16  降低 26.63%  ✓
+  达标序列占比    81.48%   (66/81)  ✓
+  分级 MAPE      L1 14.07%   L2 nan%
+  逐序列分布     中位 14.64%  P75 17.71%  P90 22.58%  最大 82.72%  超标 15 条
+  综合判定：✅ 达标
+  评估耗时 8837ms
+
+权重：outputs\models\lstm_v1.pt
+报告：outputs\models\lstm_v1.report.json
+总耗时 52.40s
+
+----- 可写入 model_registry 的记录 -----
+{
+  "version": "lstm_v1",
+  "path": "outputs\\models\\lstm_v1.pt",
+  "n_features": 11,
+  "hidden_size": 48,
+  "num_layers": 2,
+  "window": 21,
+  "weighted_mape": 14.07,
+  "is_active": 1
+}

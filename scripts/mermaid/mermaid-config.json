@@ -1,0 +1,23 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Microsoft YaHei, Segoe UI, sans-serif",
+    "fontSize": "14px",
+    "primaryColor": "#E6F1FB",
+    "primaryTextColor": "#0C447C",
+    "primaryBorderColor": "#185FA5",
+    "lineColor": "#5F5E5A",
+    "tertiaryColor": "#F1EFE8",
+    "attributeBackgroundColorOdd": "#F6FAFE",
+    "attributeBackgroundColorEven": "#FFFFFF",
+    "relationColor": "#185FA5",
+    "relationLabelBackground": "#FFF7E3",
+    "relationLabelColor": "#5F5E5A"
+  },
+  "er": {
+    "layoutDirection": "TB",
+    "entityPadding": 14,
+    "useMaxWidth": false,
+    "diagramPadding": 18
+  }
+}

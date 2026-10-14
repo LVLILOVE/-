@@ -1,0 +1,50 @@
+%% FIG-03 预测执行域 ER 图（关键字段展开）
+erDiagram
+    datasets ||--o{ tasks : "1:N 作为输入 RESTRICT"
+    tasks ||--o{ predictions : "1:N 产出明细 CASCADE"
+    tasks ||--|| metrics : "1:1 产出指标 CASCADE"
+
+    tasks {
+        INTEGER id PK "主键，自增"
+        INTEGER user_id FK "归属；0 表示游客"
+        INTEGER dataset_id FK "输入数据集 RESTRICT"
+        TEXT task_name "任务名，空则后端生成"
+        TEXT granularity "固定 warehouse_sku"
+        INTEGER horizon "预测步长 7/14/30"
+        TEXT status "created/running/succeeded/failed"
+        TEXT error_code "E_TIMEOUT 等失败码"
+        TEXT model_version "必填，引用启用模型"
+        INTEGER series_total "待预测序列数"
+        INTEGER l1_count "L1 模型推理条数"
+        INTEGER l2_count "L2 规则降级条数"
+        INTEGER l3_count "L3 不可预测条数"
+        INTEGER duration_ms "端到端耗时，验证 60s"
+        INTEGER is_deleted "软删除标记"
+    }
+
+    predictions {
+        INTEGER id PK "主键，自增"
+        INTEGER task_id FK "所属任务 CASCADE"
+        TEXT sku_id "商品编码"
+        TEXT warehouse_id "仓库编码，不可空"
+        TEXT forecast_date "预测目标日期"
+        REAL predicted_value "预测销量"
+        REAL actual_value "回测真值，仅回测有"
+        REAL baseline_value "移动平均基线值"
+        TEXT granularity_level "L1/L2/L3 建模层级"
+    }
+
+    metrics {
+        INTEGER id PK "主键，自增"
+        INTEGER task_id UK "一对一，UNIQUE"
+        REAL mape "加权 MAPE 硬指标 20"
+        REAL mae "加权 MAE"
+        REAL rmse "加权 RMSE"
+        REAL baseline_mae "移动平均基线 MAE"
+        REAL mae_improve_pct "MAE 相对基线降幅 硬指标 15"
+        REAL rmse_improve_pct "RMSE 相对基线降幅"
+        REAL series_pass_rate "达标序列占比 辅助 60"
+        REAL l1_mape "L1 分组 MAPE"
+        REAL l2_mape "L2 分组 MAPE"
+        INTEGER is_over_threshold "加权 MAPE 是否超阈值"
+    }

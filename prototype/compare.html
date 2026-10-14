@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨任务对比 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 跨任务对比</div>
+      <div class="row-between wrap" style="align-items:flex-end;gap:.75rem">
+        <div>
+          <h1 style="margin:0">跨任务对比</h1>
+          <p class="lede" style="margin:.375rem 0 0">
+            最多同时对比 <strong>4 个</strong>任务，用于评估不同步长 / 参数的预测效果差异。
+            所有任务必须使用<strong>同一份数据文件</strong>才具有可比性。
+          </p>
+        </div>
+        <button class="btn btn-secondary" onclick="exportCompare()">导出对比表</button>
+      </div>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="normal">已选 3 个任务</button>
+      <button class="state-pill" data-state="few">仅选 1 个（不足）</button>
+      <button class="state-pill" data-state="mismatch">数据文件不一致</button>
+      <button class="state-pill" data-state="empty">无可对比任务</button>
+    </div>
+
+    <div class="stack">
+
+      <!-- ============ 任务选择 ============ -->
+      <section class="card" id="card-pick">
+        <div class="card-head">
+          <h3>选择要对比的任务</h3>
+          <div class="right t-xs t-muted" id="pick-count">已选 3 / 4</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th style="width:36px"></th>
+                <th>任务</th>
+                <th>提交时间</th>
+                <th>步长</th>
+                <th>模型</th>
+                <th class="num">加权 MAPE</th>
+                <th class="num">基线提升</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="pick-body"></tbody>
+          </table>
+        </div>
+        <div class="alert alert-warning mt-3 hidden" id="mismatch-alert" style="margin-bottom:0">
+          <div class="alert-body">
+            <div class="alert-title">所选任务的数据文件不一致，对比结果不可信</div>
+            选中任务分别使用了 <code>item_store_feature_1010_1227.csv</code> 与
+            <code>item_store_feature_full.csv</code>。
+            不同数据的序列集合与时间范围不同，指标差异可能来自数据本身而非参数。
+            <div class="mt-1">建议：只对比使用同一份数据文件的任务。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 指标对比 ============ -->
+      <section class="card" id="card-metrics">
+        <div class="card-head">
+          <h3>指标对比</h3>
+          <div class="right t-xs t-muted">绿色 = 该行最优值</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data" id="cmp-table">
+            <thead id="cmp-head"></thead>
+            <tbody id="cmp-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 曲线对比 ============ -->
+      <section class="card" id="card-chart">
+        <div class="card-head">
+          <h3>预测曲线对比</h3>
+          <div class="right">
+            <select class="select" id="pick-series" style="font-size:.75rem;padding:.25rem .5rem">
+              <option value="0">上海仓 · 纯棉圆领短袖T恤 男</option>
+              <option value="1">广州仓 · 纯棉圆领短袖T恤 男</option>
+              <option value="2">北京仓 · 纯棉圆领短袖T恤 男</option>
+            </select>
+          </div>
+        </div>
+        <div id="chart-host"></div>
+        <div class="t-xs t-muted mt-2">
+          同一序列在不同步长下的预测形态对比。虚线表示预测段，颜色对应下方图例。
+          <strong>注意</strong>：不同任务的历史段一致（同一数据），差异只体现在预测段。
+        </div>
+      </section>
+
+      <!-- ============ 差异归因 ============ -->
+      <section class="card" id="card-diff">
+        <div class="card-head"><h3>差异归因</h3></div>
+        <div class="grid-2">
+          <div class="table-wrap">
+            <table class="fields">
+              <thead><tr><th>对比维度</th><th>结论</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>步长影响</td>
+                  <td>7 天任务的加权 MAPE <strong>14.6%</strong>，比 14 天（14.3%）略高，
+                      比 30 天（15.5%）低 0.9 个百分点。<strong>三档步长均可稳定达标</strong>，
+                      且长步长的误差增长被残差学习与滚动统计抑制在很小范围内。</td>
+                </tr>
+                <tr>
+                  <td>模型版本影响</td>
+                  <td>本次对比中模型版本一致（lstm_v1），未产生差异。</td>
+                </tr>
+                <tr>
+                  <td>节假日特征影响</td>
+                  <td>三个任务均开启节假日特征，未产生差异。</td>
+                </tr>
+                <tr>
+                  <td>达标情况</td>
+                  <td>7 / 14 / 30 天任务<strong>全部满足四项硬约束</strong>。其中 14 天任务的各项指标最均衡
+                      （MAPE 14.3%、达标占比 84.0%），可作为默认推荐配置。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div class="mini-grid">
+              <div class="mini-card">
+                <div class="mc-t">最优步长</div>
+                <div class="mc-v">14 天</div>
+                <div class="mc-d" style="color:var(--success)">MAPE 14.3%</div>
+              </div>
+              <div class="mini-card">
+                <div class="mc-t">步长 7 → 30 的 MAPE 增幅</div>
+                <div class="mc-v">+0.9 pt</div>
+                <div class="mc-d t-muted">残差学习抑制了误差累积</div>
+              </div>
+              <div class="mini-card">
+                <div class="mc-t">达标任务数</div>
+                <div class="mc-v">2 / 3</div>
+                <div class="mc-d t-muted">30 天任务未达标</div>
+              </div>
+              <div class="mini-card">
+                <div class="mc-t">耗时差异</div>
+                <div class="mc-v">21.9 s → 58.2 s</div>
+                <div class="mc-d" style="color:var(--warning)">30 天逼近 60 s 上限</div>
+              </div>
+            </div>
+            <div class="alert alert-success mt-3" style="margin-bottom:0">
+              <div class="alert-body">
+                <div class="alert-title">结论建议</div>
+                补货决策优先采用 <strong>7 天步长</strong> 的结果；14 天可用于双周备货计划；
+                <strong>30 天结果不建议直接采信</strong>，仅作趋势参考。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 不足 / 空态 ============ -->
+      <section class="card hidden" id="card-empty">
+        <div class="empty">
+          <div class="empty-icon" data-icon="compare"></div>
+          <h4 id="empty-title">至少需要选择 2 个任务才能对比</h4>
+          <p id="empty-desc">请在上方任务列表中勾选至少两个已完成的任务。任务状态为「失败」的记录不参与对比。</p>
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn btn-primary" onclick="setState('normal')">返回选择</button>
+            <a class="btn btn-secondary" href="history.html">查看全部历史任务</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 原型说明 ============ -->
+      <div class="spec-note">
+        <div class="sn-head">
+          <span class="sn-tag">原型说明</span>
+          <span>本页与 PRD 的对应关系</span>
+        </div>
+        <table class="sn-table">
+          <tr><td>多任务指标并排对比（最优值高亮）</td><td><code>FR-HIS-04</code></td></tr>
+          <tr><td>同一序列在不同任务下的曲线叠加</td><td><code>FR-VIS-09</code></td></tr>
+          <tr><td>数据文件不一致时给出不可比警告</td><td><code>FR-HIS-04</code> 附注</td></tr>
+          <tr><td>失败任务不参与对比</td><td><code>FR-HIS-06</code></td></tr>
+          <tr><td>最多 4 个任务的限制</td><td><code>FR-HIS-04</code> 附注</td></tr>
+          <tr><td>对比表导出</td><td><code>FR-HIS-03</code></td></tr>
+        </table>
+        <div class="sn-foot">埋点：<code>EV-CMP-01</code>（对比页访问）· <code>EV-CMP-02</code>（任务勾选）· <code>EV-CMP-03</code>（导出）</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+initShell('history.html');
+
+document.querySelectorAll('[data-icon]').forEach(function (el) {
+  var svg = ICONS[el.getAttribute('data-icon')];
+  if (svg) el.innerHTML = svg;
+});
+
+var COMPARABLE = HISTORY.filter(function (h) { return h.status === 'succeeded'; });
+var selected = ['T-20261008-0931', 'T-20261008-1412', 'T-20261007-1835'];
+
+var raw = buildDataset({ days: 200, endDate: BIZ.dateEnd, sparseSeed: 20261008 });
+var M = computeTaskMetrics(raw, 14);
+
+/* ---------- 选择列表 ---------- */
+function renderPick() {
+  document.getElementById('pick-body').innerHTML = COMPARABLE.map(function (h) {
+    var on = selected.indexOf(h.id) >= 0;
+    return '<tr>' +
+      '<td><input type="checkbox" data-id="' + h.id + '" ' + (on ? 'checked' : '') +
+      ' style="width:15px;height:15px;accent-color:var(--primary);cursor:pointer"></td>' +
+      '<td><div class="t-bold">' + h.name + '</div><div class="t-xs t-muted t-mono">' + h.id + '</div></td>' +
+      '<td class="t-mono t-xs">' + h.createdAt + '</td>' +
+      '<td>' + h.horizon + ' 天</td>' +
+      '<td class="t-mono t-xs">' + h.params.model + '</td>' +
+      '<td class="num t-mono" style="color:' + (h.weightedMape <= BIZ.weightedMapeLimit ? 'var(--success)' : 'var(--danger)') + '">' +
+      h.weightedMape.toFixed(1) + '%</td>' +
+      '<td class="num t-mono">↓ ' + h.maeImprove.toFixed(1) + '%</td>' +
+      '<td>' + statusBadge(h.status) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  document.querySelectorAll('#pick-body input[type=checkbox]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      if (cb.checked) {
+        if (selected.length >= 4) { cb.checked = false; alert('最多同时对比 4 个任务。'); return; }
+        selected.push(cb.dataset.id);
+      } else {
+        selected = selected.filter(function (x) { return x !== cb.dataset.id; });
+      }
+      document.getElementById('pick-count').textContent = '已选 ' + selected.length + ' / 4';
+      renderAll();
+    });
+  });
+}
+
+/* ---------- 指标对比表 ---------- */
+function renderCmp() {
+  var list = COMPARABLE.filter(function (h) { return selected.indexOf(h.id) >= 0; });
+  var head = '<tr><th>指标</th>' + list.map(function (h) {
+    return '<th class="num">' + h.horizon + ' 天<br><span class="t-xs t-muted" style="font-weight:400">' +
+      h.createdAt.slice(5, 10) + '</span></th>';
+  }).join('') + '<th>最优</th></tr>';
+  document.getElementById('cmp-head').innerHTML = head;
+
+  var rows = [
+    { k: '加权 MAPE', get: function (h) { return h.weightedMape; }, fmt: function (v) { return v.toFixed(1) + '%'; }, lower: true, limit: '≤ 20%' },
+    { k: '加权 MAE 相对基线提升', get: function (h) { return h.maeImprove; }, fmt: function (v) { return '↓ ' + v.toFixed(1) + '%'; }, lower: false, limit: '≥ 15%' },
+    { k: '加权 RMSE 相对基线提升', get: function (h) { return h.rmseImprove; }, fmt: function (v) { return '↓ ' + v.toFixed(1) + '%'; }, lower: false, limit: '≥ 15%' },
+    { k: '达标序列占比', get: function (h) { return h.seriesPassRate; }, fmt: function (v) { return v.toFixed(1) + '%'; }, lower: false, limit: '≥ 60%' },
+    { k: 'L1 / L2 / L3 序列数', get: function (h) { return null; }, raw: function (h) { return h.l1 + ' / ' + h.l2 + ' / ' + h.l3; }, lower: null },
+    { k: '端到端耗时', get: function (h) { return h.durationMs; }, fmt: function (v) { return (v / 1000).toFixed(1) + ' s'; }, lower: true, limit: '≤ 60 s' },
+    { k: '推理设备', get: function () { return null; }, raw: function (h) { return h.device === 'cuda' ? 'GPU' : 'CPU'; }, lower: null },
+  ];
+
+  document.getElementById('cmp-body').innerHTML = rows.map(function (r) {
+    var vals = list.map(r.get);
+    var comparable = vals.filter(function (v) { return v !== null; });
+    var best = comparable.length
+      ? (r.lower === true ? Math.min.apply(null, comparable) : r.lower === false ? Math.max.apply(null, comparable) : null)
+      : null;
+
+    var cells = list.map(function (h, i) {
+      var v = vals[i];
+      var txt = r.raw ? r.raw(h) : (v === null ? '—' : r.fmt(v));
+      var isBest = best !== null && v === best;
+      var style = isBest ? 'color:var(--success);font-weight:700' : '';
+      return '<td class="num t-mono" style="' + style + '">' + txt +
+        (isBest ? ' <span class="badge badge-success" style="font-size:.5625rem">最优</span>' : '') + '</td>';
+    }).join('');
+
+    var bestCell = best === null ? '<span class="t-muted">—</span>'
+      : '<span class="t-xs t-muted">' + (r.lower ? '越低越好' : '越高越好') + ' · ' + (r.limit || '') + '</span>';
+
+    return '<tr><td class="t-bold">' + r.k + '</td>' + cells + '<td>' + bestCell + '</td></tr>';
+  }).join('');
+}
+
+/* ---------- 曲线对比 ---------- */
+function renderChart() {
+  var list = COMPARABLE.filter(function (h) { return selected.indexOf(h.id) >= 0; });
+  var idx = Number(document.getElementById('pick-series').value);
+  var s = M.perSeries[idx];
+  var hist = s.observed.filter(function (p) { return p.value !== null; }).slice(-35);
+
+  var cols = ['--c1', '--c2', '--c5', '--c3'];
+  var series = [{
+    label: '历史销量（所有任务共用）',
+    color: cssVar('--text-3'),
+    points: hist.map(function (p) { return { date: p.date, value: p.value }; }),
+    width: 1.8,
+    opacity: 0.7,
+  }];
+
+  list.forEach(function (h, i) {
+    var fc = s.forecast.map(function (p) {
+      // 不同步长 → 只保留前 h 天，模拟步长差异
+      return p.h <= h.horizon ? { date: p.date, value: p.predict } : { date: p.date, value: null };
+    });
+    series.push({
+      label: h.horizon + ' 天 · MAPE ' + h.weightedMape.toFixed(1) + '%',
+      color: cssVar(cols[i % 4]),
+      dash: true,
+      points: fc,
+    });
+  });
+
+  document.getElementById('chart-host').innerHTML = multiLineChart({
+    series: series, height: 340, aria: '同一序列在不同步长下的预测对比',
+  });
+}
+
+document.getElementById('pick-series').addEventListener('change', renderChart);
+
+/* ---------- 状态 ---------- */
+function renderAll() {
+  var list = COMPARABLE.filter(function (h) { return selected.indexOf(h.id) >= 0; });
+  var show = function (id, v) { document.getElementById(id).classList.toggle('hidden', !v); };
+
+  if (list.length < 2) {
+    show('card-metrics', false); show('card-chart', false);
+    show('card-diff', false); show('card-empty', true);
+    document.getElementById('empty-title').textContent = '至少需要选择 2 个任务才能对比';
+    document.getElementById('empty-desc').textContent =
+      '当前只选中 ' + list.length + ' 个任务。请再勾选至少一个已完成的任务。';
+    return;
+  }
+  show('card-metrics', true); show('card-chart', true);
+  show('card-diff', true); show('card-empty', false);
+
+  var datasets = {};
+  list.forEach(function (h) { datasets[h.dataset] = 1; });
+  show('mismatch-alert', Object.keys(datasets).length > 1);
+
+  renderCmp();
+  renderChart();
+}
+
+function setState(s) {
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.classList.toggle('active', p.dataset.state === s);
+  });
+  ['card-pick', 'card-metrics', 'card-chart', 'card-diff', 'card-empty', 'mismatch-alert']
+    .forEach(function (id) { document.getElementById(id).classList.add('hidden'); });
+
+  if (s === 'few') {
+    selected = ['T-20261008-0931'];
+    document.getElementById('card-pick').classList.remove('hidden');
+    document.getElementById('pick-count').textContent = '已选 1 / 4';
+    renderPick(); renderAll();
+    return;
+  }
+  if (s === 'mismatch') {
+    selected = ['T-20261008-0931', 'T-20261007-1835'];
+    document.getElementById('card-pick').classList.remove('hidden');
+    document.getElementById('pick-count').textContent = '已选 2 / 4';
+    renderPick(); renderAll();
+    return;
+  }
+  if (s === 'empty') {
+    document.getElementById('card-empty').classList.remove('hidden');
+    document.getElementById('empty-title').textContent = '暂无可对比的历史任务';
+    document.getElementById('empty-desc').textContent =
+      '对比功能需要至少两个「已完成」状态的任务。当前没有符合条件的记录，请先完成至少两次预测。';
+    return;
+  }
+  selected = ['T-20261008-0931', 'T-20261008-1412', 'T-20261007-1835'];
+  document.getElementById('card-pick').classList.remove('hidden');
+  document.getElementById('pick-count').textContent = '已选 3 / 4';
+  renderPick(); renderAll();
+}
+
+function exportCompare() {
+  var list = COMPARABLE.filter(function (h) { return selected.indexOf(h.id) >= 0; });
+  exportCsv('compare.csv', list.map(function (h) {
+    return {
+      task_id: h.id, name: h.name, horizon_days: h.horizon, model: h.params.model,
+      dataset: h.dataset, series_count: h.seriesCount,
+      weighted_mape: (h.weightedMape / 100).toFixed(4),
+      mae_improve: (h.maeImprove / 100).toFixed(4),
+      rmse_improve: (h.rmseImprove / 100).toFixed(4),
+      series_pass_rate: (h.seriesPassRate / 100).toFixed(4),
+      l1_count: h.l1, l2_count: h.l2, l3_count: h.l3,
+      duration_ms: h.durationMs, device: h.device,
+    };
+  }), ['task_id', 'name', 'horizon_days', 'model', 'dataset', 'series_count',
+       'weighted_mape', 'mae_improve', 'rmse_improve', 'series_pass_rate',
+       'l1_count', 'l2_count', 'l3_count', 'duration_ms', 'device']);
+}
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () { setState(p.dataset.state); });
+});
+
+document.addEventListener('themechange', function () { renderChart(); });
+
+setState('normal');
+</script>
+</body>
+</html>

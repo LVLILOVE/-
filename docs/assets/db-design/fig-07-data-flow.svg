@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 545" width="900" height="545">
+  <defs>
+    <marker id="f7arw" markerWidth="10" markerHeight="10" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L9,4 L0,8 z" fill="#185FA5"/>
+    </marker>
+  </defs>
+  <rect width="900" height="545" fill="#FFFFFF"/>
+
+  <text x="450" y="34" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="18" font-weight="bold" fill="#0C447C" text-anchor="middle">数据落库流程</text>
+  <text x="450" y="56" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12.5" fill="#5F5E5A" text-anchor="middle">从 CSV 到可查询结果的 5 次写库动作 · 每一步都对应明确的表与状态</text>
+
+  <!-- ① CSV -->
+  <rect x="270" y="72" width="360" height="44" rx="8" fill="#F6FAFE" stroke="#185FA5" stroke-width="1.4"/>
+  <circle cx="294" cy="94" r="11" fill="#185FA5"/>
+  <text x="294" y="99" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">1</text>
+  <text x="322" y="99" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12.5" fill="#0C447C">CSV 文件（用户上传 / 内置示例）</text>
+
+  <path d="M450,116 L450,132" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <!-- ② 校验 -->
+  <rect x="270" y="134" width="360" height="44" rx="8" fill="#F6FAFE" stroke="#185FA5" stroke-width="1.4"/>
+  <circle cx="294" cy="156" r="11" fill="#185FA5"/>
+  <text x="294" y="161" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">2</text>
+  <text x="322" y="161" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12.5" fill="#0C447C">7 步顺序校验（越靠前越快失败）</text>
+
+  <path d="M450,178 L450,194" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <!-- ③ datasets -->
+  <rect x="270" y="196" width="360" height="44" rx="8" fill="#EAF6EE" stroke="#2E7D4F" stroke-width="1.4"/>
+  <circle cx="294" cy="218" r="11" fill="#2E7D4F"/>
+  <text x="294" y="223" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">3</text>
+  <text x="322" y="223" font-family="Consolas, monospace" font-size="12" fill="#1F5C38">落盘 uploads/u{id}/ → INSERT datasets</text>
+
+  <path d="M450,240 L450,256" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <!-- ④ tasks -->
+  <rect x="270" y="258" width="360" height="44" rx="8" fill="#EAF6EE" stroke="#2E7D4F" stroke-width="1.4"/>
+  <circle cx="294" cy="280" r="11" fill="#2E7D4F"/>
+  <text x="294" y="285" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">4</text>
+  <text x="322" y="285" font-family="Consolas, monospace" font-size="12" fill="#1F5C38">INSERT tasks（status=created）</text>
+
+  <path d="M450,302 L450,318" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <!-- ⑤ 推理 -->
+  <rect x="270" y="320" width="360" height="44" rx="8" fill="#FFF9EC" stroke="#B07A18" stroke-width="1.4"/>
+  <circle cx="294" cy="342" r="11" fill="#B07A18"/>
+  <text x="294" y="347" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">5</text>
+  <text x="322" y="347" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12.5" fill="#7A5610">LSTM 推理 + 三级降级（L1 / L2 / L3）</text>
+
+  <!-- 分支线 -->
+  <path d="M450,364 L450,382" stroke="#185FA5" stroke-width="1.6" fill="none"/>
+  <path d="M295,382 L605,382" stroke="#185FA5" stroke-width="1.6" fill="none"/>
+  <path d="M295,382 L295,398" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+  <path d="M605,382 L605,398" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <!-- ⑥ predictions -->
+  <rect x="150" y="400" width="290" height="62" rx="8" fill="#F6FAFE" stroke="#185FA5" stroke-width="1.4"/>
+  <text x="295" y="422" font-family="Consolas, monospace" font-size="12.5" font-weight="bold" fill="#0C447C" text-anchor="middle">predictions</text>
+  <text x="295" y="441" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#5F5E5A" text-anchor="middle">逐预测点批量 INSERT</text>
+  <text x="295" y="456" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#5F5E5A" text-anchor="middle">禁止逐行 commit（NFR-REL-04）</text>
+
+  <!-- ⑦ metrics -->
+  <rect x="460" y="400" width="290" height="62" rx="8" fill="#F6FAFE" stroke="#185FA5" stroke-width="1.4"/>
+  <text x="605" y="422" font-family="Consolas, monospace" font-size="12.5" font-weight="bold" fill="#0C447C" text-anchor="middle">metrics</text>
+  <text x="605" y="441" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#5F5E5A" text-anchor="middle">单行写入，与任务一对一</text>
+  <text x="605" y="456" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="11.5" fill="#5F5E5A" text-anchor="middle">含分布与分阶段耗时 JSON</text>
+
+  <!-- 消费端 -->
+  <path d="M295,462 L295,478 M605,462 L605,478" stroke="#185FA5" stroke-width="1.6" fill="none"/>
+  <path d="M295,478 L605,478" stroke="#185FA5" stroke-width="1.6" fill="none"/>
+  <path d="M450,478 L450,492" stroke="#185FA5" stroke-width="1.6" fill="none" marker-end="url(#f7arw)"/>
+
+  <rect x="230" y="494" width="440" height="38" rx="8" fill="#F4F4F2" stroke="#D6D5CF" stroke-width="1.2"/>
+  <text x="450" y="518" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="12" fill="#3F3E3A" text-anchor="middle">结果页 / 历史页 / 导出 · 经视图 v_task_summary 聚合读取</text>
+</svg>

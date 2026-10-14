@@ -1,0 +1,11 @@
+%% FIG-01 数据库全景 ER 图（8 表 + 基数 + 删除行为）
+%% 生成：mmdc -i fig-01-er-overview.mmd -o fig-01-er-overview.png -p ../../../scripts/mermaid/puppeteer-config.json -c ../../../scripts/mermaid/mermaid-config.json -b white -s 3
+erDiagram
+    users ||--o{ datasets : "1:N 拥有 CASCADE"
+    users ||--o{ tasks : "1:N 拥有 CASCADE"
+    users ||..o{ operation_logs : "1:N 产生 无外键"
+    datasets ||--o{ tasks : "1:N 作为输入 RESTRICT"
+    tasks ||--o{ predictions : "1:N 产出明细 CASCADE"
+    tasks ||--|| metrics : "1:1 产出指标 CASCADE"
+    tasks ||..o{ events : "1:N 埋点关联 无外键"
+    model_registry ||..o{ tasks : "逻辑引用版本号"

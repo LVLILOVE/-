@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .auth-wrap {
+    min-height: 100vh; display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,460px);
+  }
+  @media (max-width: 900px) { .auth-wrap { grid-template-columns: 1fr; } .auth-aside { display: none; } }
+
+  .auth-aside {
+    padding: 2.5rem; display: flex; flex-direction: column; justify-content: center;
+    background:
+      radial-gradient(900px 500px at 12% 8%, oklch(0.62 0.145 205 / .16), transparent 62%),
+      radial-gradient(700px 420px at 88% 92%, oklch(0.66 0.16 265 / .14), transparent 60%),
+      var(--bg-subtle);
+    border-right: 1px solid var(--border);
+  }
+  .auth-aside .aa-inner { max-width: 440px; }
+  .auth-aside h1 { font-size: 1.75rem; letter-spacing: -.02em; margin-bottom: .75rem; }
+  .auth-aside h1 em {
+    font-style: normal;
+    background: linear-gradient(100deg, var(--primary), oklch(0.68 0.16 265));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .auth-aside p { color: var(--text-2); font-size: .875rem; line-height: 1.8; margin-bottom: 1.5rem; }
+  .aa-list { display: flex; flex-direction: column; gap: .75rem; }
+  .aa-item { display: flex; gap: .625rem; align-items: flex-start; font-size: .8125rem; color: var(--text-2); }
+  .aa-item .aa-ic {
+    width: 20px; height: 20px; border-radius: 50%; flex: none; margin-top: 1px;
+    display: grid; place-items: center; background: var(--success-soft);
+    color: oklch(0.55 0.15 155);
+  }
+  .aa-item .aa-ic svg { width: 11px; height: 11px; }
+  html.dark .aa-item .aa-ic { color: oklch(0.82 0.15 155); }
+
+  .auth-main {
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1.5rem; background: var(--bg);
+  }
+  .auth-card { width: 100%; max-width: 372px; }
+  .auth-card .ac-head { margin-bottom: 1.5rem; }
+  .auth-card .ac-head h2 { font-size: 1.25rem; margin-bottom: .25rem; }
+  .auth-card .ac-head p { font-size: .8125rem; color: var(--text-3); }
+
+  .auth-foot {
+    margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    font-size: .75rem; color: var(--text-3); text-align: center;
+  }
+  .auth-foot a { font-weight: 600; }
+
+  .pw-meter { display: flex; gap: 3px; margin-top: .4375rem; }
+  .pw-meter i {
+    height: 3px; flex: 1; border-radius: 99px; background: var(--border-strong);
+    transition: background-color .25s;
+  }
+  .pw-meter.s1 i:nth-child(-n+1) { background: var(--danger); }
+  .pw-meter.s2 i:nth-child(-n+2) { background: var(--warning); }
+  .pw-meter.s3 i:nth-child(-n+3) { background: oklch(0.72 0.14 130); }
+  .pw-meter.s4 i { background: var(--success); }
+
+  .demo-accounts {
+    margin-top: 1rem; padding: .75rem .875rem; border-radius: var(--radius-sm);
+    background: var(--surface-2); border: 1px dashed var(--border-strong);
+    font-size: .75rem; color: var(--text-2);
+  }
+  .demo-accounts .da-title {
+    font-weight: 650; color: var(--text); margin-bottom: .375rem;
+    display: flex; align-items: center; gap: .375rem;
+  }
+  .demo-accounts .da-title svg { width: 13px; height: 13px; color: var(--info); }
+  .demo-accounts code {
+    background: var(--surface); padding: 1px 5px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--primary);
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <!-- 左侧品牌区 -->
+  <aside class="auth-aside">
+    <div class="aa-inner">
+      <a class="brand mb-3" href="index.html" style="margin-bottom:1.75rem">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8 4 5"/></svg></span>
+        <span>销量预测</span>
+      </a>
+      <h1>让补货决策<br><em>有数可依</em></h1>
+      <p>
+        上传历史销量表，一分钟拿到未来 7 / 14 / 30 天的分仓预测曲线、
+        加权误差指标与可导出的预测明细。
+      </p>
+      <div class="aa-list">
+        <div class="aa-item"><span class="aa-ic" data-icon="check"></span><span>仓库 × 商品粒度建模，直接指导分仓铺货</span></div>
+        <div class="aa-item"><span class="aa-ic" data-icon="check"></span><span>加权 MAPE ≤ 20%，与移动平均基线同期对比</span></div>
+        <div class="aa-item"><span class="aa-ic" data-icon="check"></span><span>覆盖率如实披露，不可预测的序列明确标注</span></div>
+        <div class="aa-item"><span class="aa-ic" data-icon="check"></span><span>数据仅用于本次预测，按用户目录隔离存储</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 右侧表单区 -->
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="ac-head">
+        <h2>登录</h2>
+        <p>使用邮箱与密码登录，或先<a href="upload.html">用示例数据体验</a></p>
+      </div>
+
+      <!-- 状态切换（原型演示用） -->
+      <div class="row wrap mb-2" style="gap:.375rem">
+        <span class="t-xs t-muted">演示状态：</span>
+        <button class="state-pill active" data-state="normal">正常</button>
+        <button class="state-pill" data-state="loading">登录中</button>
+        <button class="state-pill" data-state="error">密码错误</button>
+        <button class="state-pill" data-state="locked">限流冷却</button>
+      </div>
+
+      <!-- 错误态提示 -->
+      <div class="alert alert-danger hidden" id="login-alert">
+        <span data-icon="alert"></span>
+        <div class="alert-body">
+          <div class="alert-title" id="alert-title">邮箱或密码不正确</div>
+          <p id="alert-text">请检查后重试。这是第 2 次失败，连续 3 次失败后该邮箱将进入 60 秒冷却期。</p>
+        </div>
+      </div>
+
+      <form id="login-form" onsubmit="return false" novalidate>
+        <div class="field">
+          <label for="email">邮箱</label>
+          <div class="input-group">
+            <input class="input" type="email" id="email" name="email"
+                   placeholder="you@example.com" autocomplete="username"
+                   value="wanglin@shop-demo.cn">
+          </div>
+          <div class="field-error hidden" id="err-email">
+            <span data-icon="alert"></span><span>请输入有效的邮箱地址</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">密码</label>
+          <input class="input" type="password" id="password" name="password"
+                 placeholder="请输入密码" autocomplete="current-password"
+                 value="demo1234">
+          <div class="field-error hidden" id="err-password">
+            <span data-icon="alert"></span><span>密码不能为空</span>
+          </div>
+        </div>
+
+        <div class="row-between mb-2">
+          <label class="switch" style="gap:.5rem">
+            <input type="checkbox" checked>
+            <span class="switch-track"></span>
+            <span class="switch-text t-sm">记住我</span>
+          </label>
+          <a class="t-sm" href="#" onclick="return false">忘记密码？</a>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" id="login-btn" type="submit">
+          <span id="login-btn-text">登录</span>
+        </button>
+      </form>
+
+      <div class="demo-accounts">
+        <div class="da-title"><span data-icon="info"></span>演示账号</div>
+        邮箱 <code>wanglin@shop-demo.cn</code> · 密码 <code>demo1234</code>
+      </div>
+
+      <div class="auth-foot">
+        还没有账号？<a href="register.html">免费注册</a>
+        <div class="mt-1">登录即表示同意《用户协议》与《数据用途说明》</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/demo-data.js"></script>
+<script>
+  // 注入图标
+  document.querySelectorAll('[data-icon]').forEach(function (el) {
+    var svg = ICONS[el.getAttribute('data-icon')];
+    if (svg) el.innerHTML = svg;
+  });
+
+  var alertBox = document.getElementById('login-alert');
+  var alertTitle = document.getElementById('alert-title');
+  var alertText = document.getElementById('alert-text');
+  var btn = document.getElementById('login-btn');
+  var btnText = document.getElementById('login-btn-text');
+
+  var STATE_TEXT = {
+    normal: ['', ''],
+    error: [
+      '邮箱或密码不正确',
+      '请检查后重试。这是第 2 次失败，连续 3 次失败后该邮箱将进入 60 秒冷却期。'
+    ],
+    locked: [
+      '尝试次数过多，已暂时锁定',
+      '请在 47 秒后重试。这是防止密码被暴力破解的安全策略。'
+    ],
+  };
+
+  function setState(state) {
+    document.querySelectorAll('.state-pill').forEach(function (p) {
+      p.classList.toggle('active', p.dataset.state === state);
+    });
+
+    // 重置
+    alertBox.className = 'alert alert-danger hidden';
+    btn.disabled = false;
+    btnText.textContent = '登录';
+    document.getElementById('email').setAttribute('aria-invalid', 'false');
+    document.getElementById('password').setAttribute('aria-invalid', 'false');
+
+    if (state === 'loading') {
+      btn.disabled = true;
+      btnText.textContent = '登录中…';
+      return;
+    }
+    if (state === 'normal') return;
+
+    alertBox.className = 'alert alert-danger';
+    alertTitle.textContent = STATE_TEXT[state][0];
+    alertText.textContent = STATE_TEXT[state][1];
+    if (state === 'locked') {
+      btn.disabled = true;
+      btnText.textContent = '已锁定（47s）';
+    }
+    document.getElementById('password').setAttribute('aria-invalid', 'true');
+  }
+
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.addEventListener('click', function () { setState(p.dataset.state); });
+  });
+
+  // 正常态下点击登录 → 走一次 loading 再跳转（演示真实等待感）
+  btn.addEventListener('click', function () {
+    if (btn.disabled) return;
+    setState('loading');
+    setTimeout(function () { window.location.href = 'dashboard.html'; }, 900);
+  });
+</script>
+</body>
+</html>

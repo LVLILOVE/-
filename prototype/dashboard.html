@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工作台 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .quick-grid { display: grid; gap: .875rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .quick {
+    display: flex; gap: .75rem; align-items: flex-start;
+    padding: 1rem; border-radius: var(--radius); cursor: pointer;
+    background: var(--surface); border: 1px solid var(--border);
+    transition: border-color .18s, transform .18s;
+  }
+  .quick:hover { border-color: var(--primary); transform: translateY(-2px); text-decoration: none; }
+  .quick-icon {
+    width: 34px; height: 34px; border-radius: var(--radius-sm); flex: none;
+    display: grid; place-items: center; background: var(--primary-soft); color: var(--primary);
+  }
+  .quick-icon svg { width: 17px; height: 17px; }
+  .quick h4 { font-size: .8125rem; margin-bottom: .1875rem; color: var(--text); }
+  .quick p { font-size: .75rem; color: var(--text-3); line-height: 1.6; }
+
+  .task-list { display: flex; flex-direction: column; }
+  .task-row {
+    display: grid; grid-template-columns: minmax(0,1fr) 92px 92px 92px 104px 92px;
+    gap: .75rem; align-items: center;
+    padding: .75rem 1.125rem; border-bottom: 1px solid var(--border);
+    transition: background-color .15s;
+  }
+  .task-row:hover { background: var(--surface-2); }
+  .task-row:last-child { border-bottom: none; }
+  .task-row.head {
+    background: var(--surface-2); font-size: .6875rem; font-weight: 650;
+    color: var(--text-2); padding-top: .5rem; padding-bottom: .5rem;
+    position: sticky; top: 0; z-index: 1;
+  }
+  .task-name { font-size: .8125rem; font-weight: 600; color: var(--text); }
+  .task-meta { font-size: .6875rem; color: var(--text-3); margin-top: 2px; font-family: var(--font-mono); }
+  .task-cell { font-size: .8125rem; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 1080px) {
+    .task-row { grid-template-columns: minmax(0,1fr) 92px 104px; }
+    .task-row .hide-md { display: none; }
+  }
+
+  /* 迷你趋势线 */
+  .spark { width: 74px; height: 22px; }
+</style>
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 概览</div>
+      <div class="row-between">
+        <div>
+          <h1>下午好，王琳</h1>
+          <p class="lede">这里是你的预测任务概览。最近一次任务完成于 2 小时前，加权 MAPE 14.3%，已达标。</p>
+        </div>
+        <a class="btn btn-primary" href="upload.html">
+          <span data-icon="plus"></span>新建预测任务
+        </a>
+      </div>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="metric-grid mb-3">
+      <div class="metric metric-brand">
+        <div class="metric-label">累计任务数</div>
+        <div class="metric-value">14<span class="unit">次</span></div>
+        <div class="metric-foot">最近 30 天</div>
+      </div>
+      <div class="metric metric-pass">
+        <div class="metric-label">任务成功率
+          <span data-icon="info" style="width:11px;height:11px;opacity:.5"></span>
+        </div>
+        <div class="metric-value">92.9<span class="unit">%</span></div>
+        <div class="metric-foot up"><span data-icon="arrowUp"></span>13 成功 / 1 超时</div>
+      </div>
+      <div class="metric metric-pass">
+        <div class="metric-label">加权 MAPE 均值</div>
+        <div class="metric-value">14.5<span class="unit">%</span></div>
+        <div class="metric-foot up">≤ 20% 达标</div>
+      </div>
+      <div class="metric metric-brand">
+        <div class="metric-label">平均端到端耗时</div>
+        <div class="metric-value">31.4<span class="unit">s</span></div>
+        <div class="metric-foot">上限 60s · P95 58.2s</div>
+      </div>
+      <div class="metric metric-warn">
+        <div class="metric-label">平均 L3 占比</div>
+        <div class="metric-value">0.0<span class="unit">%</span></div>
+        <div class="metric-foot">长尾序列已由 L2 规则承接</div>
+      </div>
+    </div>
+
+    <!-- 快速入口 -->
+    <h3 class="mb-2">快速开始</h3>
+    <div class="quick-grid mb-3">
+      <a class="quick" href="upload.html">
+        <div class="quick-icon" data-icon="upload"></div>
+        <div>
+          <h4>上传销量 CSV</h4>
+          <p>拖拽或选择文件，自动完成字段校验与清洗</p>
+        </div>
+      </a>
+      <a class="quick" href="upload.html">
+        <div class="quick-icon" data-icon="layers"></div>
+        <div>
+          <h4>用示例数据体验</h4>
+          <p>内置菜鸟数据集抽样，零准备即可跑通全流程</p>
+        </div>
+      </a>
+      <a class="quick" href="history.html">
+        <div class="quick-icon" data-icon="history"></div>
+        <div>
+          <h4>回看历史任务</h4>
+          <p>查看过往预测的指标表现与曲线对比</p>
+        </div>
+      </a>
+      <a class="quick" href="compare.html">
+        <div class="quick-icon" data-icon="compare"></div>
+        <div>
+          <h4>跨任务对比</h4>
+          <p>把两次预测叠加在同一坐标系，判断结论是否稳定</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- 最近任务 -->
+    <div class="card">
+      <div class="card-head">
+        <h3>最近任务</h3>
+        <span class="sub">按创建时间倒序</span>
+        <div class="right">
+          <a class="btn btn-ghost btn-sm" href="history.html">
+            查看全部<span data-icon="arrowRight"></span>
+          </a>
+        </div>
+      </div>
+      <div class="task-list" id="task-list"></div>
+    </div>
+
+    <div class="spec-note">
+      <div class="spec-title"><span data-icon="info"></span>本页与 PRD 的对应关系</div>
+      <table>
+        <thead><tr><th>需求编号</th><th>实现说明</th></tr></thead>
+        <tbody>
+          <tr><td>FR-HIS-01</td><td>最近任务列表展示任务名、创建时间、粒度、步长、加权 MAPE、序列数，按时间倒序</td></tr>
+          <tr><td>FR-USR-08</td><td>顶栏对游客态显示"登录 / 免费注册"，对登录态显示用户与退出</td></tr>
+          <tr><td>NFR-USE-01</td><td>主干路径入口收敛为「新建预测任务」单一主按钮，从登录到看到结果 ≤ 5 步</td></tr>
+          <tr><td>NFR-USE-04</td><td>提供「用示例数据体验」入口，无数据用户可一键跑通</td></tr>
+          <tr><td>FR-SYS-05</td><td>页脚常驻免责声明，任意页面可达</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spec-note" style="background:var(--surface-2);border-color:var(--border);border-left-color:var(--text-3)">
+      <div class="spec-title" style="color:var(--text-2)">
+        <span data-icon="info"></span>原型独有说明（非 PRD 要求）
+      </div>
+      本页顶部 5 个指标卡为<strong>原型演示用</strong>，用于传达产品定位。
+      PRD 未定义工作台首页的汇总指标体系，正式开发时可裁剪为「最近任务 + 快速入口」两项，
+      或作为 P2 迭代项补充埋点驱动的看板（参考 <code>EV-PRED-02</code>、<code>EV-VIS-01</code>）。
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+  initShell('dashboard');
+  document.querySelectorAll('[data-icon]').forEach(function (el) {
+    var svg = ICONS[el.getAttribute('data-icon')];
+    if (svg) el.innerHTML = svg;
+  });
+
+  /* 迷你趋势线（SVG 折线，用于列表右侧快速判读） */
+  function sparkline(seed, positive) {
+    var rng = makeRng(seed);
+    var pts = [], v = 50;
+    for (var i = 0; i < 14; i++) {
+      v += (rng() - (positive ? 0.42 : 0.5)) * 18;
+      v = Math.max(8, Math.min(92, v));
+      pts.push(v);
+    }
+    var d = pts.map(function (y, i) {
+      return (i === 0 ? 'M' : 'L') + (i * (74 / 13)).toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+    var color = positive ? 'oklch(0.78 0.15 145)' : 'oklch(0.76 0.18 25)';
+    return '<svg class="spark" viewBox="0 0 74 100" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>';
+  }
+
+  var rows = HISTORY.slice(0, 5).map(function (t, i) {
+    var ok = t.status === 'succeeded';
+    var mapeCell = ok
+      ? '<span class="' + (t.weightedMape <= 20 ? '' : 't-bold') + '" style="color:' +
+        (t.weightedMape <= 20 ? 'inherit' : 'var(--danger)') + '">' + pct(t.weightedMape) + '</span>'
+      : '<span class="t-muted">—</span>';
+    return '<div class="task-row" style="cursor:pointer" onclick="location.href=\'' +
+      (ok ? 'history-detail.html' : 'history.html') + '\'">' +
+      '<div>' +
+        '<div class="task-name">' + t.name + ' ' + statusBadge(t.status, t.errorCode) + '</div>' +
+        '<div class="task-meta">' + t.id + ' · ' + t.createdAt + ' · ' + t.dataset + '</div>' +
+      '</div>' +
+      '<div class="task-cell t-sm t-2 hide-md">' + t.horizon + ' 天</div>' +
+      '<div class="task-cell t-sm t-2 hide-md">' + num(t.seriesCount) + ' 条</div>' +
+      '<div class="task-cell">' + mapeCell + '</div>' +
+      '<div class="hide-md">' + sparkline(100 + i * 7, ok && t.weightedMape <= 20) + '</div>' +
+      '<div class="t-right t-xs t-muted">' + ms(t.durationMs) + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('task-list').innerHTML =
+    '<div class="task-row head">' +
+      '<div>任务</div>' +
+      '<div class="hide-md">步长</div>' +
+      '<div class="hide-md">序列数</div>' +
+      '<div>加权 MAPE</div>' +
+      '<div class="hide-md">近 14 天趋势</div>' +
+      '<div class="t-right">耗时</div>' +
+    '</div>' + rows;
+</script>
+</body>
+</html>

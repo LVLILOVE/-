@@ -1,0 +1,74 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>01 项目概况 · 问题定义</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>从业务问题到可验收的硬指标</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>数据来源：菜鸟需求预测与分仓规划数据集（天池）</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 668, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: '20px 24px', flexDirection: 'column' }}>
+                <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2 }}>问题</Text>
+                <Text style={{ fontSize: 28, color: '#0E3F8C', fontWeight: 'bold', marginTop: 8 }}>稀疏数据下的分仓预测</Text>
+                <Box style={{ width: 48, height: 4, background: '#1E4FA8', marginTop: 12 }} />
+
+                <Text style={{ fontSize: 22, color: '#1A2230', lineHeight: 1.62, marginTop: 14 }}>数据集的真实形态是长尾：963 个商品 × 5 个仓库理论上应有 4,815 条序列，但大量商品只覆盖 1–2 个仓库。<br /><br />这意味着「每个仓库每个商品都有 450 天历史」这个前提并不成立。若默认它成立，绝大多数序列在推理阶段拿不到足够输入。</Text>
+
+                <Box style={{ flex: 1 }} />
+
+                <Box style={{ background: '#E8EFF8', borderRadius: 8, padding: '14px 20px', flexDirection: 'row', alignItems: 'center', gap: 22 }}>
+                    <Box style={{ flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 38, color: '#1E4FA8', fontWeight: 'bold', lineHeight: 1.1 }}>4,815</Text>
+                        <Text style={{ fontSize: 15, color: '#4A5568', marginTop: 6 }}>条理论序列（963 商品 × 5 仓）</Text>
+                    </Box>
+                    <Box style={{ width: 1, height: 68, background: '#C3D3EA' }} />
+                    <Box style={{ flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 38, color: '#D9534F', fontWeight: 'bold', lineHeight: 1.1 }}>17,063</Text>
+                        <Text style={{ fontSize: 15, color: '#4A5568', marginTop: 6 }}>条缺失仓库样本</Text>
+                    </Box>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 532, paddingLeft: 24, flexDirection: 'column' }}>
+                <Box style={{ height: 286, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 10, padding: '20px 22px', flexDirection: 'column' }}>
+                    <Text style={{ fontSize: 15, color: '#D9534F', letterSpacing: 2 }}>硬指标红线</Text>
+                    <Text style={{ fontSize: 24, color: '#0E3F8C', fontWeight: 'bold', marginTop: 8 }}>三条可被第三方复核的指标</Text>
+
+                    <Box style={{ height: 56, background: '#F0F5FC', borderRadius: 8, padding: '0 16px', flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568' }}>销量加权 MAPE</Text>
+                        <Text style={{ fontSize: 22, color: '#1E4FA8', fontWeight: 'bold' }}>≤ 20%</Text>
+                    </Box>
+                    <Box style={{ height: 56, background: '#F0F5FC', borderRadius: 8, padding: '0 16px', flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568' }}>MAE 相对基线降低</Text>
+                        <Text style={{ fontSize: 22, color: '#1E4FA8', fontWeight: 'bold' }}>≥ 15%</Text>
+                    </Box>
+                    <Box style={{ height: 56, background: '#F0F5FC', borderRadius: 8, padding: '0 16px', flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                        <Text style={{ flex: 1, fontSize: 18, color: '#4A5568' }}>RMSE 相对基线降低</Text>
+                        <Text style={{ fontSize: 22, color: '#1E4FA8', fontWeight: 'bold' }}>≥ 15%</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ height: 210, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 14, flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
+                    <Box style={{ width: 264, height: 158, borderRadius: 6, overflow: 'hidden', background: '#FFFFFF' }}>
+                        <Image src='assets/upload.png' style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+                    </Box>
+                    <Box style={{ flex: 1, paddingLeft: 16, flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>数据集上传页</Text>
+                        <Text style={{ fontSize: 16, color: '#8B97A8', lineHeight: 1.5, marginTop: 8 }}>四列英文表头契约，仓库列缺失直接拒收</Text>
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>04 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>

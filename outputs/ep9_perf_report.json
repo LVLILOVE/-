@@ -1,0 +1,95 @@
+{
+  "env": {
+    "sample_dataset_id": 1,
+    "torch_device": "auto",
+    "task_budget_ms": 60000,
+    "max_series": 1000,
+    "baseline_total_ms": 7873,
+    "db_path": "C:\\Users\\Administrator\\WorkBuddy\\销量预测\\data\\tmp\\verify_ep9_perf\\app.db"
+  },
+  "cases": {
+    "preview": {
+      "rows": 20,
+      "worst_ms": 55.7
+    },
+    "history_list": {
+      "total": 1,
+      "items": 1,
+      "worst_ms": 61.4
+    },
+    "first_paint": {
+      "limit_ms": 3000,
+      "owner": "scripts/verify_ep9_browser.mjs（需真实浏览器；TestClient 测不到渲染与资源加载）"
+    },
+    "dirty_data": {
+      "orphan_predictions": 0,
+      "orphan_metrics": 0,
+      "running_tasks": 0,
+      "half_baked": 0,
+      "duplicate_keys": 0,
+      "zero_byte_uploads": [],
+      "owner_mismatch": 0
+    },
+    "concurrent3": {
+      "all_succeeded": true,
+      "per_task_ms": [
+        32207,
+        37610,
+        37513
+      ],
+      "per_request_wall_ms": [
+        32252,
+        37653,
+        37567
+      ],
+      "source_field": "CreateTaskResponse.duration_ms"
+    },
+    "cpu_fallback": {
+      "elapsed_ms": 23489,
+      "device": "cpu"
+    },
+    "stress_1000x30": {
+      "status": "failed",
+      "error_code": "E_TIMEOUT",
+      "service_elapsed_ms": 250302,
+      "wall_ms": 250302.1
+    }
+  },
+  "timings_ms": {
+    "main_path_steps": {
+      "注册": 447.3,
+      "登录": 447.3,
+      "上传数据集": 106.1,
+      "API-09 详情/预估": 26.2,
+      "API-12 建任务(h=14)": 1177.5,
+      "API-13 状态": 11.6,
+      "API-14 结果": 40.1,
+      "API-15 明细": 16.0,
+      "API-16 导出 CSV": 20.8
+    },
+    "main_path_total": 2293.0,
+    "e2e_h14_sample_ms": 11854.8,
+    "preview_ms": 55.7,
+    "history_list_ms": 61.4,
+    "concurrent3_wall_ms": 37657.4,
+    "concurrent3_per_task_ms": [
+      32207,
+      37610,
+      37513
+    ],
+    "concurrent3_per_request_wall_ms": [
+      32252,
+      37653,
+      37567
+    ],
+    "cpu_fallback_h14_ms": 23489,
+    "stress_1000x30_ms": 250302
+  },
+  "summary": {
+    "passed": 47,
+    "failed": 0,
+    "total_s": 351.5,
+    "sla_ms": 60000,
+    "checked_at": "2026-10-12 10:43:25"
+  }
+}

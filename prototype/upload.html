@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新建预测 · 上传数据 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb">工作台 / 新建预测 / 上传数据</div>
+      <h1>上传历史销量数据</h1>
+      <p class="lede">
+        支持 CSV 格式，单文件不超过 20 MB、50 万行。必需字段为
+        <code>sku_id</code>、<code>warehouse_id</code>、<code>date</code>、<code>sales</code>，
+        其中仓库列为必需项，缺失将直接拒绝。
+      </p>
+    </div>
+
+    <!-- 步骤条 -->
+    <div class="row mb-3" style="gap:.5rem;font-size:.75rem">
+      <span class="badge badge-primary">1 · 上传数据</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">2 · 确认参数</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">3 · 执行预测</span>
+      <span class="t-muted">→</span>
+      <span class="badge badge-neutral">4 · 查看结果</span>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="idle">待上传</button>
+      <button class="state-pill" data-state="selected">已选择文件</button>
+      <button class="state-pill" data-state="uploading">上传中</button>
+      <button class="state-pill" data-state="validating">校验中</button>
+      <button class="state-pill" data-state="ok">校验通过</button>
+      <button class="state-pill" data-state="err-missing">缺字段</button>
+      <button class="state-pill" data-state="err-date">日期异常</button>
+      <button class="state-pill" data-state="err-negative">负值</button>
+      <button class="state-pill" data-state="err-gap">时间断档</button>
+      <button class="state-pill" data-state="err-series">序列超限</button>
+    </div>
+
+    <div class="with-aside">
+      <div>
+        <!-- ========== 上传区 ========== -->
+        <div class="card" id="card-upload">
+          <div class="card-head">
+            <h3>1. 选择数据文件</h3>
+            <div class="right">
+              <button class="btn btn-ghost btn-sm" onclick="showState('idle')">重置</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- 空状态：拖拽区 -->
+            <div class="dropzone" id="dropzone">
+              <div class="dropzone-icon" data-icon="upload"></div>
+              <strong>把 CSV 文件拖到这里，或点击选择</strong>
+              <div class="dz-hint">
+                支持 .csv · 单文件 ≤ 20 MB · 行数 ≤ 500,000
+              </div>
+            </div>
+
+            <!-- 已选择 / 上传中 -->
+            <div class="hidden" id="file-block">
+              <div class="file-chip">
+                <div class="file-chip-icon">CSV</div>
+                <div>
+                  <div class="fc-name" id="fc-name">item_store_feature_1010_1227.csv</div>
+                  <div class="fc-meta" id="fc-meta">0.42 MB · 14,305 行 · 4 列</div>
+                </div>
+                <div class="fc-right">
+                  <span class="badge badge-neutral" id="fc-status">待上传</span>
+                  <button class="btn btn-ghost btn-sm" onclick="showState('idle')"
+                          aria-label="移除文件" data-icon="x"></button>
+                </div>
+              </div>
+              <div class="mt-2 hidden" id="upload-progress">
+                <div class="row-between t-xs t-muted mb-1">
+                  <span id="up-label">正在上传…</span><span id="up-pct" class="t-mono">0%</span>
+                </div>
+                <div class="progress"><i id="up-bar" style="width:0%"></i></div>
+              </div>
+            </div>
+
+            <div class="btn-row mt-2">
+              <button class="btn btn-secondary btn-sm" onclick="return false">
+                <span data-icon="download"></span>下载标准模板
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="showState('ok')">
+                <span data-icon="layers"></span>改用示例数据（菜鸟数据集抽样）
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== 校验中 ========== -->
+        <div class="card hidden" id="card-validating">
+          <div class="card-body">
+            <div class="row" style="gap:.75rem">
+              <span class="dot dot-info dot-pulse" style="width:9px;height:9px"></span>
+              <div style="flex:1">
+                <div class="t-bold">正在校验数据…</div>
+                <div class="t-xs t-muted" id="val-step">第 1/7 步：检查文件扩展名与大小</div>
+              </div>
+            </div>
+            <div class="progress mt-2"><i id="val-bar" style="width:14%"></i></div>
+          </div>
+        </div>
+
+        <!-- ========== 校验失败（结构化错误） ========== -->
+        <div class="card hidden" id="card-error">
+          <div class="card-head">
+            <h3 style="color:var(--danger)">数据校验未通过</h3>
+            <div class="right"><span class="badge badge-danger" id="err-code">40001</span></div>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-danger alert-accent-danger mb-2">
+              <span data-icon="alert"></span>
+              <div class="alert-body">
+                <div class="alert-title" id="err-msg">缺少必需字段：warehouse_id（仓库编码）</div>
+                <p id="err-detail">校验顺序第 3 步失败。</p>
+              </div>
+            </div>
+
+            <!-- 缺字段 -->
+            <div class="hidden" id="err-body-missing">
+              <div class="row wrap mb-2" style="gap:.75rem">
+                <div>
+                  <div class="t-xs t-muted mb-1">已识别的表头</div>
+                  <div class="row wrap" style="gap:.3125rem">
+                    <span class="badge badge-success" data-icon="check">sku_id</span>
+                    <span class="badge badge-success" data-icon="check">date</span>
+                    <span class="badge badge-success" data-icon="check">sales</span>
+                    <span class="badge badge-danger" data-icon="x">warehouse_id（缺失）</span>
+                  </div>
+                </div>
+              </div>
+              <div class="alert alert-info mt-0">
+                <span data-icon="info"></span>
+                <div class="alert-body">
+                  <div class="alert-title">如何修正</div>
+                  <p id="err-suggestion"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 日期异常 / 负值：错误明细表 -->
+            <div class="hidden" id="err-body-rows">
+              <div class="row-between mb-1">
+                <div class="t-xs t-muted">错误明细（最多显示前 20 条）</div>
+                <button class="btn btn-secondary btn-sm" onclick="downloadErrorDetail()">
+                  <span data-icon="download"></span>下载错误明细 CSV
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table class="data" id="err-table"><thead id="err-thead"></thead><tbody id="err-tbody"></tbody></table>
+              </div>
+              <div class="alert alert-info mt-2 mb-0">
+                <span data-icon="info"></span>
+                <div class="alert-body">
+                  <div class="alert-title">如何修正</div>
+                  <p id="err-suggestion2"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 时间断档 -->
+            <div class="hidden" id="err-body-gap">
+              <div class="table-wrap mb-2">
+                <table class="data">
+                  <thead>
+                    <tr><th>商品 (sku_id)</th><th>仓库 (warehouse_id)</th><th>断档区间</th>
+                        <th class="num">缺失天数</th></tr>
+                  </thead>
+                  <tbody id="gap-tbody"></tbody>
+                </table>
+              </div>
+              <div class="alert alert-warning mb-0">
+                <span data-icon="alert"></span>
+                <div class="alert-body">
+                  <div class="alert-title">请选择处理方式（系统不会自动继续）</div>
+                  <p>自动插值会用线性插值补齐缺失日期；放弃上传则保留原始数据不变，需你修正后重传。</p>
+                  <div class="btn-row mt-2">
+                    <button class="btn btn-primary btn-sm" onclick="showState('ok')">
+                      <span data-icon="check"></span>自动插值补齐后继续
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="showState('idle')">
+                      放弃上传
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 序列数超限 -->
+            <div class="hidden" id="err-body-series">
+              <div class="grid-2 mb-2">
+                <div class="metric metric-fail">
+                  <div class="metric-label">当前序列数</div>
+                  <div class="metric-value" id="series-cur">1,284</div>
+                  <div class="metric-foot">sku_id × warehouse_id 去重后</div>
+                </div>
+                <div class="metric metric-brand">
+                  <div class="metric-label">上限</div>
+                  <div class="metric-value">1,000</div>
+                  <div class="metric-foot">受 60 秒端到端约束</div>
+                </div>
+              </div>
+              <div class="alert alert-info mb-0">
+                <span data-icon="info"></span>
+                <div class="alert-body">
+                  <div class="alert-title">如何修正</div>
+                  <p id="err-suggestion3"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-row mt-3">
+              <button class="btn btn-primary" onclick="showState('idle')">
+                <span data-icon="refresh"></span>返回重新上传
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== 校验通过：预览 ========== -->
+        <div class="card hidden" id="card-ok">
+          <div class="card-head">
+            <h3 style="color:oklch(0.58 0.15 155)">数据校验通过</h3>
+            <div class="right"><span class="badge badge-success" data-icon="check">7/7 项检查全部通过</span></div>
+          </div>
+          <div class="card-body">
+            <div class="metric-grid mb-3">
+              <div class="metric metric-pass">
+                <div class="metric-label">数据行数</div>
+                <div class="metric-value">14,305</div>
+                <div class="metric-foot">时间范围 2015-08-30 ~ 2015-12-27</div>
+              </div>
+              <div class="metric metric-pass">
+                <div class="metric-label">商品数</div>
+                <div class="metric-value">40</div>
+                <div class="metric-foot">去重 sku_id</div>
+              </div>
+              <div class="metric metric-pass">
+                <div class="metric-label">仓库数</div>
+                <div class="metric-value">5</div>
+                <div class="metric-foot">去重 warehouse_id</div>
+              </div>
+              <div class="metric metric-brand">
+                <div class="metric-label">待预测序列数</div>
+                <div class="metric-value">113</div>
+                <div class="metric-foot">上限 1,000 · 占用 11.3%</div>
+              </div>
+            </div>
+
+            <div class="row-between mb-1">
+              <h4 class="mb-0">数据预览（前 20 行）</h4>
+              <div class="row" style="gap:.5rem">
+                <input class="input" style="width:170px;min-height:28px;font-size:.75rem"
+                       placeholder="搜索商品 / 仓库" oninput="filterPreview(this.value)">
+                <span class="t-xs t-muted">系统实际读到的内容</span>
+              </div>
+            </div>
+            <div class="table-wrap" style="max-height:340px">
+              <table class="data" id="preview-table">
+                <thead>
+                  <tr>
+                    <th>sku_id</th><th>warehouse_id</th><th>date</th>
+                    <th class="num">sales</th><th>商品名称</th><th>仓库</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="btn-row mt-3">
+              <a class="btn btn-primary" href="params.html">
+                下一步：确认预测参数<span data-icon="arrowRight"></span>
+              </a>
+              <button class="btn btn-secondary" onclick="showState('idle')">重新上传</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 字段规范 -->
+        <div class="card">
+          <div class="card-head">
+            <h3>CSV 字段规范</h3>
+            <span class="sub">强制契约 · 校验顺序不可调整</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="fields">
+              <thead>
+                <tr><th>列名</th><th>中文含义</th><th>必需</th><th>类型</th><th>约束</th><th>缺失后果</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>sku_id</code></td><td>商品编码</td>
+                  <td><span class="badge badge-success">必需</span></td><td>字符串</td>
+                  <td>非空，长度 ≤ 64</td><td>拒绝上传</td>
+                </tr>
+                <tr>
+                  <td><code>warehouse_id</code></td><td>仓库编码</td>
+                  <td><span class="badge badge-danger">必需</span></td><td>字符串</td>
+                  <td>非空，长度 ≤ 64</td>
+                  <td><strong style="color:var(--danger)">拒绝上传</strong>（分仓预测的立身之本）</td>
+                </tr>
+                <tr>
+                  <td><code>date</code></td><td>日期</td>
+                  <td><span class="badge badge-success">必需</span></td><td>日期</td>
+                  <td>可解析，推荐 <code>YYYY-MM-DD</code></td><td>拒绝上传</td>
+                </tr>
+                <tr>
+                  <td><code>sales</code></td><td>销量</td>
+                  <td><span class="badge badge-success">必需</span></td><td>数值</td>
+                  <td>≥ 0，整数或小数均可</td><td>拒绝上传</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-body" style="border-top:1px solid var(--border)">
+            <div class="t-xs t-muted mb-1">校验顺序（任一步失败即终止，不继续后续校验）</div>
+            <div class="row wrap" style="gap:.3125rem">
+              <span class="badge badge-neutral">1 扩展名</span>
+              <span class="badge badge-neutral">2 大小 / 行数</span>
+              <span class="badge badge-neutral">3 表头完整性</span>
+              <span class="badge badge-neutral">4 日期可解析性</span>
+              <span class="badge badge-neutral">5 销量非负</span>
+              <span class="badge badge-neutral">6 时间连续性</span>
+              <span class="badge badge-neutral">7 序列数上限</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="spec-note">
+          <div class="spec-title"><span data-icon="info"></span>本页与 PRD 的对应关系</div>
+          <table>
+            <thead><tr><th>需求编号</th><th>实现说明</th></tr></thead>
+            <tbody>
+              <tr><td>FR-UPL-01</td><td>拖拽与点击两种上传方式；非 .csv 前端即时拦截</td></tr>
+              <tr><td>FR-UPL-02</td><td>「改用示例数据（菜鸟数据集抽样）」一键加载入口</td></tr>
+              <tr><td>FR-UPL-03 / NFR-PERF-03/04</td><td>大小上限 20 MB、行数上限 500,000 在拖拽区明示并前置拦截</td></tr>
+              <tr><td>FR-UPL-04</td><td>上传进度条 + 百分比（对应 NFR-PERF-06 的"不卡死"）</td></tr>
+              <tr><td>FR-UPL-05</td><td>结构化错误：错误类型 + 出错列/行号 + 修复建议</td></tr>
+              <tr><td>FR-UPL-06</td><td>「下载错误明细 CSV」按钮（仅含不合格行）</td></tr>
+              <tr><td>FR-UPL-07</td><td>数据预览前 20 行，表头与数据类型与源文件一致</td></tr>
+              <tr><td>FR-UPL-08</td><td>「下载标准模板」入口</td></tr>
+              <tr><td>FR-UPL-09</td><td>缺字段态：逐列标注已识别 / 缺失，并给出修正建议</td></tr>
+              <tr><td>FR-UPL-10</td><td>日期异常态：列出行号与原始值（示例含 3 种典型错法）</td></tr>
+              <tr><td>FR-UPL-11</td><td>负值态：明确声明"系统不自动取绝对值"，需用户修正</td></tr>
+              <tr><td>FR-UPL-12 / 13</td><td>断档态：列出断档区间与缺失天数，提供"自动插值 / 放弃"二选一，未选择不继续</td></tr>
+              <tr><td>FR-UPL-14</td><td>序列超限态：展示当前值与上限对照，提示筛选商品</td></tr>
+              <tr><td>FR-UPL-15</td><td>通过后展示行数 / 商品数 / 仓库数 / 序列数摘要</td></tr>
+              <tr><td>FR-DAT-02（埋点）</td><td>每个错误态对应 <code>dataset_validate_fail</code> 的 <code>fail_stage</code>，用于反推提示优化</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== 右栏 ========== -->
+      <aside class="aside">
+        <div class="card">
+          <div class="card-head"><h4>数据要求速查</h4></div>
+          <div class="card-body">
+            <dl class="meta-list">
+              <div class="meta-row"><dt>文件格式</dt><dd class="mono">.csv</dd></div>
+              <div class="meta-row"><dt>大小上限</dt><dd class="mono">20 MB</dd></div>
+              <div class="meta-row"><dt>行数上限</dt><dd class="mono">500,000</dd></div>
+              <div class="meta-row"><dt>序列数上限</dt><dd class="mono">1,000</dd></div>
+              <div class="meta-row"><dt>日期格式</dt><dd class="mono">YYYY-MM-DD</dd></div>
+              <div class="meta-row"><dt>编码</dt><dd class="mono">UTF-8</dd></div>
+              <div class="meta-row"><dt>最少历史</dt><dd class="mono">28 天</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h4>这份数据会怎么用</h4></div>
+          <div class="card-body">
+            <div class="t-xs t-2" style="line-height:1.85">
+              <div class="row mb-1" style="align-items:flex-start;gap:.4375rem">
+                <span class="dot dot-info" style="margin-top:6px"></span>
+                <span><strong>字段校验</strong>：逐项检查必需列、日期格式与数值合法性</span>
+              </div>
+              <div class="row mb-1" style="align-items:flex-start;gap:.4375rem">
+                <span class="dot dot-info" style="margin-top:6px"></span>
+                <span><strong>清洗</strong>：缺失线性插值、异常尖峰截断（P99.5 / 均值+3σ）</span>
+              </div>
+              <div class="row mb-1" style="align-items:flex-start;gap:.4375rem">
+                <span class="dot dot-info" style="margin-top:6px"></span>
+                <span><strong>序列分级</strong>：按有效历史点数打 L1 / L2 / L3 标签</span>
+              </div>
+              <div class="row mb-1" style="align-items:flex-start;gap:.4375rem">
+                <span class="dot dot-info" style="margin-top:6px"></span>
+                <span><strong>推理</strong>：加载预训练模型，批量前向（不重新训练）</span>
+              </div>
+              <div class="row" style="align-items:flex-start;gap:.4375rem">
+                <span class="dot dot-info" style="margin-top:6px"></span>
+                <span><strong>对照</strong>：计算移动平均基线与加权指标</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-2" style="margin-bottom:0">
+          <span data-icon="shield"></span>
+          <div class="alert-body">
+            <div class="alert-title">数据用途</div>
+            <p>你上传的数据仅用于本次预测计算，不作其他用途，其他用户无法访问。</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script>
+  initShell('upload');
+  document.querySelectorAll('[data-icon]').forEach(function (el) {
+    var svg = ICONS[el.getAttribute('data-icon')];
+    if (svg) el.innerHTML = svg;
+  });
+
+  /* ---------- 拖拽交互 ---------- */
+  var dz = document.getElementById('dropzone');
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('dragover'); });
+  });
+  dz.addEventListener('drop', function () { showState('selected'); });
+  dz.addEventListener('click', function () { showState('selected'); });
+
+  /* ---------- 预览数据（前 20 行，真实结构） ---------- */
+  function buildPreviewData() {
+    var rows = [];
+    var ds = buildDataset({ days: 30 });
+    var used = {};
+    for (var i = 0; i < ds.length && rows.length < 20; i++) {
+      var s = ds[i];
+      var pts = s.observed.filter(function (p) { return p.value !== null; }).slice(-2);
+      pts.forEach(function (p) {
+        if (rows.length >= 20) return;
+        rows.push({
+          sku_id: s.itemId, warehouse_id: s.storeCode, date: p.date,
+          sales: p.value, itemName: s.itemName, storeName: s.storeName,
+        });
+      });
+    }
+    return rows.slice(0, 20);
+  }
+  var PREVIEW = buildPreviewData();
+
+  function renderPreview(filter) {
+    var f = (filter || '').trim().toLowerCase();
+    var rows = PREVIEW.filter(function (r) {
+      return !f || r.sku_id.includes(f) || r.warehouse_id.includes(f) ||
+             r.itemName.toLowerCase().includes(f) || r.storeName.includes(f);
+    });
+    document.getElementById('preview-tbody').innerHTML = rows.length
+      ? rows.map(function (r) {
+          return '<tr><td class="mono">' + r.sku_id + '</td>' +
+            '<td class="mono">' + r.warehouse_id + '</td>' +
+            '<td class="mono">' + r.date + '</td>' +
+            '<td class="num t-mono">' + num(r.sales) + '</td>' +
+            '<td>' + r.itemName + '</td>' +
+            '<td>' + r.storeName + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" class="t-center t-muted" style="padding:1.5rem">没有匹配的行</td></tr>';
+  }
+  function filterPreview(v) { renderPreview(v); }
+
+  /* ---------- 错误表 ---------- */
+  function renderErrorTable(cols, rows) {
+    document.getElementById('err-thead').innerHTML =
+      '<tr>' + cols.map(function (c, i) {
+        return '<th' + (c.num ? ' class="num"' : '') + '>' + c.label + '</th>';
+      }).join('') + '</tr>';
+    document.getElementById('err-tbody').innerHTML = rows.map(function (r) {
+      return '<tr>' + cols.map(function (c) {
+        var v = r[c.key];
+        var cls = c.mono ? ' class="mono"' : (c.num ? ' class="num t-mono"' : '');
+        if (c.danger) cls = ' class="mono" style="color:var(--danger);font-weight:650"';
+        return '<td' + cls + '>' + (v === undefined || v === null ? '—' : v) + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+  }
+
+  /* ---------- 状态机 ---------- */
+  var STATES = {
+    idle: function () {
+      show(['card-upload']);
+      document.getElementById('dropzone').classList.remove('hidden');
+      document.getElementById('file-block').classList.add('hidden');
+    },
+    selected: function () {
+      show(['card-upload']);
+      document.getElementById('dropzone').classList.add('hidden');
+      document.getElementById('file-block').classList.remove('hidden');
+      document.getElementById('upload-progress').classList.add('hidden');
+      document.getElementById('fc-status').className = 'badge badge-neutral';
+      document.getElementById('fc-status').textContent = '待上传';
+      document.getElementById('fc-name').textContent = 'item_store_feature_1010_1227.csv';
+      document.getElementById('fc-meta').textContent = '0.42 MB · 14,305 行 · 4 列';
+    },
+    uploading: function () {
+      STATES.selected();
+      document.getElementById('upload-progress').classList.remove('hidden');
+      document.getElementById('fc-status').className = 'badge badge-info';
+      document.getElementById('fc-status').textContent = '上传中';
+      animate('up-bar', 'up-pct', 'up-label', 0, 100, 1100, '正在上传…', '%');
+    },
+    validating: function () {
+      show(['card-validating']);
+      var steps = [
+        '第 1/7 步：检查文件扩展名与大小',
+        '第 2/7 步：检查行数与序列数规模',
+        '第 3/7 步：检查表头完整性',
+        '第 4/7 步：检查日期可解析性',
+        '第 5/7 步：检查销量非负性',
+        '第 6/7 步：检查时间连续性',
+        '第 7/7 步：检查序列数上限',
+      ];
+      var i = 0;
+      var bar = document.getElementById('val-bar');
+      var t = setInterval(function () {
+        i++;
+        if (i >= steps.length) { clearInterval(t); return; }
+        document.getElementById('val-step').textContent = steps[i];
+        bar.style.width = Math.round(((i + 1) / steps.length) * 100) + '%';
+      }, 260);
+    },
+    ok: function () {
+      show(['card-ok']);
+      renderPreview('');
+    },
+    'err-missing': function () { showError('missingColumn'); },
+    'err-date': function () { showError('badDate'); },
+    'err-negative': function () { showError('negative'); },
+    'err-series': function () { showError('tooManySeries'); },
+    'err-gap': function () { showError('gap'); },
+  };
+
+  function show(ids) {
+    ['card-upload', 'card-validating', 'card-error', 'card-ok'].forEach(function (c) {
+      document.getElementById(c).classList.toggle('hidden', ids.indexOf(c) === -1);
+    });
+  }
+
+  function showError(key) {
+    var e = VALIDATE_ERRORS[key];
+    show(['card-error']);
+    document.getElementById('err-code').textContent = e.code;
+    document.getElementById('err-msg').textContent = e.message;
+    document.getElementById('err-detail').textContent = e.detail;
+
+    ['err-body-missing', 'err-body-rows', 'err-body-gap', 'err-body-series'].forEach(function (b) {
+      document.getElementById(b).classList.add('hidden');
+    });
+
+    if (key === 'missingColumn') {
+      document.getElementById('err-body-missing').classList.remove('hidden');
+      document.getElementById('err-suggestion').textContent = e.suggestion;
+    }
+    if (key === 'badDate') {
+      document.getElementById('err-body-rows').classList.remove('hidden');
+      renderErrorTable(
+        [{ key: 'line', label: '行号', num: true },
+         { key: 'raw', label: '原始值', danger: true },
+         { key: 'expect', label: '问题说明' }],
+        e.rows
+      );
+      document.getElementById('err-suggestion2').textContent = e.suggestion;
+    }
+    if (key === 'negative') {
+      document.getElementById('err-body-rows').classList.remove('hidden');
+      renderErrorTable(
+        [{ key: 'line', label: '行号', num: true },
+         { key: 'raw', label: 'sales 原始值', danger: true },
+         { key: 'sku', label: 'sku_id', mono: true },
+         { key: 'store', label: 'warehouse_id', mono: true }],
+        e.rows
+      );
+      document.getElementById('err-suggestion2').textContent = e.suggestion;
+    }
+    if (key === 'gap') {
+      document.getElementById('err-body-gap').classList.remove('hidden');
+      document.getElementById('gap-tbody').innerHTML = e.gaps.map(function (g) {
+        return '<tr><td class="mono">' + g.sku + '</td>' +
+          '<td class="mono">' + g.store + '</td>' +
+          '<td class="mono">' + g.from + ' ~ ' + g.to + '</td>' +
+          '<td class="num t-mono" style="color:var(--warning);font-weight:650">' + g.missing + '</td></tr>';
+      }).join('');
+    }
+    if (key === 'tooManySeries') {
+      document.getElementById('err-body-series').classList.remove('hidden');
+      document.getElementById('series-cur').textContent = num(e.current);
+      document.getElementById('err-suggestion3').textContent = e.suggestion;
+    }
+  }
+
+  function animate(barId, pctId, labelId, from, to, dur, label, unit) {
+    var bar = document.getElementById(barId), pctEl = document.getElementById(pctId);
+    var start = performance.now();
+    function tick(now) {
+      var t = Math.min(1, (now - start) / dur);
+      var v = Math.round(from + (to - from) * t);
+      bar.style.width = v + '%';
+      pctEl.textContent = v + (unit || '');
+      if (t < 1) requestAnimationFrame(tick);
+      else if (labelId) document.getElementById(labelId).textContent = label;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function downloadErrorDetail() {
+    exportCsv('error-detail.csv', [
+      { line: 128, raw_value: '2015/13/45', reason: '日期月份与日期越界' },
+      { line: 2041, raw_value: '20151010', reason: '日期格式应为 YYYY-MM-DD' },
+      { line: 8802, raw_value: '2015-1-7 ', reason: '月份日期未补零' },
+    ]);
+  }
+
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.addEventListener('click', function () {
+      document.querySelectorAll('.state-pill').forEach(function (q) { q.classList.remove('active'); });
+      p.classList.add('active');
+      STATES[p.dataset.state]();
+    });
+  });
+
+  STATES.idle();
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+[
+  {
+    "horizon": 7,
+    "wall_ms": 11329,
+    "rolling_ms": 2366,
+    "fallback_ms": 278,
+    "stages": {
+      "validate": 29,
+      "preprocess": 787,
+      "features": 1087,
+      "inference": 150,
+      "metrics": 584
+    },
+    "algo_two": 10488,
+    "bt": 5346,
+    "fc": 5142,
+    "io": 61
+  },
+  {
+    "horizon": 14,
+    "wall_ms": 16618,
+    "rolling_ms": 4000,
+    "fallback_ms": 302,
+    "stages": {
+      "validate": 31,
+      "preprocess": 794,
+      "features": 1149,
+      "inference": 3,
+      "metrics": 725
+    },
+    "algo_two": 15842,
+    "bt": 7067,
+    "fc": 8775,
+    "io": 59
+  },
+  {
+    "horizon": 30,
+    "wall_ms": 23843,
+    "rolling_ms": 7476,
+    "fallback_ms": 299,
+    "stages": {
+      "validate": 39,
+      "preprocess": 968,
+      "features": 1306,
+      "inference": 6,
+      "metrics": 924
+    },
+    "algo_two": 22766,
+    "bt": 11084,
+    "fc": 11682,
+    "io": 54
+  }
+]

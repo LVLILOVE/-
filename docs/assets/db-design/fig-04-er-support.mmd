@@ -1,0 +1,38 @@
+%% FIG-04 支撑域 ER 图（关键字段展开）
+erDiagram
+    model_registry ||..o{ tasks : "逻辑引用版本号"
+    users ||..o{ operation_logs : "1:N 产生 无外键"
+    tasks ||..o{ events : "1:N 埋点关联 无外键"
+
+    model_registry {
+        INTEGER id PK "主键，自增"
+        TEXT version UK "版本号，如 lstm_v1"
+        TEXT file_path "权重 bundle 相对路径"
+        INTEGER window_size "生产配置 21"
+        INTEGER hidden_size "生产配置 48"
+        INTEGER num_layers "生产配置 2"
+        REAL dropout "正则化强度"
+        INTEGER param_count "参数量 31729"
+        REAL val_mape "验证集加权 MAPE"
+        INTEGER is_active "启用版本，全局唯一为 1"
+        TEXT trained_at "训练完成时间"
+    }
+
+    operation_logs {
+        INTEGER id PK "主键，自增"
+        INTEGER user_id "可为空：未登录操作"
+        TEXT action "login/register/logout/upload/predict/export/delete"
+        TEXT target_id "关联对象 id"
+        TEXT result "success/fail"
+        TEXT ip "来源 IP"
+        TEXT created_at "记录时间"
+    }
+
+    events {
+        INTEGER id PK "主键，自增"
+        TEXT event_name "埋点事件名"
+        INTEGER user_id "可为空"
+        INTEGER task_id "可为空"
+        TEXT properties "JSON 字符串"
+        TEXT created_at "记录时间"
+    }

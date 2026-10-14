@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- 全局基础样式（对齐原型 app.css 第 2 节，令牌在 theme/tokens.css） ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1.0312rem;
+}
+
+h4 {
+  font-size: 0.9375rem;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+::selection {
+  background: var(--primary-soft);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-field);
+  border-radius: 99px;
+  border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}
+
+/* ---------- 骨架屏（WS-3-04） ----------
+   背景渐变平移 = 光带扫过。颜色全走 CSS 变量，因此深浅主题下都自然可读，
+   也避免在 CSS 里写死色值（令牌是唯一真源，UX-GOV-02）。 */
+.sk {
+  background-image: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--border) 40%,
+    var(--surface-2) 80%
+  );
+  background-size: 220% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  0% {
+    background-position: 130% 0;
+  }
+  100% {
+    background-position: -30% 0;
+  }
+}
+
+/* 尊重「减少动效」偏好（无障碍）：关闭扫光动画，保留静态占位 */
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    animation: none;
+    background: var(--surface-2);
+  }
+}
+
+/* ---------- 表格次要列在窄屏隐藏（UX-P04-04 / UX-P09 同源） ----------
+   1080px 是原型 `.hide-md` 的断点：低于此宽度隐藏「步长 / 序列数 / 趋势 /
+   分级 / 耗时」等辅助列，保留「任务 / 指标 / 状态 / 操作」——
+   这些列决定用户能否判断结果好坏，次要列只是锦上添花。
+
+   ⚠️ 用 `display:none` 而非折叠宽度：表格容器已有 `overflow-x:auto`，
+      若保留宽度，窄屏下仍会横向滚动，隐藏就失去意义。 */
+@media (max-width: 1080px) {
+  .hide-md {
+    display: none;
+  }
+}
+
+/* ---------- 首页：五步流程的连接线（区块 ③） ----------
+   ≥901px 时横排，用 ::after 画参与步之间的细线；窄屏竖排时隐藏。 */
+@media (min-width: 901px) {
+  .steps .step:not(:last-child) {
+    position: relative;
+  }
+  .steps .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0.5rem;
+    top: 1.4rem;
+    width: calc(100% - 3.5rem);
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+/* ---------- 首页：首屏事实数字（区块 ①） ---------- */
+.hero-facts .hero-fact {
+  min-width: 96px;
+}
+
+/* ---------- 首页：特性卡悬停（区块 ②） ---------- */
+.feat {
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.feat:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feat {
+    transition: none;
+  }
+  .feat:hover {
+    transform: none;
+  }
+}

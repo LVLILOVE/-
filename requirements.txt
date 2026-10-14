@@ -1,0 +1,35 @@
+# ============ 运行环境 ============
+# Python 3.12.14
+
+# ---------- 核心框架 ----------
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+pydantic==2.9.2
+pydantic[email]
+
+# ---------- 数据与存储 ----------
+SQLAlchemy==2.0.36
+python-multipart==0.0.12
+aiofiles==23.2.1
+
+# ---------- 认证与安全 ----------
+bcrypt==5.0.0
+PyJWT==2.9.0
+
+# ---------- 算法层（🔒 版本锁定，见 NFR-COMP-07）----------
+# torch==2.9.1+cu128   # 需从 PyTorch 官方源安装，见下方说明
+pandas==2.3.3
+numpy==2.5.3
+
+# ---------- 导出 ----------
+openpyxl==3.1.5
+
+# ---------- 开发期（不进生产镜像）----------
+ruff==0.6.9
+pytest==8.3.3
+httpx==0.27.2
+
+# ============ 安装说明 ============
+# torch 需从 PyTorch 官方源安装（否则会装成 CPU 版）：
+#   pip install torch==2.9.1+cu128 --index-url https://download.pytorch.org/whl/cu128
+# 无 GPU 机器改装 CPU 版，并对齐 app/algo/model.py 的设备自动回退（FR-MOD-10）。

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>任务详情 · 电商销量预测系统</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header id="app-header"></header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+
+  <main class="main main-wide">
+    <div class="page-head">
+      <div class="crumb"><a href="history.html">历史任务</a> / T-20261008-0931</div>
+      <div class="row-between wrap" style="align-items:flex-end;gap:.75rem">
+        <div>
+          <div class="row" style="gap:.5rem">
+            <h1 style="margin:0">双十一前 · 分仓备货预测</h1>
+            <span class="badge badge-success">✓ 已完成</span>
+          </div>
+          <p class="lede" style="margin:.375rem 0 0">
+            任务 <code>T-20261008-0931</code> · 提交于 2026-10-08 09:31 · 耗时 34.3 秒
+          </p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="alert('导出（原型演示）')">导出结果</button>
+          <a class="btn btn-ghost" href="compare.html">加入对比</a>
+          <button class="btn btn-danger btn-sm" onclick="location.href='history.html#delete'">删除任务</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 演示状态切换 -->
+    <div class="row wrap mb-2" style="gap:.375rem">
+      <span class="t-xs t-muted">演示状态：</span>
+      <button class="state-pill active" data-state="ok">成功任务</button>
+      <button class="state-pill" data-state="failed">失败任务详情</button>
+      <button class="state-pill" data-state="loading">加载中</button>
+    </div>
+
+    <div class="stack">
+
+      <!-- ============ 运行参数快照 ============ -->
+      <section class="card">
+        <div class="card-head">
+          <h3>运行参数快照</h3>
+          <div class="right t-xs t-muted">参数在任务提交时冻结，事后不可修改</div>
+        </div>
+        <div class="param-strip">
+          <div class="ps"><span class="ps-k">数据文件</span><span class="ps-v" title="item_store_feature_1010_1227.csv">item_store_feature_1010_1227.csv</span></div>
+          <div class="ps"><span class="ps-k">数据行数</span><span class="ps-v">14,305</span></div>
+          <div class="ps"><span class="ps-k">序列数</span><span class="ps-v">50</span></div>
+          <div class="ps"><span class="ps-k">预测粒度</span><span class="ps-v">仓库 × 商品</span></div>
+          <div class="ps"><span class="ps-k">预测步长</span><span class="ps-v">14 天</span></div>
+          <div class="ps"><span class="ps-k">节假日特征</span><span class="ps-v">开启</span></div>
+          <div class="ps"><span class="ps-k">滑动窗口</span><span class="ps-v">14 天</span></div>
+          <div class="ps"><span class="ps-k">模型版本</span><span class="ps-v t-mono">lstm_v1</span></div>
+        </div>
+        <div class="grid-3 mt-3">
+          <div>
+            <div class="t-xs t-muted">预测窗口</div>
+            <div class="t-bold t-mono">2015-12-28 ~ 2016-01-10</div>
+          </div>
+          <div>
+            <div class="t-xs t-muted">推理设备</div>
+            <div class="t-bold">CUDA · NVIDIA MX450</div>
+          </div>
+          <div>
+            <div class="t-xs t-muted">端到端耗时</div>
+            <div class="t-bold t-mono">34.3 s / 60 s</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 指标结论（成功态） ============ -->
+      <section class="card" id="card-metrics">
+        <div class="card-head"><h3>评估指标</h3></div>
+        <div class="metric-grid">
+          <div class="metric metric-pass">
+            <div class="metric-label">加权 MAPE</div>
+            <div class="metric-value">14.3<span class="unit">%</span></div>
+            <div class="metric-foot">门槛 ≤ 20% · 通过</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">加权 MAE</div>
+            <div class="metric-value">1.3</div>
+            <div class="metric-foot up">较基线降低 26.4%</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">加权 RMSE</div>
+            <div class="metric-value">3.4</div>
+            <div class="metric-foot up">较基线降低 27.5%</div>
+          </div>
+          <div class="metric metric-pass">
+            <div class="metric-label">达标序列占比</div>
+            <div class="metric-value">84.0<span class="unit">%</span></div>
+            <div class="metric-foot">目标 ≥ 60% · 通过</div>
+          </div>
+        </div>
+
+        <div class="cover-panel mt-3">
+          <div>
+            <div class="gauge" style="--gp:90;--gc:var(--success)">
+              <div class="gv"><b>90.0%</b><span>可评估覆盖率</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="cover-bar">
+              <i class="bar-l1" style="width:71.7%"></i>
+              <i class="bar-l2" style="width:28.3%"></i>
+              <i class="bar-l3" style="width:0%"></i>
+            </div>
+            <div class="cover-legend">
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--c1)"></span>
+                <span class="cv-name"><strong>L1</strong> · 模型推理</span>
+                <span class="cv-n">81</span><span class="cv-p">71.7%</span>
+              </div>
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--c3)"></span>
+                <span class="cv-name"><strong>L2</strong> · 商品级降级</span>
+                <span class="cv-n">32</span><span class="cv-p">28.3%</span>
+              </div>
+              <div class="cover-row">
+                <span class="cv-sw" style="background:var(--text-3)"></span>
+                <span class="cv-name"><strong>L3</strong> · 不可预测</span>
+                <span class="cv-n">0</span><span class="cv-p">0.0%</span>
+              </div>
+            </div>
+            <div class="grid-2 mt-3">
+              <div class="metric" style="padding:.625rem .75rem">
+                <div class="metric-label">L1 组平均 MAPE</div>
+                <div class="metric-value" style="font-size:1.125rem">14.3<span class="unit">%</span></div>
+              </div>
+              <div class="metric" style="padding:.625rem .75rem">
+                <div class="metric-label">L2 组平均 MAPE</div>
+                <div class="metric-value" style="font-size:1.125rem">60.3<span class="unit">%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 曲线概览 ============ -->
+      <section class="card" id="card-chart">
+        <div class="card-head">
+          <h3>预测曲线（抽样展示）</h3>
+          <div class="right">
+            <select class="select" id="pick" style="font-size:.75rem;padding:.25rem .5rem">
+              <option value="0">上海仓 · 纯棉圆领短袖T恤 男</option>
+              <option value="1">广州仓 · 纯棉圆领短袖T恤 男</option>
+              <option value="2">北京仓 · 纯棉圆领短袖T恤 男</option>
+            </select>
+          </div>
+        </div>
+        <div id="chart-host"></div>
+      </section>
+
+      <!-- ============ 执行阶段回放 ============ -->
+      <section class="card" id="card-stages">
+        <div class="card-head">
+          <h3>执行阶段耗时</h3>
+          <div class="right t-xs t-muted">总计 34.3 s · 预算 60 s</div>
+        </div>
+        <div class="stage-list">
+          <div class="stage done">
+            <span class="stage-icon" data-icon="check"></span>
+            <span class="stage-name">数据预处理 · 线性插值 + 异常尖峰截断</span>
+            <span class="stage-budget">3.1 s / 3.2 s</span>
+          </div>
+          <div class="stage done">
+            <span class="stage-icon" data-icon="check"></span>
+            <span class="stage-name">特征构建 · 滑动窗口 + 滞后 + 滚动统计</span>
+            <span class="stage-budget">5.0 s / 5.1 s</span>
+          </div>
+          <div class="stage done">
+            <span class="stage-icon" data-icon="check"></span>
+            <span class="stage-name">序列分级 · 有效历史长度判定</span>
+            <span class="stage-budget">0.5 s / 0.6 s</span>
+          </div>
+          <div class="stage done">
+            <span class="stage-icon" data-icon="check"></span>
+            <span class="stage-name">批量模型推理 · batch=34</span>
+            <span class="stage-budget">22.4 s / 22.0 s</span>
+          </div>
+          <div class="stage done">
+            <span class="stage-icon" data-icon="check"></span>
+            <span class="stage-name">指标计算 · 加权指标 + 移动平均基线</span>
+            <span class="stage-budget">3.3 s / 3.9 s</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 失败态详情 ============ -->
+      <section class="card hidden" id="card-failed">
+        <div class="card-head">
+          <h3>任务失败详情</h3>
+          <div class="right"><span class="badge badge-danger">E_TIMEOUT（50001）</span></div>
+        </div>
+        <div class="verdict fail">
+          <span class="vd-icon" data-icon="x"></span>
+          <div>
+            <div class="vd-t">端到端耗时 61.2 秒，超过 60 秒硬上限</div>
+            <div class="vd-d">
+              已完成 42/50 条序列推理，未产出完整结果。中间结果不落盘，避免半成品误导决策。
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap mt-3">
+          <table class="fields">
+            <thead><tr><th>项</th><th>值</th></tr></thead>
+            <tbody>
+              <tr><td>错误码</td><td><code>E_TIMEOUT</code>（HTTP 50001）</td></tr>
+              <tr><td>失败阶段</td><td>阶段 4/5 · 批量模型推理</td></tr>
+              <tr><td>完成进度</td><td>42 / 50 条序列</td></tr>
+              <tr><td>实际耗时</td><td>61.2 s（上限 60.0 s）</td></tr>
+              <tr><td>推理设备</td><td>CUDA（未发生回退）</td></tr>
+              <tr><td>数据文件</td><td><code>my_sales_export.csv</code> · 50 条序列 · 步长 7 天</td></tr>
+              <tr><td>中间产物</td><td>已释放，不落盘</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert alert-info mt-3" style="margin-bottom:0">
+          <div class="alert-body">
+            <div class="alert-title">为什么这次会超时</div>
+            该批次序列的历史波动显著高于常规数据，预处理阶段的缺失插值与异常检测耗时上升；
+            同时推理阶段未能在 GPU 上形成有效大批次，导致逐日推理量超出预算。
+            建议缩短步长至 7 天以内或缩减商品范围后重跑。
+          </div>
+        </div>
+        <div class="btn-row mt-3">
+          <a class="btn btn-primary" href="params.html">用相同参数重跑</a>
+          <a class="btn btn-secondary" href="history.html">返回列表</a>
+        </div>
+      </section>
+
+      <!-- ============ 加载骨架 ============ -->
+      <section class="card hidden" id="card-loading">
+        <div class="skeleton sk-line w40" style="height:20px"></div>
+        <div class="skeleton mt-3" style="height:120px"></div>
+        <div class="skeleton mt-2" style="height:260px"></div>
+      </section>
+
+      <!-- ============ 原型说明 ============ -->
+      <div class="spec-note" id="card-spec">
+        <div class="sn-head">
+          <span class="sn-tag">原型说明</span>
+          <span>本页与 PRD 的对应关系</span>
+        </div>
+        <table class="sn-table">
+          <tr><td>运行参数快照（提交时冻结）</td><td><code>FR-HIS-04</code></td></tr>
+          <tr><td>指标结论与覆盖率披露复现</td><td><code>FR-VIS-02</code> · <code>FR-VIS-07</code></td></tr>
+          <tr><td>失败任务的错误码、失败阶段、完成进度</td><td><code>FR-SYS-07</code> · <code>FR-HIS-06</code></td></tr>
+          <tr><td>失败原因分析与重跑入口</td><td><code>FR-SYS-08</code></td></tr>
+          <tr><td>中间产物不落盘的说明</td><td><code>NFR-REL-04</code></td></tr>
+        </table>
+        <div class="sn-foot">埋点：<code>EV-HIS-03</code>（打开详情）· <code>EV-HIS-05</code>（重跑）</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<footer id="app-footer"></footer>
+
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+initShell('history.html');
+
+document.querySelectorAll('[data-icon]').forEach(function (el) {
+  var svg = ICONS[el.getAttribute('data-icon')];
+  if (svg) el.innerHTML = svg;
+});
+
+var raw = buildDataset({ days: 200, endDate: BIZ.dateEnd, sparseSeed: 20261008 });
+var M = computeTaskMetrics(raw, 14);
+
+/* 本页展示历史任务 T-20261008-0931，数值一律取自 HISTORY[0] 与真实指标 M，
+   不在 HTML 里写死 —— 否则重训模型后页面会与算法再次不一致。 */
+var TASK = HISTORY[0];
+
+function renderHistoryDetail() {
+  var grid = document.querySelectorAll('#card-metrics .metric-grid .metric');
+  function fillMetric(i, label, value, foot, cls) {
+    var el = grid[i];
+    if (!el) return;
+    el.className = 'metric ' + (cls || '');
+    el.querySelector('.metric-label').textContent = label;
+    el.querySelector('.metric-value').innerHTML = value;
+    el.querySelector('.metric-foot').textContent = foot;
+  }
+  if (grid.length >= 4) {
+    fillMetric(0, '加权 MAPE',
+      TASK.weightedMape.toFixed(1) + '<span class="unit">%</span>',
+      '门槛 ≤ ' + BIZ.weightedMapeLimit + '% · 通过', 'metric-pass');
+    fillMetric(1, '加权 MAE',
+      M.weightedMae.toFixed(1),
+      '较基线降低 ' + TASK.maeImprove.toFixed(1) + '%', 'metric-pass');
+    fillMetric(2, '加权 RMSE',
+      M.weightedRmse.toFixed(1),
+      '较基线降低 ' + TASK.rmseImprove.toFixed(1) + '%', 'metric-pass');
+    fillMetric(3, '达标序列占比',
+      TASK.seriesPassRate.toFixed(1) + '<span class="unit">%</span>',
+      '目标 ≥ ' + BIZ.seriesPassRateTarget + '% · 通过', 'metric-pass');
+  }
+
+  // 覆盖率仪表与分级条
+  var tot = (TASK.l1 + TASK.l2 + TASK.l3) || 1;
+  var coverPct = ((TASK.l1 + TASK.l2) / tot) * 100;
+  var gv = document.querySelector('#card-metrics .cover-panel .gv b');
+  if (gv) gv.textContent = coverPct.toFixed(1) + '%';
+  var gauge = document.querySelector('#card-metrics .gauge');
+  if (gauge) gauge.setAttribute('style', '--gp:' + coverPct.toFixed(0) + ';--gc:var(--success)');
+
+  var bars = document.querySelectorAll('#card-metrics .cover-bar i');
+  var pcts = [TASK.l1 / tot * 100, TASK.l2 / tot * 100, TASK.l3 / tot * 100];
+  bars.forEach(function (b, i) { if (pcts[i] != null) b.style.width = pcts[i].toFixed(1) + '%'; });
+
+  var rows = document.querySelectorAll('#card-metrics .cover-legend .cover-row');
+  [[TASK.l1, pcts[0]], [TASK.l2, pcts[1]], [TASK.l3, pcts[2]]].forEach(function (v, i) {
+    if (!rows[i]) return;
+    rows[i].querySelector('.cv-n').textContent = v[0];
+    rows[i].querySelector('.cv-p').textContent = v[1].toFixed(1) + '%';
+  });
+
+  // L1 / L2 组平均 MAPE
+  var mini = document.querySelectorAll('#card-metrics .grid-2 .metric .metric-value');
+  if (mini[0]) mini[0].innerHTML = (M.l1Mape != null ? M.l1Mape.toFixed(1) : '—') + '<span class="unit">%</span>';
+  if (mini[1]) mini[1].innerHTML = (M.l2Mape != null ? M.l2Mape.toFixed(1) : '—') + '<span class="unit">%</span>';
+
+  // 页头任务信息
+  document.title = TASK.name + ' · 任务详情 · 电商销量预测系统';
+}
+renderHistoryDetail();
+
+function drawChart(idx) {
+  var s = M.perSeries[idx];
+  document.getElementById('chart-host').innerHTML = lineChart({
+    history: s.observed.filter(function (p) { return p.value !== null; }).slice(-42),
+    forecast: s.forecast,
+    height: 300,
+    aria: s.itemName + ' 历史与预测',
+  });
+}
+
+document.getElementById('pick').addEventListener('change', function () {
+  drawChart(Number(this.value));
+});
+
+function setState(s) {
+  document.querySelectorAll('.state-pill').forEach(function (p) {
+    p.classList.toggle('active', p.dataset.state === s);
+  });
+  ['card-metrics', 'card-chart', 'card-stages', 'card-failed', 'card-loading', 'card-spec']
+    .forEach(function (id) { document.getElementById(id).classList.add('hidden'); });
+
+  if (s === 'loading') {
+    document.getElementById('card-loading').classList.remove('hidden');
+    setTimeout(function () { setState('ok'); }, 1200);
+    return;
+  }
+  if (s === 'failed') {
+    document.getElementById('card-failed').classList.remove('hidden');
+    document.getElementById('card-spec').classList.remove('hidden');
+    return;
+  }
+  ['card-metrics', 'card-chart', 'card-stages', 'card-spec'].forEach(function (id) {
+    document.getElementById(id).classList.remove('hidden');
+  });
+  drawChart(0);
+}
+
+document.querySelectorAll('.state-pill').forEach(function (p) {
+  p.addEventListener('click', function () { setState(p.dataset.state); });
+});
+
+document.addEventListener('themechange', function () { drawChart(Number(document.getElementById('pick').value)); });
+
+setState('ok');
+</script>
+</body>
+</html>

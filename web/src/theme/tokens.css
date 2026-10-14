@@ -1,0 +1,130 @@
+/* ==========================================================================
+   设计令牌（自动生成，勿手改）—— 来源 prototype/assets/app.css 的
+   :root 与 html.dark 两个令牌块，原样移植。颜色一律 oklch()，禁止改写为 hex。
+   如需调整令牌，请修改 app.css 后重跑 scripts/verify_tokens.py --write。
+   ========================================================================== */
+
+:root {
+  /* 品牌色：青蓝（数据/科技感），避免使用陈旧的 bootstrap 蓝 */
+  /* L 由 WCAG 反解得出：0.50 使「白字于主按钮」与「主色作正文/链接」
+     同时达到 4.5:1（反解过程见 scripts/a11y_audit.py --solve） */
+  --brand-h: 205;
+  --primary:        oklch(0.475 0.145 var(--brand-h));
+  --primary-hover:  oklch(0.41 0.15 var(--brand-h));
+  --primary-soft:   oklch(0.475 0.145 var(--brand-h) / 0.12);
+  --primary-ring:   oklch(0.475 0.145 var(--brand-h) / 0.35);
+
+  /* 语义色：浅色主题取「深值」，使同一令牌既可作为实色填充承载白字，
+     也可直接作为正文/图标色（两者都需 4.5:1 / 3:1） */
+  --success: oklch(0.51 0.15 155);
+  --success-soft: oklch(0.51 0.15 155 / 0.14);
+  --warning: oklch(0.54 0.155 75);
+  --warning-soft: oklch(0.54 0.155 75 / 0.15);
+  --danger:  oklch(0.555 0.20 25);
+  --danger-soft: oklch(0.555 0.20 25 / 0.14);
+  --info:    oklch(0.53 0.13 250);
+  --info-soft: oklch(0.53 0.13 250 / 0.14);
+
+  /* on-color：置于实色填充之上的前景色。
+     浅色主题填充为深色 => 油墨为白；深色主题整体反转，见 html.dark */
+  --on-primary: oklch(0.99 0 0);
+  --on-success: oklch(0.99 0 0);
+  --on-danger:  oklch(0.99 0 0);
+
+  /* soft 底（--{k}-soft）之上的前景色。
+     ⚠️ 为什么不能直接复用 --{k}：soft 底 = 语义色以低透明度「叠」在 surface 上。
+     深色主题下 surface 很暗（L=0.225），叠出的底色也偏暗，而 --success / --danger
+     / --info 的 L 本身不高（0.68 / 0.64 / 0.68），实测对比度只有 3.62 / 3.07 / 3.52，
+     低于 AA 4.5:1 —— 即「徽标/状态标」在深色下文字发灰看不清。
+     （--primary 4.63 与 --warning 4.64 恰好达标，但为口径统一一并给出。）
+     浅色主题 soft 底极浅，语义色本身已达标，故直接复用同值；深色主题单独拉亮。 */
+  --on-primary-soft: oklch(0.475 0.145 205);
+  --on-success-soft: oklch(0.51 0.15 155);
+  --on-warning-soft: oklch(0.54 0.155 75);
+  --on-danger-soft:  oklch(0.555 0.20 25);
+  --on-info-soft:    oklch(0.53 0.13 250);
+
+  /* 中性色阶（浅色模式） */
+  --bg:            oklch(0.985 0.002 250);
+  --bg-subtle:     oklch(0.965 0.004 250);
+  --surface:       oklch(1 0 0);
+  --surface-2:     oklch(0.975 0.003 250);
+  --border:        oklch(0.905 0.006 250);
+  --border-strong: oklch(0.85 0.008 250);
+  /* 表单/次级按钮描边：须 3:1 vs surface-2（SC 1.4.11）；
+     --border/--border-strong 只承担装饰性分隔线，按标准豁免 3:1 */
+  --border-field:  oklch(0.645 0.008 250);
+  --text:          oklch(0.22 0.012 250);
+  --text-2:        oklch(0.45 0.012 250);
+  --text-3:        oklch(0.535 0.012 250);
+
+  /* 图表色（顺序色板） */
+  --c1: oklch(0.61 0.155 205);
+  --c2: oklch(0.645 0.155 145);
+  --c3: oklch(0.665 0.16 75);
+  --c4: oklch(0.64 0.19 25);
+  --c5: oklch(0.62 0.16 300);
+
+  --radius: 0.625rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 0.875rem;
+
+  --shadow-sm: 0 1px 2px oklch(0.2 0.02 250 / 0.06);
+  --shadow: 0 1px 3px oklch(0.2 0.02 250 / 0.08), 0 6px 16px oklch(0.2 0.02 250 / 0.06);
+  --shadow-lg: 0 4px 12px oklch(0.2 0.02 250 / 0.10), 0 18px 40px oklch(0.2 0.02 250 / 0.10);
+
+  --font-sans: 'Inter', 'Outfit', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+
+  --header-h: 56px;
+  --sidebar-w: 220px;
+  --maxw: 1320px;
+}
+
+html.dark {
+  --bg:            oklch(0.175 0.012 250);
+  --bg-subtle:     oklch(0.205 0.014 250);
+  --surface:       oklch(0.225 0.014 250);
+  --surface-2:     oklch(0.255 0.014 250);
+  --border:        oklch(0.315 0.014 250);
+  --border-strong: oklch(0.395 0.016 250);
+  --border-field:  oklch(0.54 0.014 250);
+  --text:          oklch(0.955 0.004 250);
+  --text-2:        oklch(0.76 0.012 250);
+  --text-3:        oklch(0.63 0.012 250);
+
+  /* 深色主题：填充转亮、油墨转深（on-color 整体反转）。
+     语义色必须显式写回亮值，否则会继承 :root 新增的深值 */
+  --primary:       oklch(0.72 0.15 var(--brand-h));
+  --primary-hover: oklch(0.78 0.15 var(--brand-h));
+  --primary-soft:  oklch(0.72 0.15 var(--brand-h) / 0.10);
+  --primary-ring:  oklch(0.72 0.15 var(--brand-h) / 0.40);
+  --success:      oklch(0.68 0.145 155);
+  --success-soft: oklch(0.68 0.145 155 / 0.14);
+  --warning:      oklch(0.76 0.155 75);
+  --warning-soft: oklch(0.76 0.155 75 / 0.10);
+  --danger:       oklch(0.64 0.20 25);
+  --danger-soft:  oklch(0.64 0.20 25 / 0.14);
+  --info:         oklch(0.68 0.13 250);
+  --info-soft:    oklch(0.68 0.13 250 / 0.14);
+  --on-primary: oklch(0.19 0.03 205);
+  --on-success: oklch(0.19 0.03 155);
+  --on-danger:  oklch(0.19 0.03 25);
+
+  /* soft 底之上的前景色：深色主题必须单独拉亮（原因与实测值见 :root 同名注释） */
+  --on-primary-soft: oklch(0.72 0.15 var(--brand-h));
+  --on-success-soft: oklch(0.80 0.15 155);
+  --on-warning-soft: oklch(0.76 0.155 75);
+  --on-danger-soft:  oklch(0.76 0.18 25);
+  --on-info-soft:    oklch(0.80 0.13 250);
+
+  --c1: oklch(0.72 0.15 205);
+  --c2: oklch(0.78 0.15 145);
+  --c3: oklch(0.80 0.15 75);
+  --c4: oklch(0.72 0.185 25);
+  --c5: oklch(0.72 0.16 300);
+
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow: 0 1px 3px oklch(0 0 0 / 0.4), 0 6px 16px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 4px 12px oklch(0 0 0 / 0.45), 0 18px 40px oklch(0 0 0 / 0.4);
+}

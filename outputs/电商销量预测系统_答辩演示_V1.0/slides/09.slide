@@ -1,0 +1,102 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>02 技术方案 · 降级策略</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>稀疏数据下的三级降级兜底</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>判定阈值：单序列历史有效点数 ≥ 90 天</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 700, height: 512, flexDirection: 'column' }}>
+                <Box style={{ height: 48, background: '#E8EFF8', borderRadius: 8, padding: '0 20px', flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>输入：一条「仓库 × 商品」序列</Text>
+                </Box>
+
+                <Box style={{ height: 132, background: '#FFFFFF', border: '1px solid #D6DCE5', borderLeft: '5px solid #1E4FA8', borderRadius: 8, padding: '0 20px', flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                    <Box style={{ width: 78, flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 30, color: '#1E4FA8', fontWeight: 'bold' }}>L1</Text>
+                        <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 2 }}>本仓充足</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 18 }}>
+                        <Text style={{ fontSize: 20, color: '#1A2230' }}>本仓历史有效点数 ≥ 90 天</Text>
+                        <Text style={{ fontSize: 17, color: '#4A5568', lineHeight: 1.45, marginTop: 8 }}>直接用 LSTM 推理未来 horizon 天，输出完整数值预测</Text>
+                    </Box>
+                    <Text style={{ fontSize: 17, color: '#1E4FA8', fontWeight: 'bold' }}>数值预测</Text>
+                </Box>
+
+                <Box style={{ height: 132, background: '#FFFFFF', border: '1px solid #D6DCE5', borderLeft: '5px solid #3D7BD9', borderRadius: 8, padding: '0 20px', flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                    <Box style={{ width: 78, flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 30, color: '#3D7BD9', fontWeight: 'bold' }}>L2</Text>
+                        <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 2 }}>跨仓补足</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 18 }}>
+                        <Text style={{ fontSize: 20, color: '#1A2230' }}>本仓不足，但同商品跨仓聚合 ≥ 90 天</Text>
+                        <Text style={{ fontSize: 17, color: '#4A5568', lineHeight: 1.45, marginTop: 8 }}>按商品级预测，再依各仓历史占比分摊到目标仓</Text>
+                    </Box>
+                    <Text style={{ fontSize: 17, color: '#3D7BD9', fontWeight: 'bold' }}>标注粒度</Text>
+                </Box>
+
+                <Box style={{ height: 132, background: '#FFFFFF', border: '1px solid #D6DCE5', borderLeft: '5px solid #8B97A8', borderRadius: 8, padding: '0 20px', flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                    <Box style={{ width: 78, flexDirection: 'column' }}>
+                        <Text style={{ fontSize: 30, color: '#5A6678', fontWeight: 'bold' }}>L3</Text>
+                        <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 2 }}>数据不足</Text>
+                    </Box>
+                    <Box style={{ flex: 1, flexDirection: 'column', paddingLeft: 18 }}>
+                        <Text style={{ fontSize: 20, color: '#1A2230' }}>跨仓聚合后仍不足 90 天</Text>
+                        <Text style={{ fontSize: 17, color: '#4A5568', lineHeight: 1.45, marginTop: 8 }}>不输出数值，前端明确提示该序列历史不足、建议补充数据</Text>
+                    </Box>
+                    <Text style={{ fontSize: 17, color: '#5A6678', fontWeight: 'bold' }}>不预测</Text>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 500, paddingLeft: 24, flexDirection: 'column' }}>
+                <Box style={{ height: 270, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: '20px 22px', flexDirection: 'column' }}>
+                    <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2 }}>实测覆盖率</Text>
+                    <Text style={{ fontSize: 24, color: '#0E3F8C', fontWeight: 'bold', marginTop: 8 }}>113 条序列的分级分布</Text>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
+                        <Text style={{ width: 44, fontSize: 19, color: '#1E4FA8', fontWeight: 'bold' }}>L1</Text>
+                        <Box style={{ flex: 1, height: 22, background: '#E8EFF8', borderRadius: 4, flexDirection: 'row' }}>
+                            <Box style={{ width: 232, height: 22, background: '#1E4FA8', borderRadius: 4 }} />
+                        </Box>
+                        <Text style={{ width: 62, fontSize: 19, color: '#1A2230', fontWeight: 'bold', textAlign: 'right' }}>81</Text>
+                    </Box>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                        <Text style={{ width: 44, fontSize: 19, color: '#3D7BD9', fontWeight: 'bold' }}>L2</Text>
+                        <Box style={{ flex: 1, height: 22, background: '#E8EFF8', borderRadius: 4, flexDirection: 'row' }}>
+                            <Box style={{ width: 92, height: 22, background: '#3D7BD9', borderRadius: 4 }} />
+                        </Box>
+                        <Text style={{ width: 62, fontSize: 19, color: '#1A2230', fontWeight: 'bold', textAlign: 'right' }}>32</Text>
+                    </Box>
+
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
+                        <Text style={{ width: 44, fontSize: 19, color: '#5A6678', fontWeight: 'bold' }}>L3</Text>
+                        <Box style={{ flex: 1, height: 22, background: '#E8EFF8', borderRadius: 4, flexDirection: 'row' }}>
+                            <Box style={{ width: 6, height: 22, background: '#8B97A8', borderRadius: 4 }} />
+                        </Box>
+                        <Text style={{ width: 62, fontSize: 19, color: '#1A2230', fontWeight: 'bold', textAlign: 'right' }}>0</Text>
+                    </Box>
+
+                    <Text style={{ fontSize: 16, color: '#8B97A8', marginTop: 16 }}>合计 113 条（演示数据集 9 条为 L1 8 / L2 1）</Text>
+                </Box>
+
+                <Box style={{ height: 226, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 10, padding: '18px 20px', flexDirection: 'column', marginTop: 16 }}>
+                    <Text style={{ fontSize: 20, color: '#0E3F8C', fontWeight: 'bold' }}>降级不是补丁，而是常用通道</Text>
+                    <Text style={{ fontSize: 22, color: '#1A2230', lineHeight: 1.5, marginTop: 10 }}>L2 占 28.3%，说明真实数据下「本仓不足」是常态。把这条路径显式建模、并让前端可辨识粒度等级，比强行给所有序列一个像预测的数字更负责。</Text>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>09 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>

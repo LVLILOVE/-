@@ -1,0 +1,7 @@
+{
+  "preprocess_ms": 786,
+  "features_ms": 1100,
+  "inference_ms": 14,
+  "metrics_ms": 636,
+  "total_ms": 7874
+}

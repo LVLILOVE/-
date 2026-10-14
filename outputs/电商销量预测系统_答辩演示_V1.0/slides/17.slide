@@ -1,0 +1,106 @@
+<Slide style={{ width: 1280, height: 720, padding: '0 40px', background: '#FFFFFF', flexDirection: 'column' }}>
+    <Box style={{ height: 80, width: '100%', background: '#0E3F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: 'bold', letterSpacing: 1 }}>电商销量预测系统 · 课程答辩演示</Text>
+        <Text style={{ fontSize: 14, color: '#B9CCEF' }}>05 难点与应对 · 解法</Text>
+    </Box>
+
+    <Box style={{ height: 580, width: '100%', flexDirection: 'column' }}>
+        <Box style={{ height: 68, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 32, color: '#0E3F8C', fontWeight: 'bold' }}>五个真实难点与其应对</Text>
+            <Text style={{ fontSize: 15, color: '#8B97A8' }}>共性：默认做法会在真实环境里失效</Text>
+        </Box>
+
+        <Box style={{ height: 512, width: '100%', flexDirection: 'row' }}>
+            <Box style={{ width: 646, height: 512, flexDirection: 'column' }}>
+                <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2, marginBottom: 8 }}>难点 → 应对</Text>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 90 }}>
+                    <Box style={{ width: 236, height: 76, background: '#E8EFF8', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#0E3F8C', fontWeight: 'bold' }}>数据稀疏</Text>
+                        <Text style={{ fontSize: 14, color: '#5A6678', marginTop: 4 }}>多数序列无足够历史</Text>
+                    </Box>
+                    <Box style={{ width: 36, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 22, color: '#3D7BD9' }}>→</Text>
+                    </Box>
+                    <Box style={{ flex: 1, height: 76, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#1A2230' }}>三级降级兜底，覆盖率分级暴露给前端</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 90 }}>
+                    <Box style={{ width: 236, height: 76, background: '#E8EFF8', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#0E3F8C', fontWeight: 'bold' }}>模型塌回均值</Text>
+                        <Text style={{ fontSize: 14, color: '#5A6678', marginTop: 4 }}>预测曲线趋于平直</Text>
+                    </Box>
+                    <Box style={{ width: 36, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 22, color: '#3D7BD9' }}>→</Text>
+                    </Box>
+                    <Box style={{ flex: 1, height: 76, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#1A2230' }}>改为学残差，并设退化序列 σ 过滤</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 90 }}>
+                    <Box style={{ width: 236, height: 76, background: '#E8EFF8', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#0E3F8C', fontWeight: 'bold' }}>营销尖峰被误判</Text>
+                        <Text style={{ fontSize: 14, color: '#5A6678', marginTop: 4 }}>大促被当成异常截掉</Text>
+                    </Box>
+                    <Box style={{ width: 36, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 22, color: '#3D7BD9' }}>→</Text>
+                    </Box>
+                    <Box style={{ flex: 1, height: 76, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#1A2230' }}>截断时保护日历节点，保留可学信号</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 90 }}>
+                    <Box style={{ width: 236, height: 76, background: '#E8EFF8', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#0E3F8C', fontWeight: 'bold' }}>显存与 SLA 冲突</Text>
+                        <Text style={{ fontSize: 14, color: '#5A6678', marginTop: 4 }}>2 GB 显存 vs 1 分钟</Text>
+                    </Box>
+                    <Box style={{ width: 36, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 22, color: '#3D7BD9' }}>→</Text>
+                    </Box>
+                    <Box style={{ flex: 1, height: 76, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#1A2230' }}>预训练推理，把训练整条移出在线路径</Text>
+                    </Box>
+                </Box>
+
+                <Box style={{ flexDirection: 'row', alignItems: 'center', height: 90 }}>
+                    <Box style={{ width: 236, height: 76, background: '#E8EFF8', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#0E3F8C', fontWeight: 'bold' }}>接口文档白屏</Text>
+                        <Text style={{ fontSize: 14, color: '#5A6678', marginTop: 4 }}>受限网络下 CDN 不可达</Text>
+                    </Box>
+                    <Box style={{ width: 36, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 22, color: '#3D7BD9' }}>→</Text>
+                    </Box>
+                    <Box style={{ flex: 1, height: 76, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 8, padding: '0 14px', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 17, color: '#1A2230' }}>资源随仓库冻结本地托管，关闭默认外链</Text>
+                    </Box>
+                </Box>
+            </Box>
+
+            <Box style={{ width: 554, height: 512, paddingLeft: 24, flexDirection: 'column' }}>
+                <Box style={{ height: 260, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: '18px 20px', flexDirection: 'column' }}>
+                    <Text style={{ fontSize: 15, color: '#3D7BD9', letterSpacing: 2 }}>共性</Text>
+                    <Text style={{ fontSize: 24, color: '#0E3F8C', fontWeight: 'bold', marginTop: 8 }}>把隐含假设显式化为约束</Text>
+                    <Text style={{ fontSize: 22, color: '#1A2230', lineHeight: 1.5, marginTop: 12 }}>五个难点都源于某个未被检验的默认前提。应对方式不是调参，而是把该前提写成代码里的阈值或配置项。</Text>
+                </Box>
+
+                <Box style={{ height: 236, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 14, flexDirection: 'column', marginTop: 16 }}>
+                    <Box style={{ width: '100%', height: 176, borderRadius: 6, overflow: 'hidden', background: '#FFFFFF' }}>
+                        <Image src='assets/api_redoc.png' style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </Box>
+                    <Text style={{ fontSize: 14, color: '#8B97A8', marginTop: 8 }}>图 5　/redoc 视图：外部字体与图标已全部换成本地资源</Text>
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    <Box style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 14, color: '#8B97A8' }}>汇报人：吕治　·　2026 年 10 月　·　数据科学与大数据技术（2023.9–2027.6）</Text>
+        <Text style={{ fontSize: 14, color: '#1E4FA8', fontWeight: 'bold' }}>17 / 18</Text>
+    </Box>
+
+    <Box style={{ height: 20, width: '100%' }} />
+</Slide>
