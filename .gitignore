@@ -7,6 +7,7 @@ data/
 # ===== 前端依赖与构建产物 =====
 web/node_modules/
 web/dist/
+web/.vite/
 
 # ===== Python =====
 __pycache__/
