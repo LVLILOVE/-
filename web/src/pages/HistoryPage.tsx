@@ -22,9 +22,16 @@ import NoticeBar from '../components/NoticeBar';
 import { Skeleton } from '../components/Skeleton';
 import { THRESHOLDS, type HistoryItem, type HistoryQuery, type TaskStatus } from '../types';
 
-/** 汇总条的五项（`UX-P09` 汇总条） */
+/**
+ * 汇总条的**本页**四项（`UX-P09` 汇总条）。
+ *
+ * 🔴 刻意**不再含「总数」**（`D-05`）：这四个数都只能从**当前页**那 ≤20 条算出来
+ *    （接口只回当前页，没有全局聚合）。历史上这里有一项 `total: items.length`，
+ *    被渲染在标签为「任务总数」的卡片上 —— 于是有 35 条任务时卡片显示 20，
+ *    与同屏分页器的「共 35 条」当场自相矛盾。修法：总数改用接口的 `total`，
+ *    其余四项在标签上显式写「本页」，让口径与数据一致。
+ */
 type Summary = {
-  total: number;
   succeeded: number;
   failed: number;
   mapeAvg: number | null;
@@ -38,7 +45,6 @@ function summarize(items: HistoryItem[]): Summary {
     .map((i) => i.duration_ms)
     .filter((v): v is number => typeof v === 'number');
   return {
-    total: items.length,
     succeeded: succeeded.length,
     failed: items.filter((i) => i.status === 'failed').length,
     mapeAvg: mapes.length ? mapes.reduce((a, b) => a + b, 0) / mapes.length : null,
@@ -85,8 +91,9 @@ export default function HistoryPage() {
     void load(query);
   }, [load, query]);
 
-  // 🔒 汇总条按**当前页**计算，且明示「本页」—— 不这样标注，
+  // 🔒 四个派生指标按**当前页**计算，标签已显式写「本页」—— 不这样标注，
   //    用户会以为「平均 MAPE」是全部任务的平均值，而分页时它会跳变。
+  //    「任务总数」则取接口的全局 `total`（见 `D-05`），不用本页条数冒充。
   const summary = useMemo(() => summarize(items), [items]);
 
   const applyFilter = () => {
@@ -138,16 +145,21 @@ export default function HistoryPage() {
         className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5"
         data-testid="history-summary"
       >
-        <SummaryCell label="任务总数" value={String(summary.total)} testId="sum-total" />
-        <SummaryCell label="已完成" value={String(summary.succeeded)} testId="sum-succeeded" />
+        {/* 🔒 总数取自接口（全局口径）；其余四项是**本页**口径 —— 标签如实写明 */}
+        <SummaryCell label="任务总数" value={String(total)} testId="sum-total" />
         <SummaryCell
-          label="失败"
+          label="本页已完成"
+          value={String(summary.succeeded)}
+          testId="sum-succeeded"
+        />
+        <SummaryCell
+          label="本页失败"
           value={String(summary.failed)}
           testId="sum-failed"
           tone={summary.failed > 0 ? 'danger' : undefined}
         />
         <SummaryCell
-          label="平均加权 MAPE"
+          label="本页平均加权 MAPE"
           value={summary.mapeAvg === null ? '—' : `${summary.mapeAvg.toFixed(2)}%`}
           testId="sum-mape"
           tone={
@@ -159,7 +171,7 @@ export default function HistoryPage() {
           }
         />
         <SummaryCell
-          label="平均耗时"
+          label="本页平均耗时"
           value={
             summary.durationAvg === null
               ? '—'

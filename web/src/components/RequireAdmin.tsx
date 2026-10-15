@@ -42,7 +42,14 @@ export default function RequireAdmin({ children }: { children?: ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    // ⚠️ 同 `RequireAuth`：回跳地址必须带 `search`/`hash`（`D-10`），否则查询串被静默丢弃
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+      />
+    );
   }
 
   if (!isAdmin) {

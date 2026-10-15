@@ -75,7 +75,8 @@ export default function ResultPage() {
         } else if (e instanceof ApiError && e.code === ERR.UNAUTHORIZED) {
           setError('登录状态已失效，请重新登录后查看该任务');
         } else {
-          setError(e instanceof Error ? e.message : '结果加载失败');
+          // ⚠️ 兜底非空：空文案会让「字符串真值性」判别把错误当成"没出错"
+          setError(e instanceof Error && e.message ? e.message : '结果加载失败');
         }
       })
       .finally(() => {
@@ -108,7 +109,14 @@ export default function ResultPage() {
   }
 
   // ---- 空态：任务不存在 / 失败 / 无权 -------------------------------------
-  if (error) {
+  /**
+   * 🔴 判别必须显式与 `null` 比较（`D-06`）。
+   *
+   * 本页 `error` 是 `string | null`，且用 `''` 无意义 —— 若写成 `if (error)`，
+   * 一旦拿到空串（`API-14` 返回 HTML 时曾出现过），错误态会被判成「没出错」，
+   * 页面就永远停在下面的 loading 分支。
+   */
+  if (error !== null) {
     const notFound = error === 'NOT_FOUND';
     return (
       <div data-testid="result-page" data-phase="empty">
@@ -120,20 +128,30 @@ export default function ResultPage() {
           {notFound ? (
             <>
               失败或尚未完成的任务<strong>不落盘半成品</strong>，因此没有可展示的结果。
-              请调整参数重跑，或返回历史任务查看失败原因。
+              请重新上传数据后重跑，或返回历史任务查看失败原因。
             </>
           ) : (
             error
           )}
         </NoticeBar>
         <div className="mt-4 flex flex-wrap gap-2">
+          {/*
+            🔴 **不要拼 `/params?datasetId=`**（`D-03`）：
+              ① 本分支下 `data` 恒为 `null`（`setData` 只在成功路径执行），
+                 `data?.dataset.id` 永远取不到值 → 链接必然缺参；
+              ② 参数名也曾写成 `dataset_id`，而 `ParamsPage` 只认 camelCase 的
+                 `datasetId`（`params.get('datasetId')`）。
+              两者叠加 ⇒ 点「调整参数重跑」100% 落到参数页的「缺少 datasetId 参数」报错态。
+              此刻我们确实拿不到 datasetId（`API-14` 的失败响应只带 task_id），
+              故如实指向上传页，不假装能直达参数页。
+          */}
           <Link
-            to={`/params?dataset_id=${data?.dataset.id ?? ''}`}
+            to="/upload"
             className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[0.8125rem] font-semibold"
             style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
             data-testid="empty-rerun"
           >
-            调整参数重跑
+            重新上传数据重跑
           </Link>
           <Link
             to="/history"
@@ -203,7 +221,6 @@ export default function ResultPage() {
         <Card title="核心指标" testId="metrics-card-block">
           <MetricCards
             metrics={data.metrics}
-            isOverThreshold={data.is_over_threshold}
             l1Count={data.coverage.L1}
             detailTotal={data.detail_total}
           />

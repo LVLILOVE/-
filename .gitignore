@@ -34,3 +34,8 @@ Thumbs.db
 # 注：outputs/ 根目录的正式交付物（PDF / Word / PPT / 接口文档 / 模型）
 #     与 outputs/models/、outputs/电商销量预测系统_答辩演示_V1.0/ 不受影响
 outputs/*-shots/
+
+# ===== 代码审查留痕（探针原始 JSON + 截图，不入库） =====
+# 与上一条同源约定：证据截图与机器生成的原始数据不属交付物；
+# 审查报告正文（outputs/前端代码审查报告_V1.0.md）与探针脚本（scripts/_*.mjs）仍入库。
+outputs/review-probe/

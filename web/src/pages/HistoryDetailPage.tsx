@@ -190,7 +190,6 @@ export default function HistoryDetailPage() {
                 <div className="mt-3">
                   <MetricCards
                     metrics={data.metrics}
-                    isOverThreshold={data.is_over_threshold}
                     l1Count={data.coverage.L1}
                     detailTotal={data.detail_total}
                   />
@@ -315,7 +314,6 @@ function SeriesPicker({
           </option>
         ))}
       </select>
-      {series.length > 50 ? null : null}
     </label>
   );
 }

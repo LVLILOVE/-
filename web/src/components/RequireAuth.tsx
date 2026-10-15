@@ -34,7 +34,16 @@ export default function RequireAuth({ children }: { children?: ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    // ⚠️ 回跳地址要带上 `search`（`D-10`）：只存 `pathname` 会丢掉查询串，
+    //    例如 `/history?status=failed` 登录后会被还原成「/history」——
+    //    用户以为筛选还生效，实际已被静默丢弃。`hash` 同理一并带上。
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+      />
+    );
   }
 
   return <>{children ?? <Outlet />}</>;

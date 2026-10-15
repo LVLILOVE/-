@@ -8,7 +8,13 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    // 🔴 `.vite/**` 必须忽略（`D-07`）：那是 Vite 的依赖预打包缓存目录，
+    //    里面的产物 JS 不是本项目的源码，但 `eslint .` 会把它扫进来，
+    //    然后因为找不到它内联引用的第三方规则（react-internal/*、jsx-a11y/*）
+    //    而报一堆「Definition for rule ... was not found」。
+    //    症状很迷惑：dev server 一跑（生成 .vite/），`npm run lint` 就从全绿变全红，
+    //    且报错文件全是 node_modules 里的包名 —— 门禁等于永久失效。
+    ignores: ['dist/**', 'node_modules/**', '.vite/**'],
   },
   {
     files: ['**/*.{ts,tsx}'],

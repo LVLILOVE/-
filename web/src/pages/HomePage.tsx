@@ -309,8 +309,15 @@ export default function HomePage() {
                   <span className="text-[1.25rem] font-bold" style={{ color: 'var(--text)' }}>
                     {m.display}
                   </span>
-                  <span className="text-[0.6875rem]" style={{ color: 'var(--success)' }}>
-                    达标
+                  {/* 🔴 文案与配色都必须走 `m.ok`（`D-08`）：此前是硬编码的绿色「达标」，
+                      判定只写进了 `data-ok` 属性。一旦某项指标未达标，界面仍显示绿色
+                      「达标」，与同区顶部「存在未达标项」的徽标当场冲突。 */}
+                  <span
+                    className="text-[0.6875rem]"
+                    style={{ color: m.ok ? 'var(--success)' : 'var(--danger)' }}
+                    data-testid={`metric-verdict-${m.key}`}
+                  >
+                    {m.ok ? '达标' : '未达标'}
                   </span>
                 </div>
               </div>

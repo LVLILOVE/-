@@ -21,6 +21,14 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { ERR, type ApiResponse, type Paginated } from '../types';
 
+/**
+ * 客户端本地错误码 —— **不是**后端业务码。
+ *
+ * 用于「响应根本不像本系统的信封」这类**本地**判定。刻意用一个不与任何
+ * 4xxxx / 5xxxx 业务码重合的值，避免页面按错误码分支时误命中某条业务分支。
+ */
+const CLIENT_BAD_RESPONSE = -1;
+
 /** 业务错误：保留后端 code，便于按错误码分支处理 */
 export class ApiError extends Error {
   constructor(
@@ -28,7 +36,16 @@ export class ApiError extends Error {
     message: string,
     public readonly data?: unknown,
   ) {
-    super(message);
+    /**
+     * 🔒 **message 永不空串**（系统性修法）。
+     *
+     * 背景：多个页面用「字符串真值性」当错误判别（`if (error)` / `{error && ...}`）。
+     * 一旦某个错误对象的 `message` 是空串，它就会被当成「没出错」——
+     * 页面永久停在 loading、或静默降级，而且**控制台什么都没有**。
+     * 与其要求每个调用方都记得改成 `error !== null`，不如在这里兜住：
+     * 保证任何 `ApiError` 都带可读文案。
+     */
+    super(message || `请求失败（错误码 ${code}）`);
     this.name = 'ApiError';
   }
 }
@@ -98,6 +115,27 @@ export const http = createClient();
 async function unwrap<T>(p: Promise<{ data: ApiResponse<T> }>): Promise<T> {
   const res = await p;
   const body = res.data;
+
+  /**
+   * 🔴 **先校验信封形状**（`D-06`）。
+   *
+   * 反例（真实发生过）：前端 dev server 的接口代理未生效时，`/api/v1/*` 会被
+   * Vite 的 SPA 兜底接走，以 **`text/html` + HTTP 200** 返回 `index.html`。
+   * 此时 `body` 是字符串，`body.code` 为 `undefined` —— 原写法
+   * `if (body.code !== 0)` 仍然成立，于是抛出一个**连 message 都没有**的
+   * `ApiError(undefined, undefined)`，各页 `catch` 后**静默降级**，
+   * 甚至（`ResultPage`）永久停在「正在加载…」。故障被完全掩盖。
+   *
+   * 这里显式识别并给出**可执行**的文案，让这类环境故障一眼可见。
+   */
+  if (body === null || typeof body !== 'object' || typeof body.code !== 'number') {
+    throw new ApiError(
+      CLIENT_BAD_RESPONSE,
+      '服务返回了非预期的内容（不是本系统的响应格式）。通常是未连到后端，' +
+        '或前端 dev server 的接口代理未生效 —— 请在浏览器网络面板确认 /api 请求的响应类型是 application/json。',
+    );
+  }
+
   if (body.code !== 0) {
     throw new ApiError(body.code, body.message, body.data);
   }
@@ -127,6 +165,21 @@ async function unwrapBlob(p: Promise<{ data: Blob }>): Promise<Blob> {
       throw new ApiError(body.code, body.message, body.data);
     }
   }
+
+  /**
+   * 🔴 **HTML 兜底也要拦**（`D-06` 的姊妹场景）。
+   *
+   * 代理失效时 `/api/...` 返回的是 `text/html` 的 `index.html`。若不拦，
+   * 这里会把它当普通二进制交出去，用户就**成功下载到一个内容其实是网页的
+   * .csv / .xlsx** —— 打开才发现，比直接报错更糟。
+   */
+  if ((blob.type || '').includes('text/html')) {
+    throw new ApiError(
+      CLIENT_BAD_RESPONSE,
+      '下载失败：服务返回的是网页而不是文件。通常是未连到后端，或前端 dev server 的接口代理未生效。',
+    );
+  }
+
   return blob;
 }
 

@@ -34,7 +34,7 @@
  *     刷新与分享都不丢（与 `/params?datasetId=` 同一约定）
  * =============================================================================
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { ApiError, datasetApi, predictApi, systemApi } from '../api/client';
@@ -113,7 +113,6 @@ export default function RunningPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [modelVersion, setModelVersion] = useState<string>('—');
   const [revealed, setRevealed] = useState(0);
-  const bootRef = useRef(false);
 
   /* ---------------------------------------------------------------- 状态拉取 */
   const loadStatus = useCallback(async (): Promise<void> => {
@@ -175,8 +174,6 @@ export default function RunningPage() {
   const isTerminal = status !== null && (status.status === 'succeeded' || status.status === 'failed');
 
   useEffect(() => {
-    if (bootRef.current) return;
-    bootRef.current = true;
     if (prefersReducedMotion()) {
       setRevealed(PIPELINE_META.STAGE_TOTAL);
       return;
@@ -190,7 +187,12 @@ export default function RunningPage() {
       );
     }
     return () => timers.forEach((t) => window.clearTimeout(t));
-    // 只在首次挂载推进一次：`wallMs` 随状态到达而变化，若作为依赖会让动画重播
+    // 🔴 空依赖本身已经保证「只在挂载时推进一次」（`wallMs` 随后到达也不会重播），
+    //    **不要再用 `useRef` 加「只播一次」守卫**（`D-02`，本项目已踩过坑）：
+    //    React 18 StrictMode 在开发态会 setup → cleanup → setup，
+    //    旧守卫会在第二次 setup 直接 `return`，而第一次排的定时器已被 cleanup
+    //    一并清掉 ⇒ 回放**永远不推进**（实测进度条恒 0%、永远「阶段 1/5」、
+    //    第 1 阶段永远「进行中」），而页面上没有任何报错。守卫既多余，又是唯一成因。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

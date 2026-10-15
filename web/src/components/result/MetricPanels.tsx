@@ -203,8 +203,18 @@ export function VerdictBar({ metrics, isOverThreshold }: Pick<Props, 'metrics' |
   );
 }
 
-/** 四张指标卡（`UX-P08-02`） */
-export function MetricCards({ metrics, l1Count, detailTotal }: Props) {
+/**
+ * 四张指标卡（`UX-P08-02`）。
+ *
+ * ⚠️ 只取 `metrics` / `l1Count` / `detailTotal`（`D-10`）：`isOverThreshold` 由
+ *    `VerdictBar` 独占消费（总体判定只允许有一个来源），本组件不再接收 ——
+ *    接收而不用会让调用方以为「卡片也在参与判定」。
+ */
+export function MetricCards({
+  metrics,
+  l1Count,
+  detailTotal,
+}: Pick<Props, 'metrics' | 'l1Count' | 'detailTotal'>) {
   const cards = [
     {
       key: 'mape',

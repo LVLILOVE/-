@@ -599,8 +599,11 @@ export default function ParamsPage() {
                 unit="s"
                 foot={
                   remainingPct === null
-                    ? '上限 60 s'
-                    : `上限 ${PIPELINE_META.TASK_BUDGET_MS / 1000} s · 余量 ${remainingPct.toFixed(1)}%`
+                    ? `上限 ${PIPELINE_META.TASK_BUDGET_MS / 1000} s`
+                    : remainingPct < 0
+                      ? // ⚠️ 预估已超预算时不能再写「余量 -X%」（`D-09`）：负的「余量」是自相矛盾的文案
+                        `上限 ${PIPELINE_META.TASK_BUDGET_MS / 1000} s · 超预算 ${Math.abs(remainingPct).toFixed(1)}%`
+                      : `上限 ${PIPELINE_META.TASK_BUDGET_MS / 1000} s · 余量 ${remainingPct.toFixed(1)}%`
                 }
                 tone={remainingPct !== null && remainingPct < 20 ? 'warning' : 'brand'}
               />
@@ -652,7 +655,14 @@ export default function ParamsPage() {
                 ))}
                 <BudgetRow
                   name="预留余量"
-                  ms={estimateMs === null ? null : PIPELINE_META.TASK_BUDGET_MS - estimateMs}
+                  // ⚠️ 必须夹到 0（`D-09`）：预估 > 60 s 时（正是 `over_budget_risk`
+                  //    要提示的场景）原式会给出负耗时，渲染成「≈ -X.X s」。
+                  //    进度条宽度虽已 clamp 到 0，文字却是负值。
+                  ms={
+                    estimateMs === null
+                      ? null
+                      : Math.max(0, PIPELINE_META.TASK_BUDGET_MS - estimateMs)
+                  }
                   muted
                 />
               </div>

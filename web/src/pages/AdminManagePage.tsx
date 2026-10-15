@@ -89,6 +89,16 @@ export default function AdminManagePage() {
   const [tasks, setTasks] = useState<AdminTaskBrief[]>([]);
   const [taskTotal, setTaskTotal] = useState(0);
   const [taskPage, setTaskPage] = useState(1);
+  /**
+   * 🔴 任务搜索**必须有自己的草稿**（`D-04`）。
+   *
+   * 旧实现把任务 Tab 的搜索框也绑到了 `userDraft.q` —— 两个语义完全不同的
+   * 筛选项共用一个 state，后果是：在「用户管理」输入邮箱 → 切到「任务管理」，
+   * 任务搜索框里赫然是那串邮箱；点「查询」还会用它去搜任务名。
+   * 草稿（输入框）与条件（真正查询用的 `taskQuery`）分离的原则见下，
+   * 与用户 Tab 一致。
+   */
+  const [taskDraft, setTaskDraft] = useState({ q: '' });
   const [taskQuery, setTaskQuery] = useState<{ status?: TaskStatus; q?: string }>({});
   const [tasksLoading, setTasksLoading] = useState(true);
 
@@ -221,6 +231,16 @@ export default function AdminManagePage() {
       setBusy(false);
     }
   }
+
+  /**
+   * 新密码是否达标（与后端 `ResetPasswordRequest` 同源规则：≥8 位 + 字母 + 数字）。
+   *
+   * ⚠️ 单独算一次（`D-10`）：此前「提示文案 / 按钮 disabled / 按钮底色」各写了一遍，
+   *    而**底色那份漏了字母与数字两条** —— 于是像 `12345678` 这种不合格密码会让
+   *    按钮显示成"可点的红色"，实际点下去毫无反应（disabled 拦住了）。
+   *    同一判据必须只有一个来源。
+   */
+  const pwdOk = newPwd.length >= 8 && /[a-zA-Z]/.test(newPwd) && /[0-9]/.test(newPwd);
 
   const userPages = Math.max(1, Math.ceil(userTotal / 20));
   const taskPages = Math.max(1, Math.ceil(taskTotal / 20));
@@ -445,13 +465,13 @@ export default function AdminManagePage() {
                 e.preventDefault();
                 setTaskPage(1);
                 setTaskQuery({
-                  ...(userDraft.q ? { q: userDraft.q } : {}),
+                  ...(taskDraft.q ? { q: taskDraft.q } : {}),
                 });
               }}
             >
               <input
-                value={userDraft.q}
-                onChange={(e) => setUserDraft((d) => ({ ...d, q: e.target.value }))}
+                value={taskDraft.q}
+                onChange={(e) => setTaskDraft((d) => ({ ...d, q: e.target.value }))}
                 placeholder="按任务名搜索"
                 className="rounded-[var(--radius-md)] px-2.5 py-1.5 text-[0.8125rem]"
                 style={{
@@ -764,21 +784,12 @@ export default function AdminManagePage() {
             {/* 🔒 实时给强度反馈：规则与后端 `ResetPasswordRequest` 同源 */}
             <p
               className="mt-1.5 text-[0.75rem]"
-              style={{
-                color:
-                  newPwd.length === 0
-                    ? 'var(--text-3)'
-                    : newPwd.length >= 8 &&
-                        /[a-zA-Z]/.test(newPwd) &&
-                        /[0-9]/.test(newPwd)
-                      ? 'var(--success)'
-                      : 'var(--text-3)',
-              }}
+              style={{ color: pwdOk ? 'var(--success)' : 'var(--text-3)' }}
               data-testid="pwd-hint"
             >
               {newPwd.length === 0
                 ? '尚未输入'
-                : newPwd.length >= 8 && /[a-zA-Z]/.test(newPwd) && /[0-9]/.test(newPwd)
+                : pwdOk
                   ? '✓ 满足强度要求'
                   : '需不少于 8 位，且同时包含字母与数字'}
             </p>
@@ -794,16 +805,11 @@ export default function AdminManagePage() {
               <button
                 type="button"
                 className="rounded-[var(--radius-md)] px-3 py-1.5 text-[0.8125rem]"
-                disabled={
-                  busy ||
-                  newPwd.length < 8 ||
-                  !/[a-zA-Z]/.test(newPwd) ||
-                  !/[0-9]/.test(newPwd)
-                }
+                // 🔒 `disabled` 与底色必须共用同一判据 `pwdOk`（`D-10`）
+                disabled={busy || !pwdOk}
                 style={{
-                  background:
-                    busy || newPwd.length < 8 ? 'var(--surface-2)' : 'var(--danger)',
-                  color: busy || newPwd.length < 8 ? 'var(--text-3)' : 'var(--danger-fg)',
+                  background: busy || !pwdOk ? 'var(--surface-2)' : 'var(--danger)',
+                  color: busy || !pwdOk ? 'var(--text-3)' : 'var(--danger-fg)',
                 }}
                 data-testid="reset-confirm"
                 onClick={() => void doReset()}
